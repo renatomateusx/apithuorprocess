@@ -1,0 +1,86 @@
+require('dotenv-safe').load();
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var cors = require('cors');
+var bodyParser = require('body-parser');
+
+var app = express();
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+app.options('*', cors());
+
+/*Rotas */
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+var chatsRouter = require('./routes/chat.message');
+var chatsListRouter = require('./routes/chat.list.message');
+var tokenPagamento = require('./routes/token.pagamento');
+var combinacaoRouter = require('./routes/combinacoes');
+var superlikeRouter = require('./routes/superlikes');
+var visitasRouter = require('./routes/visitas');
+var extrasRouter = require('./routes/extras');
+var pagamentosRouter = require('./routes/pagamentos');
+var push = require('./routes/push');
+var notificacaoRouter = require('./routes/notificacao');
+var importarProdutosShopify = require('./routes/componentes/importarProdutosShopify');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(bodyParser.json({limit: '15mb'}));
+app.use(express.urlencoded({limit: '15mb', extended: false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors({credentials: true, origin: '*'}));
+app.options('*', cors());
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/chat', chatsRouter);
+app.use('/chatlist', chatsListRouter);
+app.use('/tokenpagamento', tokenPagamento);
+app.use('/combinacoes', combinacaoRouter);
+app.use('/superlikes', superlikeRouter);
+app.use('/visitas', visitasRouter);
+app.use('/extras', extrasRouter);
+app.use('/pagamentos', pagamentosRouter);
+app.use('/push', push);
+app.use('/notificacao', notificacaoRouter);
+app.use('/importarProdutosShopify', importarProdutosShopify);
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header(
+    'Acept',
+    'application/vnd.pagseguro.com.br.v3+{xml,json};charset=ISO-8859-1'
+  );  
+  next();
+});
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+app.use(bodyParser);
+
+module.exports = app;
