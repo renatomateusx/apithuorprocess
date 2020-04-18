@@ -1,5 +1,5 @@
 var pool = require('../db/queries');
-
+var utils = require('../resources/util');
 module.exports.GetIntegracaoShopifyCheckout = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
@@ -89,4 +89,20 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.ReInstalarIntegracao = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            utils.makeAPICallExternalHTTPS()
+            .then(retorno =>{
+
+            })
+            .catch(error =>{
+                console.log("Erro ao tentar criar a API de Produtos para o tema.");
+            })
+        } catch (error) {
+            reject(error);
+        }
+    });
 }

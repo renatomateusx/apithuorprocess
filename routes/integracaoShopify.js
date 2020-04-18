@@ -12,5 +12,8 @@ router.post('/UpdateIntegracaoCheckout', integracaoShopify.UpdateIntegracaoShopi
 
 router.get('/GetIntegracaoCheckout', integracaoShopify.GetIntegracaoShopifyCheckout);
 
+router.get('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
+
+
 
 module.exports = router;

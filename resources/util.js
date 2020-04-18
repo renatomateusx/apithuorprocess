@@ -1,6 +1,7 @@
 var jwt = require('jsonwebtoken');
 var request = require('request');
 const https = require('https');
+const querystring = require('querystring');
 /*DEIXEI COMENTADO PARA COLOCAR, SE FOR PRECISO, NO ARQUIVO VIEWS/LAYOUT.PUG script(src='https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js')*/
 module.exports.verifyJWT = function (req, res, next) {
   var token = req.headers['authorization'];
@@ -68,16 +69,19 @@ module.exports.makeAPICallExternalParams = function (url, body) {
   });
 };
 
-module.exports.makeAPICallExternalParamsJSON = function (url, body) {
+module.exports.makeAPICallExternalParamsJSON = function (url, path, body, headerAdditional, valueHeaderAditional) {
   return new Promise((resolve, reject) => {
+    //console.log("Body", body);
+    var postData = querystring.stringify(body);
+
     request(
       {
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/vnd.pagseguro.com.br.v3+{xml,json};charset=ISO-8859-1'
+          headerAdditional: valueHeaderAditional
         },
-        uri: url,
-        body: body,
+        uri: url + path,
+        body: JSON.stringify(body),
         method: 'POST',
       },
       function (err, res, body) {
@@ -85,6 +89,7 @@ module.exports.makeAPICallExternalParamsJSON = function (url, body) {
         resolve(body);
       }
     );
+
   });
 };
 
