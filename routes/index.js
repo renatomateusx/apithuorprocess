@@ -9,7 +9,7 @@ const PRIVATE_VAPID = '_kRzHiscHBIGftfA7IehH9EA3RvBl8SBYhXBAMz6GrI';
 router.get('/', function (req, res, next) {
   let socket = req.app.get('socketio');
   //socket.emit('newrequest', req.body);
-
+  
   res.send('/index');
 });
 

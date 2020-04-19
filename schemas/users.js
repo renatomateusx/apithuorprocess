@@ -1,4 +1,5 @@
 var pool = require('../db/queries');
+var jwt = require('jsonwebtoken');
 
 module.exports.GetUserByID = (req, res, next) => {
     return new Promise((resolve, reject) => {
@@ -84,22 +85,23 @@ module.exports.EfetuaLogin = (req, res, next) => {
     try {
         if (req.body !== undefined) {
             const { email, senha } = req.body
-
+            
             pool.query('SELECT * FROM usuarios WHERE email = $1 and senha = $2', [email, senha], (error, results) => {
                 if (error) {
                     throw error
                 }
                 if (results.rows[0]) {
-                    const id = results.rows[0]._id;
+                    const id = results.rows[0].id;
+                   
                     var token = jwt.sign({ id }, process.env.SECRET, {
-                        expiresIn: 950400,
+                        expiresIn: '4h',
                     });
                     let LRetornoLogin = {
-                        user: results.row[0],
+                        user: results.rows[0],
                         auth: token.length > 0,
                         token: token,
                     };
-                    response.status(200).json(LRetornoLogin);
+                    res.status(200).json(LRetornoLogin);
 
                 } else {
                     res.status(404).send('Login e a Senha inválidos!');
