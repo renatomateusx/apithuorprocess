@@ -68,7 +68,7 @@ const arrayWebHooks = [
   }
 ]
 
-router.post('/ImportarProdutosShopify', function (req, res, next) {
+router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, next) {
   try {
     const { id_usuario } = req.body;
     req.body.id = id_usuario;
@@ -88,7 +88,7 @@ router.post('/ImportarProdutosShopify', function (req, res, next) {
             //console.log(URL_TESTE);
             //url = "https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json";
             const url = format("https://{}:{}@{}/admin/api/{}/{}.json", chave_api_key, senha, url_loja, versao, resourceProdutos);
-            console.log(url);
+            //console.log(url);
             utilis.makeAPICallExternalHTTPS(url)
               .then(produtos => {
                 processaListaProdutos(produtos, req, res, next);
@@ -127,11 +127,11 @@ function processaWebHooks(req, res, next, url, path, headerAditional, valueHeade
       .then(produtos => {
         console.log("WebHook Criado ", json.webhook.topic);
       })
-      .catch(error =>{
+      .catch(error => {
         console.log("Erro ao criar webhooks", error);
       })
   });
-  res.json({mensagem: "Ok!"});
+  res.json({ mensagem: "Ok!" });
   res.end();
 }
 

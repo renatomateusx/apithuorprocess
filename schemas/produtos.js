@@ -3,12 +3,12 @@ var pool = require('../db/queries');
 module.exports.GetProdutos = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
-        pool.query('SELECT * FROM produtos', (error, results) => {
+        pool.query('SELECT * FROM produtos where id_usuario = $1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
-            }
-            res.status(200).json(results.rows);
-
+            }            
+            res.status(200).send(results.rows);
+            res.end();
         })
     } catch (error) {
         res.json(error);

@@ -7,14 +7,14 @@ var produtosSchema = require('../schemas/produtos');
 
 /* User Pagination */
 //utilis.verifyJWT,
-router.post('/GetProdutos', produtosSchema.GetProdutos);
+router.post('/GetProdutos', utilis.verifyJWT, produtosSchema.GetProdutos);
 
-router.post('/GetProdutoByID', produtosSchema.GetProdutoByID);
+router.post('/GetProdutoByID', utilis.verifyJWT, produtosSchema.GetProdutoByID);
 
-router.post('/AddProduto', produtosSchema.AddProduto);
+router.post('/AddProduto', utilis.verifyJWT, produtosSchema.AddProduto);
 
-router.put('/UpdateProduto', produtosSchema.UpdateProduto);
+router.put('/UpdateProduto', utilis.verifyJWT, produtosSchema.UpdateProduto);
 
-router.post('/DeleteProduto', produtosSchema.DeleteProduto);
+router.post('/DeleteProduto', utilis.verifyJWT, produtosSchema.DeleteProduto);
 
 module.exports = router;

@@ -9,8 +9,8 @@ module.exports.verifyJWT = function (req, res, next) {
     return res
       .status(401)
       .send({ auth: false, message: 'Nenhum token enviado.' });
-
-  jwt.verify(token, process.env.SECRET, function (err, decoded) {
+  var LToken = token.split(' ');
+  jwt.verify(LToken[1], process.env.SECRET, function (err, decoded) {
     if (err)
       return res
         .status(401)

@@ -85,7 +85,7 @@ module.exports.EfetuaLogin = (req, res, next) => {
     try {
         if (req.body !== undefined) {
             const { email, senha } = req.body
-            
+           
             pool.query('SELECT * FROM usuarios WHERE email = $1 and senha = $2', [email, senha], (error, results) => {
                 if (error) {
                     throw error
@@ -101,10 +101,11 @@ module.exports.EfetuaLogin = (req, res, next) => {
                         auth: token.length > 0,
                         token: token,
                     };
+                    //console.log("Enviando", LRetornoLogin);
                     res.status(200).json(LRetornoLogin);
 
                 } else {
-                    res.status(404).send('Login e a Senha inválidos!');
+                    res.status(401).json({mensagem: 'Login e a Senha inválidos!'});
                 }
 
             })
