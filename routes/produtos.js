@@ -17,4 +17,14 @@ router.put('/UpdateProduto', utilis.verifyJWT, produtosSchema.UpdateProduto);
 
 router.post('/DeleteProduto', utilis.verifyJWT, produtosSchema.DeleteProduto);
 
+router.post('/UpdateStatusProduto', utilis.verifyJWT, produtosSchema.UpdateStatusProduto);
+
+router.post('/UpdateTipoProduto', utilis.verifyJWT, produtosSchema.UpdateTipoProduto);
+
+router.post('/UpdateCustomFreteProduto', utilis.verifyJWT, produtosSchema.UpdateCustomFreteProduto);
+
+router.post('/UpdateTipoFreteProduto', utilis.verifyJWT, produtosSchema.UpdateTipoFreteProduto);
+
+router.post('/UpdateURLDirProduto', utilis.verifyJWT, produtosSchema.UpdateURLDirProduto);
+
 module.exports = router;
