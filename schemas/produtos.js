@@ -6,7 +6,7 @@ module.exports.GetProdutos = (req, res, next) => {
         pool.query('SELECT * FROM produtos where id_usuario = $1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
-            }            
+            }
             res.status(200).send(results.rows);
             res.end();
         })
@@ -19,7 +19,7 @@ module.exports.GetProdutos = (req, res, next) => {
 module.exports.GetProdutoByID = (req, res, next) => {
     try {
         const { id_produto } = req.body;
-        
+
         pool.query('SELECT * FROM produtos WHERE id_produto_json = $1', [id_produto], (error, results) => {
             if (error) {
                 throw error
@@ -49,7 +49,7 @@ module.exports.GetProdutoExists = (req, res, next) => {
         }
     });
 }
-module.exports.GetProdutoExists2 = async function(req, res, next) {
+module.exports.GetProdutoExists2 = async function (req, res, next) {
 
     try {
         const { id_produto_json } = req.body;
@@ -69,9 +69,13 @@ module.exports.GetProdutoExists2 = async function(req, res, next) {
 module.exports.AddProduto = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
-            const { id_produto_json, json_dados_produto, titulo_produto } = req.body
+            const { id_produto_json, json_dados_produto, titulo_produto, id_usuario } = req.body
+            var status = '1';
+            var tipo_produto = 'FISICO';
+            var custom_frete = '0';
 
-            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE id_produto_json = $1);', [id_produto_json, json_dados_produto, titulo_produto], (error, results) => {
+
+            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete) SELECT $1, $2, $3, $4, $5, $6, $7 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE id_produto_json = $1);', [id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -114,7 +118,7 @@ module.exports.DeleteProduto = (req, res, next) => {
         res.end();
     }
 }
-module.exports.UpdateStatusProduto= (req, res, next) =>{
+module.exports.UpdateStatusProduto = (req, res, next) => {
     try {
         const { status, id_produto_json } = req.body
 
@@ -130,7 +134,7 @@ module.exports.UpdateStatusProduto= (req, res, next) =>{
     }
 }
 
-module.exports.UpdateTipoProduto= (req, res, next)=>{
+module.exports.UpdateTipoProduto = (req, res, next) => {
     try {
         const { tipo_produto, id_produto_json } = req.body
         pool.query('UPDATE produtos SET tipo_produto = $1 WHERE id_produto_json = $2', [tipo_produto, id_produto_json], (error, results) => {
@@ -145,7 +149,7 @@ module.exports.UpdateTipoProduto= (req, res, next)=>{
     }
 }
 
-module.exports.UpdateCustomFreteProduto= (req, res, next)=>{
+module.exports.UpdateCustomFreteProduto = (req, res, next) => {
     try {
         const { custom_frete, id_produto_json } = req.body
         pool.query('UPDATE produtos SET custom_frete = $1 WHERE id_produto_json = $2', [custom_frete, id_produto_json], (error, results) => {
@@ -159,7 +163,7 @@ module.exports.UpdateCustomFreteProduto= (req, res, next)=>{
         res.end();
     }
 }
-module.exports.UpdateTipoFreteProduto= (req, res, next)=>{
+module.exports.UpdateTipoFreteProduto = (req, res, next) => {
     try {
         const { tipo_frete, preco_frete, id_produto_json } = req.body
         console.log("Dados", tipo_frete, preco_frete);
@@ -175,7 +179,7 @@ module.exports.UpdateTipoFreteProduto= (req, res, next)=>{
     }
 }
 
-module.exports.UpdateURLDirProduto= (req, res, next)=>{
+module.exports.UpdateURLDirProduto = (req, res, next) => {
     try {
         const { url_dir_cartao, url_dir_boleto, id_produto_json } = req.body
         pool.query('UPDATE produtos SET url_dir_cartao = $1, url_dir_boleto = $2 WHERE id_produto_json = $3', [url_dir_cartao, url_dir_boleto, id_produto_json], (error, results) => {
@@ -188,4 +192,99 @@ module.exports.UpdateURLDirProduto= (req, res, next)=>{
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetPrazoEnvioVarianteByID = function (req, res, next) {
+
+    try {
+        const { id_variante, id_usuario, campo } = req.body;
+        pool.query('SELECT * FROM variantes WHERE id_variante = $1 and id_usuario = $2', [id_variante, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+
+            if (results.rows[0] !== undefined) {
+                res.json({ campo: campo, prazo_envio: results.rows[0].prazo_envio });
+                res.end();
+            }
+            else {
+                res.json({ campo: campo, prazo_envio: 0 });
+                res.end();
+            }
+        })
+
+    } catch (error) {
+
+    }
+
+}
+
+module.exports.SalvaPrazoEnvioVarianteByID = function (req, res, next) {
+
+    try {
+        const { id_variante, id_usuario, prazo_envio } = req.body;
+        pool.query('INSERT INTO variantes (id_variante, id_usuario, prazo_postagem) VALUES ($1, $2, $3) ON CONFLICT (id_variante) DO UPDATE SET prazo_postagem = $3', [id_variante, id_usuario, prazo_envio], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(201).send(`Variante Atualizada: ${results.insertId}`)
+        })
+
+    } catch (error) {
+
+    }
+
+}
+
+module.exports.SalvaGerenciamentoEstoqueVarianteByID = function (req, res, next) {
+
+    try {
+        const { id_variante, id_usuario, quantidade, quantidade_minima } = req.body;
+        var gerencia_estoque = 1;
+        var prazo_postagem = 0;
+        console.log("Evento", id_variante);
+        pool.query('INSERT INTO variantes (quantidade, quantidade_minima, gerencia_estoque, id_variante, id_usuario, prazo_postagem) VALUES($1, $2, $3, $4, $5,$6) ON CONFLICT (id_variante) DO UPDATE SET quantidade = $1, quantidade_minima = $2, gerencia_estoque = $3, prazo_postagem = $6', [quantidade, quantidade_minima, gerencia_estoque, id_variante, id_usuario, prazo_postagem], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(201).send(`Variante Atualizada: ${results.insertId}`)
+        })
+
+    } catch (error) {
+
+    }
+
+}
+
+module.exports.DesativaGerenciamentoEstoquePorVarianteID = function (req, res, next) {
+
+    try {
+        const { id_variante, id_usuario } = req.body;
+        pool.query("UPDATE variantes set gerencia_estoque = '0' WHERE id_variante = $1 and id_usuario = $2", [id_variante, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(201).send(`Variante Atualizada: ${results.insertId}`)
+        })
+
+    } catch (error) {
+
+    }
+
+}
+
+module.exports.GetDadosEstoquePorVarianteID = function (req, res, next) {
+    try {
+        const { id_variante, id_usuario } = req.body;
+        pool.query("SELECT * FROM variantes WHERE id_variante = $1 and id_usuario = $2", [id_variante, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).json(results.rows)
+        })
+
+    } catch (error) {
+
+    }
+
 }

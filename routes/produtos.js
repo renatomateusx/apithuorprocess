@@ -27,4 +27,18 @@ router.post('/UpdateTipoFreteProduto', utilis.verifyJWT, produtosSchema.UpdateTi
 
 router.post('/UpdateURLDirProduto', utilis.verifyJWT, produtosSchema.UpdateURLDirProduto);
 
+router.post('/GetPrazoEnvioVarianteByID', utilis.verifyJWT, produtosSchema.GetPrazoEnvioVarianteByID);
+
+router.post('/SalvaPrazoEnvioVarianteByID', utilis.verifyJWT, produtosSchema.SalvaPrazoEnvioVarianteByID);
+
+router.post('/SalvaGerenciamentoEstoqueVarianteByID', utilis.verifyJWT, produtosSchema.SalvaGerenciamentoEstoqueVarianteByID);
+
+router.post('/DesativaGerenciamentoEstoquePorVarianteID', utilis.verifyJWT, produtosSchema.DesativaGerenciamentoEstoquePorVarianteID);
+
+router.post('/GetDadosEstoquePorVarianteID', utilis.verifyJWT, produtosSchema.GetDadosEstoquePorVarianteID);
+
+
+
+
+
 module.exports = router;

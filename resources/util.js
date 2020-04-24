@@ -41,7 +41,8 @@ module.exports.makeAPICallExternalHTTPS = function (url) {
       });
       // The whole response has been received. Print out the result.
       resp.on('end', () => {
-        resolve(data);
+        var retorno =[data, resp.headers];
+        resolve(retorno);
       });
 
     }).on("error", (err) => {

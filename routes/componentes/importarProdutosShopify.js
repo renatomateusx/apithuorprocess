@@ -87,11 +87,12 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
             //const URL_TESTE = 'https://fdfb548a78fd2d4b9481d92e0b185efe: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@kingofertas.myshopify.com/admin/api/2020-04/products.json';
             //console.log(URL_TESTE);
             //url = "https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json";
-            const url = format("https://{}:{}@{}/admin/api/{}/{}.json", chave_api_key, senha, url_loja, versao, resourceProdutos);
-            //console.log(url);
+            const url = format("https://{}:{}@{}/admin/api/{}/{}.json?limit=50", chave_api_key, senha, url_loja, versao, resourceProdutos);
+            console.log(url);
             utilis.makeAPICallExternalHTTPS(url)
-              .then(produtos => {
-                processaListaProdutos(produtos, req, res, next);
+              .then((retorno) => {
+                processaListaProdutos(retorno[0], req, res, next);
+                tratarRepostaPaginacao(url, retorno[1], req, res, next);
               });
           })
           .catch(error => {
@@ -113,11 +114,13 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
 function processaListaProdutos(produtos, req, res, next) {
   const prod = JSON.parse(produtos);
   var prods = prod.products;
-  prods.forEach((obj, i) => {
-    InsereProduto(obj, req, res, next);
-  });
-  res.json({ mensagem: 'Ok' });
-  res.end();
+  if (prods) {
+    prods.forEach((obj, i) => {
+      InsereProduto(obj, req, res, next);
+    });
+    //res.json({ mensagem: 'Ok' });
+    //res.end();
+  }
 }
 
 function processaWebHooks(req, res, next, url, path, headerAditional, valueHeaderAditional) {
@@ -151,6 +154,29 @@ function InsereProduto(produto, req, res, next) {
         reject(error);
       })
   });
+}
+
+function tratarRepostaPaginacao(urlParams, headers, req, res, next) {
+  var Llink = headers['link'];
+  if (Llink && Llink.indexOf('next') > -1) {
+    var urlLocal = Llink.replace('<', '');
+    urlLocal = urlLocal.replace('>', '');
+    var urlLoc = new URL(urlLocal);
+    var pageInfo = urlLoc.searchParams.get("page_info");
+    var URLFinal = urlParams + "&page_info=" + pageInfo;
+    utilis.makeAPICallExternalHTTPS(URLFinal)
+      .then((retorno) => {
+        processaListaProdutos(retorno[0], req, res, next);
+        tratarRepostaPaginacao(urlParams, retorno[1], req, res, next);
+      })
+      .catch((error) => {
+        console.log("Erro ao tentar pegar, pelo tratarRespostaPaginacao, o próximo registro", error);
+      })
+  }
+  else {
+    res.json({ mensagem: 'Ok' });
+    res.end();
+  }
 }
 
 router.post('/ReInstalarIntegracao', function (req, res, next) {
