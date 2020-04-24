@@ -2,13 +2,14 @@ var express = require('express');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
 var utilis = require('../../resources/util');
-var pool = require('../../db/queries');
 var usuario = require('../../schemas/users');
 var integracaoShopify = require('../../schemas/integracaoShopify');
 const format = require('string-format');
 var constantes = require('../../resources/constantes');
 var utilis = require('../../resources/util');
 var produtosSchema = require('../../schemas/produtos');
+var fileSystem = require('fs');
+var pathWay = require('path');
 const arrayWebHooks = [
   {
     "webhook": {
@@ -129,13 +130,112 @@ function processaWebHooks(req, res, next, url, path, headerAditional, valueHeade
     utilis.makeAPICallExternalParamsJSON(url, path, json, headerAditional, valueHeaderAditional)
       .then(produtos => {
         console.log("WebHook Criado ", json.webhook.topic);
+        res.json({ mensagem: "Ok!" });
+        res.end();
       })
       .catch(error => {
         console.log("Erro ao criar webhooks", error);
       })
   });
-  res.json({ mensagem: "Ok!" });
-  res.end();
+
+}
+
+function getTemplateThuorSnippet() {
+  return new Promise((resolve, reject) => {
+    try {
+      var pathFile = pathWay.join(__dirname, '../../public/templateThuorSnippet.text');
+      
+      var data = fileSystem.readFileSync(pathFile, 'utf8');
+      resolve(data.toString());
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+function processaTemas(req, res, next, url, path, headerAditional, valueHeaderAditional) {
+  utilis.makeAPICallExternalHeaders(url, path, headerAditional, valueHeaderAditional)
+    .then(retorno => {
+      //console.log("WebHook Criado ", url + path);
+      var LTemas = JSON.parse(retorno);
+
+      LTemas.themes.forEach((tema, i) => {
+        if (tema.role === "main") {
+          getTemplateThuorSnippet()
+            .then((retornoTemplate) => {
+              
+              var LThemeID = tema.id;
+              var LAssets = "assets.json";
+              var PathAsset = path.replace(".json", "") + "/" + LThemeID + "/" + LAssets;
+              var body = {
+                "asset": {
+                  "key": '' + constantes.RESOURCE_THUOR_SPNIPPET_LIQUID + '',
+                  "value": retornoTemplate
+                }
+              }
+              //CHAMA FUNÇÃO PARA CRIAR O ARQUIVO ThuorSnippet.liquid
+              utilis.makeAPICallExternalParamsJSON(url, PathAsset, body, headerAditional, valueHeaderAditional, 'PUT')
+                .then(retornoAssets => {
+                  //res.json({ mensagem: retornoAssets });
+                  //https://kingofertas.myshopify.com/admin/api/2020-04/themes/95439847483/assets.json?asset[key]=layout/theme.liquid
+                  var LThemeLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_THEME_LIQUID;
+                  var LThemeBak = {
+                    "asset": {
+                      "key": 'layout/theme_edited_by_thuor.liquid',
+                      "source_key": "layout/theme.liquid"
+                    }
+                  }
+                  ///CHAMA API PARA FAZER BACKUP DO THEME.LIQUID             
+                  utilis.makeAPICallExternalParamsJSON(url, PathAsset, LThemeBak, headerAditional, valueHeaderAditional, 'PUT')
+                    .then(retornoBackup => {
+                      // res.json({ mensagem: retornoBackup });
+                      utilis.makeAPICallExternalHeaders(url, LThemeLiquid, body, headerAditional, valueHeaderAditional)
+                        .then(retornoGetThemeLiquid => {
+                          var LRet = JSON.parse(retornoGetThemeLiquid);
+                          var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT, '</body>');
+                          var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT);
+                          var LThemeEdited = {
+                            "asset": {
+                              "key": 'layout/theme.liquid',
+                              "value": LNewHTMLValue
+                            }
+                          }
+                          //CHAMA API PARA ESCREVER O NOVO VALUR INCLUINDO A CHAMADA DO SNIPPET TO THUOR NO ARQUIVO THEME.LIQUID
+                          utilis.makeAPICallExternalParamsJSON(url, PathAsset, LThemeEdited, headerAditional, valueHeaderAditional, 'PUT')
+                            .then(retornoEdicaoArquivo => {
+                              res.json({ mensagem: retornoEdicaoArquivo });
+                            })
+                            .catch(error => {
+                              console.log("Erro ao EDITAR O ARQUIVO THEME.LIQUID ", error);
+                            })
+
+                        })
+                        .catch(error => {
+                          console.log("Error", error);
+                        })
+                    })
+                    .catch(error => {
+                      console.log("Error", error);
+                    })
+                })
+                .catch(error => {
+                  console.log("Error", error);
+                })
+            })
+            .catch((error) => {
+              console.log("Erro ao pegar o template ThuorSnippet", error);
+            })
+
+        }
+
+      });
+      //res.end();
+    })
+    .catch(error => {
+      console.log("Erro ao processar temas", error);
+    })
+
 }
 
 function InsereProduto(produto, req, res, next) {
@@ -194,6 +294,7 @@ router.post('/ReInstalarIntegracao', function (req, res, next) {
             const segredo_compartilhado = integraShopify[0].segredo_compartilhado;
             const versao = constantes.VERSAO_API;
             const resourceWebHooks = constantes.RESOURCE_WEBHOOKS;
+            const resourceTemas = constantes.RESOURCE_TEMAS;
 
             //url = "https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json";
             const url = format("https://{}:{}@{}", chave_api_key, senha, url_loja);
@@ -201,7 +302,8 @@ router.post('/ReInstalarIntegracao', function (req, res, next) {
             var headerAditional = "X-Shopify-Access-Token";
             var valueHeaderAditional = senha;
             processaWebHooks(req, res, next, url, path, headerAditional, valueHeaderAditional);
-
+            var PathTemas = format("/admin/api/{}/{}.json", versao, resourceTemas);
+            processaTemas(req, res, next, url, PathTemas, headerAditional, valueHeaderAditional);
           })
           .catch(error => {
             console.log("Erro ao pegar dados da integração com o checkout da shopify", error);

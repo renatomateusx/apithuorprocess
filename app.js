@@ -28,6 +28,7 @@ var push = require('./routes/push');
 var notificacaoRouter = require('./routes/notificacao');
 var importarProdutosShopify = require('./routes/componentes/importarProdutosShopify');
 var produtos = require('./routes/produtos');
+var integracaoShopify = require('./routes/integracaoShopify');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -51,6 +52,7 @@ app.use('/pagamentos', pagamentosRouter);
 app.use('/push', push);
 app.use('/notificacao', notificacaoRouter);
 app.use('/importarProdutosShopify', importarProdutosShopify);
+app.use('/integracaoShopify', integracaoShopify);
 app.use('/produtos/', produtos);
 
 app.use(function(req, res, next) {

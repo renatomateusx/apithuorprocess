@@ -4,6 +4,7 @@ var jwt = require('jsonwebtoken');
 var utilis = require('../resources/util');
 var integracaoShopify = require('../schemas/integracaoShopify');
 
+
 /* User Pagination */
 //utilis.verifyJWT, --- COLOCAR ISSO EM TODOS QUE PRECISAM.
 router.post('/AddIntegracaoCheckout', integracaoShopify.AddIntegracaoShopifyCheckout);
@@ -12,8 +13,10 @@ router.post('/UpdateIntegracaoCheckout', integracaoShopify.UpdateIntegracaoShopi
 
 router.get('/GetIntegracaoCheckout', integracaoShopify.GetIntegracaoShopifyCheckout);
 
-router.get('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
+router.post('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
 
+//ESSE NÃO PRECISA DE VERIFICAR TOKEN
+router.post('/CartShopify', integracaoShopify.CartShopify);
 
 
 module.exports = router;
