@@ -25,11 +25,11 @@
         var cartEndpoint = 'https://thuor.com.br/v1/public/shopify/cart';
         var statusEndpoint = 'https://thuor.com.br/v2/public/shopify/status';
         var shop = '{{ shop.secure_url }}';
-        
-      
+
+
         window.ThuorCheckoutUrl = '';
-      
-      
+
+
         cartEndpoint = 'https://www.drivehq.com/file/DFPublishFile.aspx/FileID7102297365/Keymv0wrhmestoo/cart.json';
 		console.log("Shop", cartEndpoint);
 
@@ -50,53 +50,53 @@ if (currentPage == 'cart') {
                     shop: window.location.host,
                     cart: cartJSON
                 }
-                var respCartClone = {
+                var respCart = {
                     "url": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart",
                     "urlCheckout": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart&redirectTo=checkout",
                     "active": "1",
                     "skip_cart": "0"
                 }
-                postAjax(cartEndpoint, JSON.stringify(dataBody), function (resEndPoint) {
-                    var respCart = JSON.parse(resEndPoint);
-                    if (!respCart.active) {
-                        hideThuorLoader();
+                //postAjax(cartEndpoint, JSON.stringify(dataBody), function (resEndPoint) {
+                //var respCart = JSON.parse(resEndPoint);
+                if (!respCart.active) {
+                    hideThuorLoader();
+                }
+                else {
+                    var otherButtons = document.getElementsByClassName('cartX_check_mainBtn');
+
+                    for (var i = 0; i < otherButtons.length; i++) {
+                        otherButtons[i].setAttribute('style', 'display: none !important');
                     }
-                    else {
-                        var otherButtons = document.getElementsByClassName('cartX_check_mainBtn');
-
-                        for (var i = 0; i < otherButtons.length; i++) {
-                            otherButtons[i].setAttribute('style', 'display: none !important');
-                        }
-                        window.ThuorCheckoutUrl = respCart.urlCheckout;
+                    window.ThuorCheckoutUrl = respCart.urlCheckout;
 
 
-                        if ((respCart.skip_cart == 1 || respCart.skip_cart == '1') && respCart.urlCheckout != '') {
-                            // Limpa o carrinho do Shopify
-                            postAjax('/cart/clear.js', JSON.stringify({}), function () {
-                                window.location = respCart.urlCheckout;
-                            });
-                        } else {
-                            hideThuorLoader();
-                            var getForm = document.getElementsByTagName('form'); var cartFrmId, getCheckoutBtn;
-                            for (var i = 0; i < getForm.length; i++) {
-                                var formAction = getForm[i].action;  formAction = formAction.split(shop);
-                                if (formAction.includes('/cart') == true || formAction[0].includes('/cart') == true) {
-                                    if ((respCart.skip_cart == 1 || respCart.skip_cart == '1')) {
-                                        getForm[i].action = respCart.urlCheckout;
-                                    }
-                                    else {
-                                        getForm[i].action = respCart.url;
-                                    }
-
+                    if ((respCart.skip_cart == 1 || respCart.skip_cart == '1') && respCart.urlCheckout != '') {
+                        // Limpa o carrinho do Shopify
+                        postAjax('/cart/clear.js', JSON.stringify({}), function () {
+                            window.location = respCart.urlCheckout;
+                        });
+                    } else {
+                        hideThuorLoader();
+                        var getForm = document.getElementsByTagName('form'); var cartFrmId, getCheckoutBtn;
+                        for (var i = 0; i < getForm.length; i++) {
+                            var formAction = getForm[i].action;  formAction = formAction.split(shop);
+                            if (formAction.includes('/cart') == true || formAction[0].includes('/cart') == true ) {
+                                if ((respCart.skip_cart == 1 || respCart.skip_cart == '1')) {
+                                    getForm[i].action = respCart.urlCheckout;
+                                }
+                                else {
+                                    getForm[i].action = respCart.url;
                                 }
 
                             }
+
                         }
-
-
                     }
 
-                });
+
+                }
+
+                //});
             });
     }
 
