@@ -11,6 +11,8 @@ router.post('/GetProdutos', utilis.verifyJWT, produtosSchema.GetProdutos);
 
 router.post('/GetProdutoByID', utilis.verifyJWT, produtosSchema.GetProdutoByID);
 
+router.post('/GetProdutoByIDThuor', produtosSchema.GetProdutoByIDThuor);
+
 router.post('/AddProduto', utilis.verifyJWT, produtosSchema.AddProduto);
 
 router.put('/UpdateProduto', utilis.verifyJWT, produtosSchema.UpdateProduto);

@@ -193,13 +193,14 @@ function getURLProduto(id_produto, quantity, variante_cart, i) {
     });
 }
 
-function getDadosAdicionaisUrlProduto(token, isShopify, clearCart) {
+function getDadosAdicionaisUrlProduto(token, isShopify, clearCart, qtdItems) {
     return new Promise((resolve, reject) => {
         try {
             var produtoFinal = "";
             produtoFinal = produtoFinal + format("cart_token={}&", token);
             produtoFinal = produtoFinal + format("isShopify={}&", isShopify);
             produtoFinal = produtoFinal + format("limpa_carrinho={}&", clearCart);
+            produtoFinal = produtoFinal + format("qtd_items={}&", qtdItems);
 
             resolve(produtoFinal);
         }
@@ -231,7 +232,7 @@ module.exports.CartShopify = async (req, res, next) => {
     clearCart = dadosLoja.limpa_carrinho;
     isShopify = 1;
     
-    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart);
+    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length);
     cart.items.forEach(async (Item, i) => {
         const cartItem = Item;
         var produto_id = Item.product_id;
