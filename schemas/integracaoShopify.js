@@ -2,6 +2,13 @@ var pool = require('../db/queries');
 var utils = require('../resources/util');
 var constantes = require('../resources/constantes');
 const format = require('string-format');
+const DeferredPromise = require('@bitbar/deferred-promise');
+
+
+const produto = "produto_option_id[@]=#&";
+const quantidade = "produto_option_quantity[@]=#&";
+const produto_variante = "produto_option_variante_id[@]=#&";
+
 module.exports.GetIntegracaoShopifyCheckout = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
@@ -103,88 +110,281 @@ module.exports.ReInstalarIntegracao = (req, res, next) => {
     });
 }
 
-module.exports.CartShopify = (req, res, next) => {
-    // return new Promise((resolve, reject) => {
+function getDadosLoja(shop) {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], async (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rows) {
+
+                results.rows.forEach(async (obj, i) => {
+                    resolve(obj);
+                })
+
+            }
+        });
+    });
+}
+function getDadosLoja(shop) {
+    return new Promise((resolve, reject) => {
         try {
-            const {shop, cart} = req.body;
-            var status, url_loja, token, isShopify, clearCart, skipToCheckout;
-            var produto_option_id=[], produto_option_quantity=[], produto_option_variante_id=[];
-            var redirTo=['cart', 'checkout'];
-            //console.log("Shop", shop);
-            const { id_usuario } = req.body;
             pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
                 if (error) {
                     throw error
                 }
-                if(results.rows){
-                    results.rows.forEach((obj,i)=>{
-                        status = obj.status;
-                        url_loja = obj.url_loja;          
-                        skipToCheckout = obj.pula_carrinho;
-                        clearCart = obj.limpa_carrinho;
-                        isShopify = 1;
-                                                             
+                if (results.rows) {
+                    results.rows.forEach((loja, i) => {
+                        resolve(loja);
                     })
-
-                    //COMEÇA A PEGAR DADOS DO JSON RECEBIDO
-                    token = "shopify-"+cart.token;
-                    var produto = "produto_option_id[@]=#&";
-                    var quantidade = "produto_option_quantity[@]=#&";
-                    var produto_variante = "produto_option_variante_id[@]=#&";
-                    var produtoFinal =constantes.WEBSITECHECKOUT;
-                    
-                    for(var i=0; i< cart.items.length; i++){
-                        produtoFinal+= produto.replace("@",i).replace("#", cart.items[i].id);
-                        produtoFinal+= quantidade.replace("@",i).replace("#", cart.items[i].quantity);
-                        produtoFinal+= produto_variante.replace("@",i).replace("#", cart.items[i].variant_id);      
-                                        
-                    }
-                    
-                    produtoFinal+=format("cart_token={}&", token);                    
-                    produtoFinal+=format("isShopify={}&", isShopify);
-                    produtoFinal+=format("limpa_carrinho={}&", clearCart);
-
-                    var urlCart = produtoFinal+= format("redirectTo={}&", redirTo[0]);
-                    var urlCheckout = produtoFinal+= format("redirectTo={}&", redirTo[1]);
-                    urlCart = urlCart.substr(0, urlCart.length-1);
-                    urlCheckout = urlCheckout.substr(0, urlCheckout.length-1);
-
-
-                    var RetornoShopify ={
-                        "url": urlCart,
-                        "urlCheckout": urlCheckout,
-                        "active": status,
-                        "skip_cart": skipToCheckout
-                    }
-                    console.log("ProdutoFinal", RetornoShopify);  
-                    
-                    
-
-
                 }
-
-            })
-            res.json({mensagem: 'recebido'});
-            res.end();
-            // this.GetIntegracaoShopifyCheckout(req, res, next)
-            //     .then((retorno) => {
-            //         console.log("Retorno", retorno);
-            //     })
-            //     .catch((error) => {
-            //         res.json(error);
-            //         res.end();
-
-            //     });
-            // utils.makeAPICallExternalHTTPS()
-            //     .then(retorno => {
-
-            //     })
-            //     .catch(error => {
-            //         console.log("Erro ao tentar criar a API de Produtos para o tema.");
-            //     })
-        } catch (error) {
-            res.json("recebido");
-            res.end();
+            });
         }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+            reject(error);
+        }
+    });
+}
+
+function getDadosProduto(id_produto, variante_cart) {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM produtos WHERE id_produto_json=$1', [id_produto], (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                if (resultsProd.rows) {
+                    resultsProd.rows.forEach((prod, ii) => {
+                        const ProdutoJSON = JSON.parse(prod.json_dados_produto);
+                        ProdutoJSON.variants.forEach((variante, i) => {
+                            if (variante.id == variante_cart) {
+                                var produto = {
+                                    id_thuor: prod.id_thuor,
+                                    variante_id: variante.id
+                                }
+                                resolve(produto);
+                            }
+                        });
+
+                    });
+                }
+            });
+        }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+            reject(error);
+        }
+    });
+}
+function getURLProduto(id_produto, quantity, variante_cart, i) {
+    return new Promise((resolve, reject) => {
+        try {
+            var produtoFinal = "";
+            produtoFinal = produtoFinal + produto.replace("@", i).replace("#", id_produto);
+            produtoFinal = produtoFinal + quantidade.replace("@", i).replace("#", quantity);
+            produtoFinal = produtoFinal + produto_variante.replace("@", i).replace("#", variante_cart);
+            resolve(produtoFinal);
+        }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+            reject(error);
+        }
+    });
+}
+
+function getDadosAdicionaisUrlProduto(token, isShopify, clearCart) {
+    return new Promise((resolve, reject) => {
+        try {
+            var produtoFinal = "";
+            produtoFinal = produtoFinal + format("cart_token={}&", token);
+            produtoFinal = produtoFinal + format("isShopify={}&", isShopify);
+            produtoFinal = produtoFinal + format("limpa_carrinho={}&", clearCart);
+
+            resolve(produtoFinal);
+        }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+            reject(error);
+        }
+    });
+}
+
+module.exports.CartShopify = async (req, res, next) => {
+    var status, url_loja, token, isShopify, clearCart, skipToCheckout;
+    var produto_option_id = [], produto_option_quantity = [], produto_option_variante_id = [];
+    const { shop, cart } = req.body;
+    token = "shopify-" + cart.token;
+    var promises = [];
+    cart.items.forEach((obj, i) => {
+        promises.push(
+            new DeferredPromise()
+        )
+    })
+    var redirTo = ['cart', 'checkout'];
+    var RetornoShopify = null;
+    var produtoFinal = constantes.WEBSITECHECKOUT;
+    const dadosLoja = await getDadosLoja(shop);
+    status = dadosLoja.status;
+    url_loja = dadosLoja.url_loja;
+    skipToCheckout = dadosLoja.pula_carrinho;
+    clearCart = dadosLoja.limpa_carrinho;
+    isShopify = 1;
+    
+    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart);
+    cart.items.forEach(async (Item, i) => {
+        const cartItem = Item;
+        var produto_id = Item.product_id;
+        var ProdutoVariante;
+        const produto = await getDadosProduto(produto_id, cartItem.id);
+        ProdutoVariante = produto.variante_id;
+        produtoFinal = produtoFinal + await getURLProduto(produto.id_thuor, cartItem.quantity, ProdutoVariante, i);
+        promises[i].resolve();
+    });
+    Promise.all(promises)
+        .then(() => {
+            var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
+            var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
+            urlCart = urlCart.substr(0, urlCart.length - 1);
+            urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
+            //console.log("Prod", produtoFinal);
+            RetornoShopify = {
+                "url": urlCart,
+                "urlCheckout": urlCheckout,
+                "active": status,
+                "skip_cart": skipToCheckout
+            }
+            //console.log("ProdutoFinal", RetornoShopify);
+            res.json(RetornoShopify);
+            res.end();
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        })
+    
+}
+module.exports.CartShopifyClone = async (req, res, next) => {
+    // return new Promise((resolve, reject) => {
+    try {
+
+        const { shop, cart } = req.body;
+        var status, url_loja, token, isShopify, clearCart, skipToCheckout;
+        var produto_option_id = [], produto_option_quantity = [], produto_option_variante_id = [];
+        var redirTo = ['cart', 'checkout'];
+        var RetornoShopify = null;
+        var produtoFinal = constantes.WEBSITECHECKOUT;
+        var promises = [];
+        //console.log("Shop", promises);
+        cart.items.forEach((obj, i) => {
+            promises.push(
+                new DeferredPromise()
+            )
+        })
+        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rows) {
+                results.rows.forEach((obj, i) => {
+                    status = obj.status;
+                    url_loja = obj.url_loja;
+                    skipToCheckout = obj.pula_carrinho;
+                    clearCart = obj.limpa_carrinho;
+                    isShopify = 1;
+
+                })
+                token = "shopify-" + cart.token;
+                const produto = "produto_option_id[@]=#&";
+                const quantidade = "produto_option_quantity[@]=#&";
+                const produto_variante = "produto_option_variante_id[@]=#&";
+
+
+                cart.items.forEach((Item, iii) => {
+                    //console.log(iii);
+                    const cartItem = Item;
+                    var produto_id = Item.product_id;
+                    var ProdutoVariante;
+
+                    pool.query('SELECT * FROM produtos WHERE id_produto_json=$1', [produto_id], (error, resultsProd) => {
+                        if (error) {
+                            throw error
+                        }
+                        if (resultsProd.rows) {
+                            resultsProd.rows.forEach((prod, ii) => {
+                                //console.log("Produto Encontrado", prod.id_thuor);
+                                const ProdutoJSON = JSON.parse(prod.json_dados_produto);
+                                ProdutoJSON.variants.forEach((variante, i) => {
+                                    //console.log("Variante", variante.id);
+                                    if (variante.id == cartItem.id) {
+                                        ProdutoVariante = variante;
+                                        //console.log("ProdutoID", ProdutoVariante.product_id);
+                                        //console.log("VarianteID", ProdutoVariante.id);
+                                        produtoFinal = produtoFinal + produto.replace("@", i).replace("#", prod.id_thuor);
+                                        produtoFinal = produtoFinal + quantidade.replace("@", i).replace("#", cart.items[i].quantity);
+                                        produtoFinal = produtoFinal + produto_variante.replace("@", i).replace("#", ProdutoVariante.id);
+
+                                    }
+                                });
+                                console.log("Produto", ii);
+                                promises[0].resolve();
+                                //promises[1].resolve();
+                            });
+
+                            //COMEÇA A PEGAR DADOS DO JSON RECEBIDO
+                            produtoFinal = produtoFinal + format("cart_token={}&", token);
+                            produtoFinal = produtoFinal + format("isShopify={}&", isShopify);
+                            produtoFinal = produtoFinal + format("limpa_carrinho={}&", clearCart);
+                            //console.log("Prod",produtoFinal);
+                        }
+                        else {
+                            res.json({ mensagem: 'recebidoow' });
+                            res.end();
+                        }
+
+                    });
+
+                });
+
+                //promises[0].resolve();
+                //promises[1].resolve();
+
+
+            }
+            else {
+                res.json({ mensagem: 'Loja Não encontrada' });
+                res.end();
+            }
+            //console.log("ProdutoFinal", RetornoShopify);
+            //res.json(RetornoShopify);
+            //res.end();
+
+
+        });
+
+        Promise.all(promises)
+            .then(() => {
+                var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
+                var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
+                urlCart = urlCart.substr(0, urlCart.length - 1);
+                urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
+                //console.log("Prod", produtoFinal);
+                RetornoShopify = {
+                    "url": urlCart,
+                    "urlCheckout": urlCheckout,
+                    "active": status,
+                    "skip_cart": skipToCheckout
+                }
+                console.log("ProdutoFinal", RetornoShopify);
+                res.json(RetornoShopify);
+                res.end();
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            })
+
+    } catch (error) {
+        res.json("recebidoei");
+        res.end();
+    }
     // });
 }
