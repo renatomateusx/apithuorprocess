@@ -31,57 +31,91 @@ module.exports.GetProdutoByID = (req, res, next) => {
         res.end();
     }
 }
+function GetImageVariantID(variant, images) {
+    return new Promise((resolve, reject) => {
+        try {
+            var imgSRC;
+            for (let img of images) {
+                if (img.variant_ids.length > 0) {
+                    //var imgs = img.variant_ids.indexOf(variant);
+                    const imgs = img.variant_ids.find(x => x == variant);
+                    //console.log("Has Image", imgs);
+                    if (imgs != undefined) {
+                        //console.log("Image", imgs);
+                        imgSRC = img.src;
+                        break;
+                    }
+                }
+            }
+            resolve(imgSRC);
+        }
+        catch (error) {
+            reject(error);
+        }
+    });
+}
 
-module.exports.GetProdutoByIDThuor = (req, res, next) => {
+
+module.exports.GetProdutoByIDThuor = async (req, res, next) => {
     try {
         const { id_produto, quantity, variant } = req.body;
         console.log(id_produto, quantity, variant)
-        pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id_produto], (error, resultsProd  ) => {
+        pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id_produto], (error, resultsProd) => {
             if (error) {
                 throw error
             }
-            if(resultsProd.rows){
-               
-                resultsProd.rows.forEach((prod, ii) => {
-                   
+
+            if (resultsProd.rows) {
+
+                resultsProd.rows.forEach(async (prod, ii) => {
+
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
-                    ProdutoJSON.variants.forEach((variante, i) => {    
-                                            
-                        if (variante.id == variant) {                                        
-                            ProdutoJSON.images.forEach((img, i)=>{ 
-                                                           
-                                if(img.variant_ids.length !== undefined){                                   
-                                    var imgSRC;
-                                    var imgs = img.variant_ids.indexOf(variant);
-                                    console.log("Imgs", imgs);
-                                    if(imgs > -1){
-                                        console.log("6", img.src);
-                                        imgSRC = img.src;
-                                        var produto = {
-                                            title: ProdutoJSON.title,
-                                            variant_id: variante.id,
-                                            variant_title: variante.title,
-                                            quantity: quantity,
-                                            variant_price_ancora: variante.compare_at_price,
-                                            variant_price: variante.price,
-                                            variant_img: imgSRC,
-                                            id_thuor: prod.id_thuor,                                
-                                        }
-                                        console.log("Variantes Images", produto);
-                                        res.status(200).json(produto);
-                                    }                                    
-                                }
-                            })
-                            
-                            
-                            
+                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
+                    // ProdutoJSON.images.forEach((img, i) => {
+                    //     if (img.variant_ids.length !== undefined) {
+                    //         var imgs = img.variant_ids.indexOf(variant);
+                    //         if (imgs > -1) {
+                    //             imgSRC = img.src;
+                    //         }
+                    //     }
+                    // });
+                    ProdutoJSON.variants.forEach((variante, i) => {
+
+                        if (variante.id == variant) {
+                            //ProdutoJSON.images.forEach((img, i) => {
+
+                            //if (img.variant_ids.length !== undefined) {
+
+                            // var imgs = img.variant_ids.indexOf(variant);
+                            //console.log("Imgs", imgs);
+                            //if (imgs > -1) {
+                            //console.log("6", img.src);
+                            //imgSRC = img.src;
+                            var produto = {
+                                title: ProdutoJSON.title,
+                                variant_id: variante.id,
+                                variant_title: variante.title,
+                                quantity: quantity,
+                                variant_price_ancora: variante.compare_at_price,
+                                variant_price: variante.price,
+                                variant_img: imgSRC,
+                                id_thuor: prod.id_thuor,
+                            }
+                            //console.log("Variantes Images", produto);
+                            res.status(200).json(produto);
+                            //}
+                            //}
+                            //})
+
+
+
                         }
                     });
 
                 });
             }
-            else{
-                res.status(200).json({mensagem: "Nenhum produto encontrado"});
+            else {
+                res.status(200).json({ mensagem: "Nenhum produto encontrado" });
             }
             //
         })

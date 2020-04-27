@@ -18,5 +18,6 @@ router.post('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
 //ESSE NÃO PRECISA DE VERIFICAR TOKEN
 router.post('/CartShopify', integracaoShopify.CartShopify);
 
+router.post('/GetDadosLoja', integracaoShopify.GetDadosLoja);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const DeferredPromise = require('@bitbar/deferred-promise');
 const produto = "produto_option_id[@]=#&";
 const quantidade = "produto_option_quantity[@]=#&";
 const produto_variante = "produto_option_variante_id[@]=#&";
+const store = "store=#&";
 
 module.exports.GetIntegracaoShopifyCheckout = (req, res, next) => {
     return new Promise((resolve, reject) => {
@@ -126,25 +127,32 @@ function getDadosLoja(shop) {
         });
     });
 }
-function getDadosLoja(shop) {
-    return new Promise((resolve, reject) => {
-        try {
-            pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
-                if (error) {
-                    throw error
-                }
-                if (results.rows) {
-                    results.rows.forEach((loja, i) => {
-                        resolve(loja);
-                    })
-                }
-            });
-        }
-        catch (error) {
-            console.log("Erro cart shopify", error);
-            reject(error);
-        }
-    });
+module.exports.GetDadosLoja = (req, res, next) => {
+    //return new Promise((resolve, reject) => {
+    try {
+        const { shop } = req.body;
+
+        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rows) {
+
+                results.rows.forEach((loja, i) => {
+                    //console.log("Shop", loja);
+                    res.json(loja);
+                    res.end();
+                })
+            }
+        });
+    }
+    catch (error) {
+        console.log("Erro cart shopify", error);
+        res.json(error);
+        res.end();
+        // reject(error);
+    }
+    //});
 }
 
 function getDadosProduto(id_produto, variante_cart) {
@@ -193,7 +201,7 @@ function getURLProduto(id_produto, quantity, variante_cart, i) {
     });
 }
 
-function getDadosAdicionaisUrlProduto(token, isShopify, clearCart, qtdItems) {
+function getDadosAdicionaisUrlProduto(token, isShopify, clearCart, qtdItems, store) {
     return new Promise((resolve, reject) => {
         try {
             var produtoFinal = "";
@@ -201,6 +209,7 @@ function getDadosAdicionaisUrlProduto(token, isShopify, clearCart, qtdItems) {
             produtoFinal = produtoFinal + format("isShopify={}&", isShopify);
             produtoFinal = produtoFinal + format("limpa_carrinho={}&", clearCart);
             produtoFinal = produtoFinal + format("qtd_items={}&", qtdItems);
+            produtoFinal = produtoFinal + format("store={}&", store);
 
             resolve(produtoFinal);
         }
@@ -231,8 +240,8 @@ module.exports.CartShopify = async (req, res, next) => {
     skipToCheckout = dadosLoja.pula_carrinho;
     clearCart = dadosLoja.limpa_carrinho;
     isShopify = 1;
-    
-    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length);
+
+    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length, url_loja);
     cart.items.forEach(async (Item, i) => {
         const cartItem = Item;
         var produto_id = Item.product_id;
@@ -262,7 +271,7 @@ module.exports.CartShopify = async (req, res, next) => {
         .catch((error) => {
             console.log("Error", error);
         })
-    
+
 }
 module.exports.CartShopifyClone = async (req, res, next) => {
     // return new Promise((resolve, reject) => {
