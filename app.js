@@ -30,6 +30,7 @@ var importarProdutosShopify = require('./routes/componentes/importarProdutosShop
 var produtos = require('./routes/produtos');
 var integracaoShopify = require('./routes/integracaoShopify');
 var logisticas = require('./routes/logisticas');
+var integracaoMP = require('./routes/componentes/MP/integracaoMP');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -54,8 +55,9 @@ app.use('/push', push);
 app.use('/notificacao', notificacaoRouter);
 app.use('/importarProdutosShopify', importarProdutosShopify);
 app.use('/integracaoShopify', integracaoShopify);
-app.use('/produtos/', produtos);
-app.use('/logisticas/', logisticas);
+app.use('/produtos', produtos);
+app.use('/logisticas', logisticas);
+app.use('/integracaoMP', integracaoMP);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
