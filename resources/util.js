@@ -2,6 +2,7 @@ var jwt = require('jsonwebtoken');
 var request = require('request');
 const https = require('https');
 const querystring = require('querystring');
+const currencyFormatter = require('currency-formatter');
 /*DEIXEI COMENTADO PARA COLOCAR, SE FOR PRECISO, NO ARQUIVO VIEWS/LAYOUT.PUG script(src='https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js')*/
 module.exports.verifyJWT = function (req, res, next) {
   var token = req.headers['authorization'];
@@ -142,4 +143,10 @@ module.exports.loadExternalJavaScriptFile = function (url) {
       })
 
   });
+};
+module.exports.formatMoney = function (value) {
+  return currencyFormatter.format(value, { code: 'USD' });
+};
+module.exports.UnformatMoney = function (value) {
+  return currencyFormatter.unformat(value, { code: 'USD' });
 };

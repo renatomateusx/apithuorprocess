@@ -10,6 +10,7 @@
     "@bitbar/deferred-promise": "^1.0.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
+    "currency-formatter": "^1.5.5",
     "debug": "^2.6.9",
     "dotenv-extended": "^2.4.0",
     "dotenv-safe": "^6.1.0",
