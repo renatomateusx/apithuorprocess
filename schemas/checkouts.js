@@ -19,7 +19,7 @@ module.exports.GetCheckoutAtivo = (req, res, next) => {
         res.end();
     }
 }
-async function mountJSONShopifyOrder(Pjson) {
+async function mountJSONShopifyOrder(Pjson, situacao) {
     return new Promise(async (resolve, reject) => {
         try {
             const LShopifyOrder = {
@@ -58,7 +58,7 @@ async function mountJSONShopifyOrder(Pjson) {
                             "amount": parseFloat(Pjson.paymentData.transaction_amount)
                         }
                     ],
-                    "financial_status": "authorized"
+                    "financial_status": situacao
                 }
             };
             resolve(LShopifyOrder);
@@ -107,7 +107,86 @@ module.exports.DoPay = (req, res, next) => {
                 const DataResponse = data.response;
                 ///console.log(data.response);
                 if (data.response.status == 'approved') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON);
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
+                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
+                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
+                    var headerAditional = "X-Shopify-Access-Token";
+                    var valueHeaderAditional = LJSON.dadosLoja.senha;
+                    //console.log(ordersShopify);
+                    //console.log(urlShopify);
+                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
+                        .then(async retornoShopify => {
+                            const RetornoShopifyJSON = retornoShopify.body;
+                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body)
+                                .then((retornoInsereTransacao) => {
+                                    res.status(200).send(DataResponse);
+                                })
+                                .catch((error) => {
+                                    console.log("Erro ao inserir transação no banco", error);
+                                })
+                        })
+                        .catch(error => {
+                            console.log("Erro ao enviar informação do checkout para a shopify", error);
+                        })
+                }
+                else {
+                    console.log("Response", data.response);
+                    res.status(200).send(data.response);
+                }
+
+            }).catch(function (error) {
+                console.log("Erro MP", error);
+                if (error.cause != undefined) {
+                    console.log(error.cause[0].code);
+                    res.status(202).send(error.cause[0].code);
+                }
+                else {
+                    res.status(202).send(error);
+                }
+            });
+
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.DoPayTicket = (req, res, next) => {
+    try {
+        const { pay } = req.body;
+        const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
+        ///console.log("Pay", LJSON);
+        mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
+        var paymentData = {
+            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
+            description: LJSON.paymentData.description,
+            payment_method_id: LJSON.paymentData.payment_method_id,
+            payer: {
+                email: LJSON.paymentData.payer,
+                first_name: LJSON.dadosComprador.nome_completo,
+                last_name: '',
+                identification: {
+                    type: 'CPF',
+                    number: LJSON.dadosComprador.cpf.replace(/./g, '').replace(/-/g, '')
+                },
+                address: {
+                    zip_code: LJSON.dadosComprador.cep.replace(/-/g, ''),
+                    street_name: LJSON.dadosComprador.endereco,
+                    street_number: LJSON.dadosComprador.numero_porta,
+                    neighborhood: LJSON.dadosComprador.bairro,
+                    city: LJSON.dadosComprador.cidade,
+                    federal_unit: LJSON.dadosComprador.estado
+                }
+            }
+        }
+        //console.log("paymentData", paymentData);
+        mercadopago.payment.create(paymentData)
+            .then(async function (data) {
+                const DataResponse = data.response;
+                ///console.log(data.response);
+                if (data.response.status == 'pending') {
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
                     var headerAditional = "X-Shopify-Access-Token";
