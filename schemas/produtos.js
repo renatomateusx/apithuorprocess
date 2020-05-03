@@ -64,33 +64,16 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
             if (error) {
                 throw error
             }
-
             if (resultsProd.rows) {
 
                 resultsProd.rows.forEach(async (prod, ii) => {
-
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
                     const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
-                    // ProdutoJSON.images.forEach((img, i) => {
-                    //     if (img.variant_ids.length !== undefined) {
-                    //         var imgs = img.variant_ids.indexOf(variant);
-                    //         if (imgs > -1) {
-                    //             imgSRC = img.src;
-                    //         }
-                    //     }
-                    // });
+                   
                     ProdutoJSON.variants.forEach((variante, i) => {
 
                         if (variante.id == variant) {
-                            //ProdutoJSON.images.forEach((img, i) => {
-
-                            //if (img.variant_ids.length !== undefined) {
-
-                            // var imgs = img.variant_ids.indexOf(variant);
-                            //console.log("Imgs", imgs);
-                            //if (imgs > -1) {
-                            //console.log("6", img.src);
-                            //imgSRC = img.src;
+                          
                             var produto = {
                                 title: ProdutoJSON.title,
                                 variant_id: variante.id,
@@ -101,14 +84,9 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
                             }
-                            //console.log("Variantes Images", produto);
+                           
                             res.status(200).json(produto);
-                            //}
-                            //}
-                            //})
-
-
-
+                            
                         }
                     });
 
@@ -118,6 +96,52 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                 res.status(200).json({ mensagem: "Nenhum produto encontrado" });
             }
             //
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetProdutoByIDImported = async (req, res, next) => {
+    try {
+        const { id_produto, quantity, variant } = req.body;
+        console.log(id_produto, quantity, variant)
+        pool.query('SELECT * FROM produtos WHERE id_produto_json = $1', [id_produto], (error, resultsProd) => {
+            if (error) {
+                throw error
+            }
+
+            if (resultsProd.rows) {
+
+                resultsProd.rows.forEach(async (prod, ii) => {
+
+                    const ProdutoJSON = JSON.parse(prod.json_dados_produto);
+                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);                   
+                    ProdutoJSON.variants.forEach((variante, i) => {
+
+                        if (variante.id == variant) {                            
+                            var produto = {
+                                title: ProdutoJSON.title,
+                                variant_id: variante.id,
+                                variant_title: variante.title,
+                                quantity: quantity,
+                                variant_price_ancora: variante.compare_at_price,
+                                variant_price: variante.price,
+                                variant_img: imgSRC,
+                                id_thuor: prod.id_thuor,
+                                id_usuario: prod.id_usuario
+                            }                           
+                            res.status(200).json(produto);                           
+                        }
+                    });
+
+                });
+            }
+            else {
+                res.status(200).json({ mensagem: "Nenhum produto encontrado" });
+            }
+            
         })
     } catch (error) {
         res.json(error);

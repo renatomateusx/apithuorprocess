@@ -20,4 +20,6 @@ router.post('/CartShopify', integracaoShopify.CartShopify);
 
 router.post('/GetDadosLoja', integracaoShopify.GetDadosLoja);
 
+router.post('/GetDadosLojaByIDUsuario', integracaoShopify.GetDadosLojaByIDUsuario);
+
 module.exports = router;

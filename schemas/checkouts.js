@@ -107,7 +107,7 @@ module.exports.DoPay = (req, res, next) => {
                 const DataResponse = data.response;
                 ///console.log(data.response);
                 if (data.response.status == 'approved') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
                     var headerAditional = "X-Shopify-Access-Token";

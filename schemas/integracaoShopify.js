@@ -154,7 +154,33 @@ module.exports.GetDadosLoja = (req, res, next) => {
     }
     //});
 }
+module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
+    //return new Promise((resolve, reject) => {
+    try {
+        const { id_usuario } = req.body;
 
+        pool.query('SELECT * FROM integracao_shopify WHERE id_usuario=$1', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rows) {
+
+                results.rows.forEach((loja, i) => {
+                    //console.log("Shop", loja);
+                    res.json(loja);
+                    res.end();
+                })
+            }
+        });
+    }
+    catch (error) {
+        console.log("Erro cart shopify", error);
+        res.json(error);
+        res.end();
+        // reject(error);
+    }
+    //});
+}
 function getDadosProduto(id_produto, variante_cart) {
     return new Promise((resolve, reject) => {
         try {
