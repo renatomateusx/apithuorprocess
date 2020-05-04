@@ -156,19 +156,20 @@ module.exports.DoPayTicket = (req, res, next) => {
     try {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
-        ///console.log("Pay", LJSON);
+        console.log("Pay", LJSON);
         mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
+        var FirstLastName = LJSON.dadosComprador.nome_completo.split(" ");
         var paymentData = {
             transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
             description: LJSON.paymentData.description,
             payment_method_id: LJSON.paymentData.payment_method_id,
             payer: {
-                email: LJSON.paymentData.payer,
-                first_name: LJSON.dadosComprador.nome_completo,
-                last_name: '',
+                email: LJSON.dadosComprador.email,
+                first_name: FirstLastName[0],
+                last_name: FirstLastName[FirstLastName.length -1],
                 identification: {
                     type: 'CPF',
-                    number: LJSON.dadosComprador.cpf.replace(/./g, '').replace(/-/g, '')
+                    number: LJSON.dadosComprador.cpf.replace(/[.-]/g, '')
                 },
                 address: {
                     zip_code: LJSON.dadosComprador.cep.replace(/-/g, ''),
@@ -180,11 +181,11 @@ module.exports.DoPayTicket = (req, res, next) => {
                 }
             }
         }
-        //console.log("paymentData", paymentData);
+        console.log("paymentData", paymentData);
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;
-                ///console.log(data.response);
+                console.log(data.response);
                 if (data.response.status == 'pending') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
