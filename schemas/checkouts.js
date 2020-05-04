@@ -119,7 +119,11 @@ module.exports.DoPay = (req, res, next) => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
                                 .then((retornoInsereTransacao) => {
-                                    res.status(200).send(DataResponse);
+                                    const response = {
+                                        dataGateway: DataResponse,
+                                        dataStore: RetornoShopifyJSON
+                                    }
+                                    res.status(200).send(response);
                                 })
                                 .catch((error) => {
                                     console.log("Erro ao inserir transação no banco", error);
@@ -166,7 +170,7 @@ module.exports.DoPayTicket = (req, res, next) => {
             payer: {
                 email: LJSON.dadosComprador.email,
                 first_name: FirstLastName[0],
-                last_name: FirstLastName[FirstLastName.length -1],
+                last_name: FirstLastName[FirstLastName.length - 1],
                 identification: {
                     type: 'CPF',
                     number: LJSON.dadosComprador.cpf.replace(/[.-]/g, '')
@@ -199,7 +203,11 @@ module.exports.DoPayTicket = (req, res, next) => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
                                 .then((retornoInsereTransacao) => {
-                                    res.status(200).send(DataResponse);
+                                    const response = {
+                                        dataGateway: DataResponse,
+                                        dataStore: RetornoShopifyJSON
+                                    }
+                                    res.status(200).send(response);
                                 })
                                 .catch((error) => {
                                     console.log("Erro ao inserir transação no banco", error);
