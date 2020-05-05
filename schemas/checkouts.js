@@ -4,6 +4,9 @@ const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
+const transacoes = require('./transacao');
+
+
 module.exports.GetCheckoutAtivo = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -117,7 +120,7 @@ module.exports.DoPay = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
+                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
                                 .then((retornoInsereTransacao) => {
                                     const response = {
                                         dataGateway: DataResponse,
@@ -201,7 +204,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
+                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
                                 .then((retornoInsereTransacao) => {
                                     const response = {
                                         dataGateway: DataResponse,

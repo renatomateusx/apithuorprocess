@@ -32,6 +32,7 @@ var integracaoShopify = require('./routes/integracaoShopify');
 var logisticas = require('./routes/logisticas');
 var integracaoMP = require('./routes/componentes/MP/integracaoMP');
 var checkouts = require('./routes/checkouts');
+var transacao = require('./routes/transacao');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -60,6 +61,7 @@ app.use('/produtos', produtos);
 app.use('/logisticas', logisticas);
 app.use('/integracaoMP', integracaoMP);
 app.use('/checkouts', checkouts);
+app.use('/transacoes', transacao);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
