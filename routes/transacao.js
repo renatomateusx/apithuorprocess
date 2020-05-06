@@ -8,6 +8,8 @@ var transacaoSchema = require('../schemas/transacao');
 /* User Pagination */
 //utilis.verifyJWT,
 router.post('/GetPedidos', transacaoSchema.GetTransacoes);
+router.post('/GetPedidosByID', transacaoSchema.GetTransacoesByID);
+
 
 
 module.exports = router;

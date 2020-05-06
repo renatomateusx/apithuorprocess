@@ -17,6 +17,22 @@ module.exports.GetTransacoes = (req, res, next) => {
     }
 }
 
+module.exports.GetTransacoesByID = (req, res, next) => {
+    try {
+        const { shop, id_usuario, id } = req.body;
+        pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2 and id=$3', [shop, id_usuario, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
 
 async function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status) {
     return new Promise(async (resolve, reject) => {
