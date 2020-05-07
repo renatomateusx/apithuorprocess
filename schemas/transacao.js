@@ -109,7 +109,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                 const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
                 const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-                
+
                 mercadopago.payment.refund(LResponseGW.id)
                     .then(async function (data) {
                         var LRefoundShopify = {
@@ -159,10 +159,6 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                     .catch(error => {
                         console.log("Erro ao efetuar o Refound", error);
                     })
-
-
-                res.status(200).send('Reembolsado com sucesso');
-                res.end();
             }
         })
     } catch (error) {

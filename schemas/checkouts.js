@@ -256,3 +256,19 @@ module.exports.DoPayTicket = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetIntegracaoCheckout = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        pool.query('SELECT * FROM integracao_checkout', (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}

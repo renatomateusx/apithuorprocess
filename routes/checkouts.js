@@ -6,6 +6,6 @@ var router = express.Router();
 router.post('/GetCheckoutAtivo', checkoutsSchema.GetCheckoutAtivo);
 router.post('/DoPay', checkoutsSchema.DoPay)
 router.post('/DoPayTicket', checkoutsSchema.DoPayTicket)
-
+router.get('/GetIntegracaoCheckout', checkoutsSchema.GetIntegracaoCheckout);
 
 module.exports = router;
