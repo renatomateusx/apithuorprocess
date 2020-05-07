@@ -127,6 +127,22 @@ function getDadosLoja(shop) {
         });
     });
 }
+module.exports.GetDadosLojaInternal = (shop) => {
+    return new Promise((resolve, reject) => {
+        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], async (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rows) {
+
+                results.rows.forEach(async (obj, i) => {
+                    resolve(obj);
+                })
+
+            }
+        });
+    });
+}
 module.exports.GetDadosLoja = (req, res, next) => {
     //return new Promise((resolve, reject) => {
     try {

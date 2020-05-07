@@ -6,7 +6,6 @@ const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
 
-
 module.exports.GetCheckoutAtivo = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -21,6 +20,22 @@ module.exports.GetCheckoutAtivo = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetCheckoutAtivoInternal = (req, res, next) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { id_usuario } = req.body;
+            pool.query('SELECT * FROM checkouts where id_usuario = $1 and status = 1', [id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 async function mountJSONShopifyOrder(Pjson, situacao) {
     return new Promise(async (resolve, reject) => {
@@ -95,63 +110,62 @@ module.exports.DoPay = (req, res, next) => {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
         ///console.log("Pay", LJSON);
-        mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
-        var paymentData = {
-            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
-            token: LJSON.paymentData.token,
-            description: LJSON.paymentData.description,
-            installments: parseInt(LJSON.paymentData.installments),
-            payment_method_id: LJSON.paymentData.payment_method_id,
-            payer: LJSON.paymentData.payer
+        if (LJSON.dadosCheckout.gateway == 1) {
+            mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
+            var paymentData = {
+                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
+                token: LJSON.paymentData.token,
+                description: LJSON.paymentData.description,
+                installments: parseInt(LJSON.paymentData.installments),
+                payment_method_id: LJSON.paymentData.payment_method_id,
+                payer: LJSON.paymentData.payer
+            }
+            //console.log("paymentData", paymentData);
+            mercadopago.payment.save(paymentData)
+                .then(async function (data) {
+                    const DataResponse = data.response;
+                    ///console.log(data.response);
+                    if (data.response.status == 'approved') {
+                        const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
+                        const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
+                        const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
+                        var headerAditional = "X-Shopify-Access-Token";
+                        var valueHeaderAditional = LJSON.dadosLoja.senha;
+                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
+                            .then(async retornoShopify => {
+                                const RetornoShopifyJSON = retornoShopify.body;
+                                transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
+                                    .then((retornoInsereTransacao) => {
+                                        const response = {
+                                            dataGateway: DataResponse,
+                                            dataStore: RetornoShopifyJSON
+                                        }
+                                        res.status(200).send(response);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Erro ao inserir transação no banco", error);
+                                    })
+                            })
+                            .catch(error => {
+                                console.log("Erro ao enviar informação do checkout para a shopify", error);
+                            })
+                    }
+                    else {
+                        console.log("Response", data.response);
+                        res.status(200).send(data.response);
+                    }
+
+                }).catch(function (error) {
+                    console.log("Erro MP", error);
+                    if (error.cause != undefined) {
+                        console.log(error.cause[0].code);
+                        res.status(202).send(error.cause[0].code);
+                    }
+                    else {
+                        res.status(202).send(error);
+                    }
+                });
         }
-        //console.log("paymentData", paymentData);
-        mercadopago.payment.save(paymentData)
-            .then(async function (data) {
-                const DataResponse = data.response;
-                ///console.log(data.response);
-                if (data.response.status == 'approved') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
-                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
-                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
-                    var headerAditional = "X-Shopify-Access-Token";
-                    var valueHeaderAditional = LJSON.dadosLoja.senha;
-                    //console.log(ordersShopify);
-                    //console.log(urlShopify);
-                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
-                        .then(async retornoShopify => {
-                            const RetornoShopifyJSON = retornoShopify.body;
-                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
-                                .then((retornoInsereTransacao) => {
-                                    const response = {
-                                        dataGateway: DataResponse,
-                                        dataStore: RetornoShopifyJSON
-                                    }
-                                    res.status(200).send(response);
-                                })
-                                .catch((error) => {
-                                    console.log("Erro ao inserir transação no banco", error);
-                                })
-                        })
-                        .catch(error => {
-                            console.log("Erro ao enviar informação do checkout para a shopify", error);
-                        })
-                }
-                else {
-                    console.log("Response", data.response);
-                    res.status(200).send(data.response);
-                }
-
-            }).catch(function (error) {
-                console.log("Erro MP", error);
-                if (error.cause != undefined) {
-                    console.log(error.cause[0].code);
-                    res.status(202).send(error.cause[0].code);
-                }
-                else {
-                    res.status(202).send(error);
-                }
-            });
-
 
     } catch (error) {
         res.json(error);

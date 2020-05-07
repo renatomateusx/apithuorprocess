@@ -9,6 +9,7 @@ var transacaoSchema = require('../schemas/transacao');
 //utilis.verifyJWT,
 router.post('/GetPedidos', transacaoSchema.GetTransacoes);
 router.post('/GetPedidosByID', transacaoSchema.GetTransacoesByID);
+router.post('/ReembolsarPedidoByID', transacaoSchema.ReembolsarPedidoByID);
 
 
 
