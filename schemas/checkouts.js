@@ -291,15 +291,21 @@ module.exports.GetIntegracaoCheckoutByID = (req, res, next) => {
 module.exports.InsertCheckoutMP = (req, res, next) => {
     try {
         const { id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, ativa_boleto, gateway } = req.body;
-        
+
         console.log(ativa_boleto);
-        pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway], (error, results) => {
+        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows[0]);
-            res.end();
+            pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows[0]);
+                res.end();
+            })
         })
+
     } catch (error) {
         res.json(error);
         res.end();
@@ -310,13 +316,19 @@ module.exports.UpdateStatusMP = (req, res, next) => {
     try {
         const { id_usuario, gateway, status } = req.body;
         console.log(req.body);
-        pool.query('UPDATE checkouts SET status=$3 where id_usuario = $1 and gateway=$2', [id_usuario, gateway, status], (error, results) => {
+        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows[0]);
-            res.end();
+            pool.query('UPDATE checkouts SET status=$3 where id_usuario = $1 and gateway=$2', [id_usuario, gateway, status], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows[0]);
+                res.end();
+            })
         })
+
     } catch (error) {
         res.json(error);
         res.end();

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var jwt = require('jsonwebtoken');
 var utilis = require('../resources/util');
-var integracaoShopify = require('../schemas/integracaoShopify');
+var integracaoShopify = require('../schemas/integracaoPlataformas');
 
 
 /* User Pagination */
@@ -21,5 +21,18 @@ router.post('/CartShopify', integracaoShopify.CartShopify);
 router.post('/GetDadosLoja', integracaoShopify.GetDadosLoja);
 
 router.post('/GetDadosLojaByIDUsuario', integracaoShopify.GetDadosLojaByIDUsuario);
+
+router.get('/GetIntegracaoPlataforma', integracaoShopify.GetIntegracaoPlataforma);
+
+router.post('/GetIntegracaoPlataformaByID', integracaoShopify.GetIntegracaoPlataformaByID);
+router.post('/InserePlataformaShopify', integracaoShopify.AddIntegracaoShopifyCheckout);
+
+router.post('/UpdateStatus', integracaoShopify.UpdateStatus);
+router.post('/AutoSinc', integracaoShopify.AutoSinc);
+router.post('/PulaCarrinho', integracaoShopify.PulaCarrinho);
+router.post('/LimpaCarrinho', integracaoShopify.LimpaCarrinho);
+
+
+
 
 module.exports = router;

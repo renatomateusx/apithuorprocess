@@ -1,6 +1,6 @@
 var pool = require('../db/queries');
 const mercadopago = require("mercadopago");
-var integracaoShopify = require('./integracaoShopify');
+var integracaoShopify = require('./integracaoPlataformas');
 var checkoutsSchema = require('./checkouts');
 const utilis = require('../resources/util');
 const format = require('string-format');

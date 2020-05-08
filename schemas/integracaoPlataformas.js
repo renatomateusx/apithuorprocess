@@ -14,7 +14,7 @@ module.exports.GetIntegracaoShopifyCheckout = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
             const { id_usuario } = req.body;
-            pool.query('SELECT * FROM integracao_shopify WHERE id_usuario=$1', [id_usuario], (error, results) => {
+            pool.query('SELECT * FROM integracoes_plataformas WHERE id_usuario=$1', [id_usuario], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -39,8 +39,9 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
             senha,
             segredo_compartilhado,
             quais_pedidos_enviar,
-            id_usuario } = req.body;
-        pool.query('INSERT INTO integracao_shopify (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10)',
+            id_usuario,
+            plataforma } = req.body;
+        pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9',
             [status,
                 auto_sincroniza,
                 pula_carrinho,
@@ -50,12 +51,13 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
                 senha,
                 segredo_compartilhado,
                 quais_pedidos_enviar,
-                id_usuario],
+                id_usuario,
+                plataforma],
             (error, results) => {
                 if (error) {
                     throw error
                 }
-                response.status(201).send(`Proposta Adicionada: ${result.insertId}`)
+                res.status(201).send(`Ok`);
             })
     } catch (error) {
         res.json(error);
@@ -77,7 +79,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
             senha,
             segredo_compartilhado,
             quais_pedidos_enviar } = req.body;
-        pool.query('UPDATE integracao_shopify SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9) WHERE id=$10 and id_usuario = $11',
+        pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9) WHERE id=$10 and id_usuario = $11',
             [status,
                 auto_sincroniza,
                 pula_carrinho,
@@ -93,7 +95,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
                 if (error) {
                     throw error
                 }
-                response.status(201).send(`Proposta Adicionada: ${result.insertId}`)
+                res.status(201).send(`Ok`);
             })
     } catch (error) {
         res.json(error);
@@ -113,7 +115,7 @@ module.exports.ReInstalarIntegracao = (req, res, next) => {
 
 function getDadosLoja(shop) {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], async (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], async (error, results) => {
             if (error) {
                 throw error
             }
@@ -129,7 +131,7 @@ function getDadosLoja(shop) {
 }
 module.exports.GetDadosLojaInternal = (shop) => {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], async (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], async (error, results) => {
             if (error) {
                 throw error
             }
@@ -148,7 +150,7 @@ module.exports.GetDadosLoja = (req, res, next) => {
     try {
         const { shop } = req.body;
 
-        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], (error, results) => {
             if (error) {
                 throw error
             }
@@ -175,7 +177,7 @@ module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
 
-        pool.query('SELECT * FROM integracao_shopify WHERE id_usuario=$1', [id_usuario], (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE id_usuario=$1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
@@ -315,6 +317,9 @@ module.exports.CartShopify = async (req, res, next) => {
         })
 
 }
+
+
+
 module.exports.CartShopifyClone = async (req, res, next) => {
     // return new Promise((resolve, reject) => {
     try {
@@ -332,7 +337,7 @@ module.exports.CartShopifyClone = async (req, res, next) => {
                 new DeferredPromise()
             )
         })
-        pool.query('SELECT * FROM integracao_shopify WHERE url_loja=$1', [shop], (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], (error, results) => {
             if (error) {
                 throw error
             }
@@ -439,4 +444,113 @@ module.exports.CartShopifyClone = async (req, res, next) => {
         res.end();
     }
     // });
+}
+
+module.exports.GetIntegracaoPlataformaByID = (req, res, next) => {
+    try {
+        const { plataforma, id_usuario } = req.body;
+        pool.query('SELECT * FROM integracoes_plataformas where id_usuario = $1 and plataforma = $2', [id_usuario, plataforma], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetIntegracaoPlataforma = (req, res, next) => {
+    try {
+        const { shop } = req.body;
+        pool.query('SELECT * FROM integracao_plataformas', (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateStatus = (req, res, next) => {
+    try {
+        const { id_usuario, plataforma, status, id } = req.body;
+        console.log(req.body);
+
+        pool.query('UPDATE integracoes_plataformas SET status=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, status, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.AutoSinc = (req, res, next) => {
+    try {
+        const { id_usuario, plataforma, auto_sincroniza } = req.body;
+        console.log(req.body);
+
+        pool.query('UPDATE integracoes_plataformas SET auto_sincroniza=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, auto_sincroniza, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.PulaCarrinho = (req, res, next) => {
+    try {
+        const { id_usuario, plataforma, pula_carrinho } = req.body;
+        console.log(req.body);
+
+        pool.query('UPDATE integracoes_plataformas SET pula_carrinho=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, pula_carrinho, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.LimpaCarrinho = (req, res, next) => {
+    try {
+        const { id_usuario, plataforma, limpa_carrinho } = req.body;
+        console.log(req.body);
+
+        pool.query('UPDATE integracoes_plataformas SET limpa_carrinho=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, limpa_carrinho, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
 }
