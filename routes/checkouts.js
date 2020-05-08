@@ -7,5 +7,10 @@ router.post('/GetCheckoutAtivo', checkoutsSchema.GetCheckoutAtivo);
 router.post('/DoPay', checkoutsSchema.DoPay)
 router.post('/DoPayTicket', checkoutsSchema.DoPayTicket)
 router.get('/GetIntegracaoCheckout', checkoutsSchema.GetIntegracaoCheckout);
+router.post('/GetIntegracaoCheckoutByID', checkoutsSchema.GetIntegracaoCheckoutByID);
+router.post('/InsertCheckoutMP', checkoutsSchema.InsertCheckoutMP);
+router.post('/UpdateStatusMP', checkoutsSchema.UpdateStatusMP);
+router.post('/UpdateAtivaBoletoMP', checkoutsSchema.UpdateAtivaBoletoMP);
+router.post('/UpdateAutoProcessamentoMP', checkoutsSchema.UpdateAutoProcessamentoMP);
 
 module.exports = router;

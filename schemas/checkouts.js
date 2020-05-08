@@ -88,23 +88,6 @@ async function mountJSONShopifyOrder(Pjson, situacao) {
     });
 }
 
-async function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status], (error, results) => {
-                if (error) {
-                    throw error
-                }
-                resolve(results.insertId);
-            })
-
-        } catch (error) {
-            reject(error);
-
-        }
-    });
-}
-
 module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
@@ -265,6 +248,90 @@ module.exports.GetIntegracaoCheckout = (req, res, next) => {
                 throw error
             }
             res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetIntegracaoCheckoutByID = (req, res, next) => {
+    try {
+        const { id_usuario, id } = req.body;
+
+        pool.query('SELECT * FROM checkouts where id_usuario = $1 and gateway=$2', [id_usuario, id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+module.exports.InsertCheckoutMP = (req, res, next) => {
+    try {
+        const { id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, ativa_boleto, gateway } = req.body;
+        
+        console.log(ativa_boleto);
+        pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateStatusMP = (req, res, next) => {
+    try {
+        const { id_usuario, gateway, status } = req.body;
+        console.log(req.body);
+        pool.query('UPDATE checkouts SET status=$3 where id_usuario = $1 and gateway=$2', [id_usuario, gateway, status], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateAtivaBoletoMP = (req, res, next) => {
+    try {
+        const { id_usuario, gateway, ativa_boleto } = req.body;
+        console.log(req.body);
+        pool.query('UPDATE checkouts SET ativa_boleto=$3 where id_usuario = $1 and gateway=$2', [id_usuario, gateway, parseInt(ativa_boleto)], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+module.exports.UpdateAutoProcessamentoMP = (req, res, next) => {
+    try {
+        const { id_usuario, gateway, processa_automaticamente } = req.body;
+        console.log(req.body);
+        pool.query('UPDATE checkouts SET captura_auto=$3 where id_usuario = $1 and gateway=$2', [id_usuario, gateway, processa_automaticamente], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
             res.end();
         })
     } catch (error) {
