@@ -3,12 +3,15 @@ var utils = require('../resources/util');
 var constantes = require('../resources/constantes');
 const format = require('string-format');
 const DeferredPromise = require('@bitbar/deferred-promise');
-
+const componenteShopify = require('../routes/componentes/importarProdutosShopify');
+const WebHookShopify = require('../webhooks/webhookshopify');
+const produtos = require('../schemas/produtos');
 
 const produto = "produto_option_id[@]=#&";
 const quantidade = "produto_option_quantity[@]=#&";
 const produto_variante = "produto_option_variante_id[@]=#&";
 const store = "store=#&";
+
 
 module.exports.GetIntegracaoShopifyCheckout = (req, res, next) => {
     return new Promise((resolve, reject) => {
@@ -554,3 +557,61 @@ module.exports.LimpaCarrinho = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.WebHookShopify = async (req, res, next) => {
+    try {
+        //const { id_usuario, plataforma, limpa_carrinho } = req.body;
+        var HTopic = req.headers['x-shopify-topic'];
+        var HSha256 = req.headers['x-shopify-hmac-sha256'];
+        var HShop = req.headers['x-shopify-shop-domain'];
+        var HVersion = req.headers['x-shopify-api-version'];
+        //////console.log(HTopic, HShop);
+        getDadosLoja(HShop)
+            .then((LDadosLoja) => {               
+                const LBody = req.body;
+                if (HTopic == 'products/create') {
+                    req.body.id_produto_json = LBody.id;
+                    req.body.json_dados_produto = LBody;
+                    req.body.titulo_produto = LBody.title;
+                    req.body.id_usuario = LDadosLoja.id_usuario;
+                    produtos.AddProduto(req, res, any);
+
+                }
+                if (HTopic == 'products/update') {
+                    req.body.id_produto_json = LBody.id;
+                    req.body.json_dados_produto = LBody;
+                    req.body.titulo_produto = LBody.title;
+                    req.body.id_usuario = LDadosLoja.id_usuario;
+                    produtos.UpdateProduto(req, res, any);
+                   
+                }
+                if (HTopic == 'orders/create') {
+                    console.log("Orders Create");
+                   
+                }
+                res.status(200).send('Ok!');
+                res.end();
+            })
+            .catch((error) => {
+                console.log("Erro ao pegar dados da Loja", error);
+                res.status(500).send('Erro ao receber dados do webhook ' + error);
+                res.end();
+            })
+
+
+        // pool.query('UPDATE integracoes_plataformas SET limpa_carrinho=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, limpa_carrinho, id], (error, results) => {
+        //     if (error) {
+        //         throw error
+        //     }
+        //     res.status(200).send(results.rows[0]);
+        //     res.end();
+        // })
+
+
+
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+

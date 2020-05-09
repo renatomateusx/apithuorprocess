@@ -15,6 +15,8 @@ router.get('/GetIntegracaoCheckout', integracaoShopify.GetIntegracaoShopifyCheck
 
 router.post('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
 
+router.post('/WebHookShopify', integracaoShopify.WebHookShopify);
+
 //ESSE NÃO PRECISA DE VERIFICAR TOKEN
 router.post('/CartShopify', integracaoShopify.CartShopify);
 
