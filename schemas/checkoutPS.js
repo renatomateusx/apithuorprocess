@@ -5,7 +5,7 @@ const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
-let xmlParser = require('xml-js');
+
 module.exports.StartSessionPS = (req, res, next) => {
 
     try {
@@ -82,10 +82,10 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         //console.log(Lurl);
 
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LJSON.paymentData, "Authorization", "Bearer " + LJSON.token, "POST")
-            .then(async (resRet) => {                
+            .then(async (resRet) => {
                 console.log("LID", resRet.body);
                 if (data.response.status.toUpperCase() == 'AUTHORIZED') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
                     var headerAditional = "X-Shopify-Access-Token";
@@ -94,6 +94,33 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
+                                .then((retornoInsereTransacao) => {
+                                    const response = {
+                                        dataGateway: DataResponse,
+                                        dataStore: RetornoShopifyJSON
+                                    }
+                                    res.status(200).send(response);
+                                })
+                                .catch((error) => {
+                                    console.log("Erro ao inserir transação no banco", error);
+                                })
+                        })
+                        .catch(error => {
+                            console.log("Erro ao enviar informação do checkout para a shopify", error);
+                        })
+                }
+                else if (data.response.status.toUpperCase() == 'WAITING') {
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
+                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
+                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
+                    var headerAditional = "X-Shopify-Access-Token";
+                    var valueHeaderAditional = LJSON.dadosLoja.senha;
+                    //console.log(ordersShopify);
+                    //console.log(urlShopify);
+                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
+                        .then(async retornoShopify => {
+                            const RetornoShopifyJSON = retornoShopify.body;
+                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
                                 .then((retornoInsereTransacao) => {
                                     const response = {
                                         dataGateway: DataResponse,
