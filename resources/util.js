@@ -70,6 +70,24 @@ module.exports.makeAPICallExternalParams = function (url, body) {
     );
   });
 };
+module.exports.makeAPICallExternalParamsPS = function (url) {
+  return new Promise((resolve, reject) => {
+    request(
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        uri: url,
+        method: 'POST',
+      },
+      function (err, res, body) {
+        if (err) reject(err);
+        resolve(body);
+      }
+    );
+  });
+};
+
 
 module.exports.makeAPICallExternalHeaders = function (url, path, headerAdditional, valueHeaderAditional) {
   return new Promise((resolve, reject) => {
@@ -150,3 +168,4 @@ module.exports.formatMoney = function (value) {
 module.exports.UnformatMoney = function (value) {
   return currencyFormatter.unformat(value, { code: 'USD' });
 };
+

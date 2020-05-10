@@ -1,5 +1,6 @@
 var express = require('express');
 var checkoutsSchema = require('../schemas/checkouts');
+var checkoutsPSSchema = require('../schemas/checkoutPS');
 
 var router = express.Router();
 /* GET home page. */
@@ -13,5 +14,7 @@ router.post('/InsertCheckoutMP', checkoutsSchema.InsertCheckoutMP);
 router.post('/UpdateStatusMP', checkoutsSchema.UpdateStatusMP);
 router.post('/UpdateAtivaBoletoMP', checkoutsSchema.UpdateAtivaBoletoMP);
 router.post('/UpdateAutoProcessamentoMP', checkoutsSchema.UpdateAutoProcessamentoMP);
+router.post('/SessionPagSeguro', checkoutsPSSchema.PublicKey);
+router.post('/DoPayPagSeguroCard', checkoutsPSSchema.DoPayPagSeguroCard);
 
 module.exports = router;

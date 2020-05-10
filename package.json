@@ -27,7 +27,8 @@
     "pug": "2.0.0-beta11",
     "sequelize": "^5.21.6",
     "socket.io": "^2.2.0",
-    "string-format": "^2.0.0"
+    "string-format": "^2.0.0",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "auto-rotate": "^1.0.8",
