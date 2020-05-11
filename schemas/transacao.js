@@ -134,7 +134,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                         const urlShopify = format("https://{}:{}@{}", LDadosLoja.chave_api_key, LDadosLoja.senha, LDadosLoja.url_loja);
                         var headerAditional = "X-Shopify-Access-Token";
                         var valueHeaderAditional = LDadosLoja.senha;
-                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
+                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
                             .then(async retornoShopify => {
                                 const RetornoShopifyJSON = retornoShopify.body;
                                 transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
@@ -166,4 +166,6 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
         res.end();
     }
 }
+
+
 

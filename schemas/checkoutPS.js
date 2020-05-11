@@ -75,7 +75,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         //const LJSONCardToken = JSON.parse(CardToken)
         //console.log(LJSONCardToken);
         //LJSON.paymentData.payment_method.card = {encrypted: LJSONCardToken.encrypted};
-        console.log(LJSON.paymentData);
+        //console.log(LJSON.paymentData);
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
         const Lurl = "https://sandbox.api.pagseguro.com/charges";
@@ -155,4 +155,83 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         res.end();
     }
 
+}
+
+module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
+    try {
+        const { shop, id_usuario, id, lvalue } = req.body;
+        pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2 and id=$3', [shop, id_usuario, id], async (error, results) => {
+            if (error) {
+                throw error
+            }
+            const LRetornoPedido = results.rows[0];
+            const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
+            const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
+            if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
+                mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
+                const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
+                const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+                const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
+                const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
+
+                var LRefund = {
+                    "amount": {
+                        "value": ValorRefund
+                    }
+                };
+                utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, "Authorization", "Bearer " + LDadosGateway.token_acesso, "POST")
+                    .then(async (resRet) => {
+                        var LRefoundShopify = {
+                            "refund": {
+                                "currency": "BRL",
+                                "notify": true,
+                                "note": "Cancelada pelo Vendedor",
+                                "shipping": {
+                                    "full_refund": true
+                                },
+                                "refund_line_items": ItemsRefound,
+                                "transactions": [
+                                    {
+                                        "amount": ValorRefund,
+                                        "kind": "refund",
+                                        "gateway": "MP"
+                                    }
+                                ]
+                            }
+                        }
+                        const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.REFOUND_ORDER);
+                        const urlShopify = format("https://{}:{}@{}", LDadosLoja.chave_api_key, LDadosLoja.senha, LDadosLoja.url_loja);
+                        var headerAditional = "X-Shopify-Access-Token";
+                        var valueHeaderAditional = LDadosLoja.senha;
+                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
+                            .then(async retornoShopify => {
+                                const RetornoShopifyJSON = retornoShopify.body;
+                                transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
+                                    .then((retornoInsereTransacao) => {
+                                        const response = {
+                                            dataGateway: data.response,
+                                            dataStore: RetornoShopifyJSON
+                                        }
+                                        res.status(200).send(response);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Erro ao inserir transação no banco", error);
+                                    })
+                            })
+                            .catch(error => {
+                                console.log("Erro ao enviar informação do checkout para a shopify", error);
+                            })
+
+                        //const LUpdateTransacao = await this.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA');
+
+                    })
+                    .catch(error => {
+                        console.log("Erro ao efetuar o Refound", error);
+                    })
+            }
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
 }
