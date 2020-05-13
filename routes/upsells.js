@@ -7,5 +7,7 @@ var router = express.Router();
 router.post('/GetUpSells', uplsells.GetUpSells);
 router.post('/SaveUpSells', uplsells.SaveUpSells);
 router.post('/DeleteUpSellByID', uplsells.DeleteUpSellByID);
+router.post('/GetUpSellByProductID', uplsells.GetUpSellByProductID);
+
 
 module.exports = router;

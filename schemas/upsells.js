@@ -53,3 +53,18 @@ module.exports.DeleteUpSellByID = (req, res, next) => {
     }
 }
 
+module.exports.GetUpSellByProductID = (req, res, next) => {
+    try {
+        const { id_usuario, id_produto } = req.body;
+        pool.query('SELECT * FROM up_sell where id_usuario = $1 and id_produto_from = $2', [id_usuario, id_produto], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
