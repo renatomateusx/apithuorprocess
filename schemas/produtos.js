@@ -69,11 +69,11 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                 resultsProd.rows.forEach(async (prod, ii) => {
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
                     const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
-                   
+
                     ProdutoJSON.variants.forEach((variante, i) => {
 
                         if (variante.id == variant) {
-                          
+
                             var produto = {
                                 title: ProdutoJSON.title,
                                 variant_id: variante.id,
@@ -84,9 +84,9 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
                             }
-                           
+
                             res.status(200).json(produto);
-                            
+
                         }
                     });
 
@@ -96,6 +96,22 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                 res.status(200).json({ mensagem: "Nenhum produto encontrado" });
             }
             //
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetProdutoIDThuor = async (req, res, next) => {
+    try {
+        const { id_produto } = req.body;
+        pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id_produto], (error, resultsProd) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).json(resultsProd.rows[0]);
+            
         })
     } catch (error) {
         res.json(error);
@@ -117,10 +133,10 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                 resultsProd.rows.forEach(async (prod, ii) => {
 
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
-                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);                   
+                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
                     ProdutoJSON.variants.forEach((variante, i) => {
 
-                        if (variante.id == variant) {                            
+                        if (variante.id == variant) {
                             var produto = {
                                 title: ProdutoJSON.title,
                                 variant_id: variante.id,
@@ -131,8 +147,8 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
                                 id_usuario: prod.id_usuario
-                            }                           
-                            res.status(200).json(produto);                           
+                            }
+                            res.status(200).json(produto);
                         }
                     });
 
@@ -141,7 +157,7 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
             else {
                 res.status(200).json({ mensagem: "Nenhum produto encontrado" });
             }
-            
+
         })
     } catch (error) {
         res.json(error);

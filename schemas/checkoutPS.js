@@ -75,7 +75,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         //const LJSONCardToken = JSON.parse(CardToken)
         //console.log(LJSONCardToken);
         //LJSON.paymentData.payment_method.card = {encrypted: LJSONCardToken.encrypted};
-        //console.log(LJSON.paymentData);
+        console.log(LJSON.paymentData);
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
         const Lurl = "https://sandbox.api.pagseguro.com/charges";

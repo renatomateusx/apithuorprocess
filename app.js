@@ -34,6 +34,7 @@ var integracaoMP = require('./routes/componentes/MP/integracaoMP');
 var checkouts = require('./routes/checkouts');
 var transacao = require('./routes/transacao');
 var webhookpagseguro = require('./webhooks/webhookpagseguro');
+var upsells = require('./routes/upsells');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -64,6 +65,7 @@ app.use('/integracaoMP', integracaoMP);
 app.use('/checkouts', checkouts);
 app.use('/transacoes', transacao);
 app.use('/webhookpagseguro', webhookpagseguro);
+app.use('/upsells', upsells);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
