@@ -57,10 +57,10 @@ module.exports.PublicKey = (req, res, next) => {
         var LBody = {
             "type": type
         }
-        //var LParams = "email=" + email;
-        //LParams = LParams + "&token=" + token;
+        var LParams = "email=" + type;
+        LParams = LParams + "&token=" + token;
         const Lurl = "https://sandbox.api.pagseguro.com/public-keys";
-        //console.log(Lurl);
+        console.log(LParams);
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, "Authorization", "Bearer " + token, "POST")
             .then(async (resRet) => {
                 //const LRetJson = xmlParser.xml2json(resRet, {compact: true});
@@ -91,7 +91,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         //const LJSONCardToken = JSON.parse(CardToken)
         //console.log(LJSONCardToken);
         //LJSON.paymentData.payment_method.card = {encrypted: LJSONCardToken.encrypted};
-        
+
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
         const Lurl = "https://sandbox.api.pagseguro.com/charges";
@@ -103,12 +103,17 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         LHeaderKey.push('X-api-version');
         LHeaderValue.push('1.0');
         LHeaderKey.push('X-idempotency-key');
-        LHeaderValue.push('');        
+        LHeaderValue.push('');
         LJSON.paymentData.amount.value = parseFloat(LJSON.paymentData.amount.value);
-        //console.log(LJSON.paymentData);       
+        //console.log(LJSON.paymentData);
         utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LJSON.paymentData, LHeaderKey, LHeaderValue, "POST")
             .then(async (resRet) => {
-                //console.log("LID", JSON.parse(resRet.body).status);
+                //console.log("LID", resRet.body);
+                if (resRet.body.indexOf('error_messages') > -1) {
+                    res.status(422).send(resRet.body);
+                    res.end();
+                    return;
+                }
                 if (JSON.parse(resRet.body).status.toUpperCase() == 'PAID') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
@@ -172,7 +177,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                 console.log("Error", error);
                 res.status(422).send(error);
                 res.end();
-            })        
+            })
     } catch (error) {
         res.json(error);
         res.end();
@@ -260,7 +265,7 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
 }
 
 async function mountJSONShopifyOrder(Pjson, situacao) {
-    return new Promise(async (resolve, reject) => {        
+    return new Promise(async (resolve, reject) => {
         try {
             const LShopifyOrder = {
                 "order": {

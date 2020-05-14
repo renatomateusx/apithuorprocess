@@ -119,7 +119,7 @@ module.exports.DoPay = (req, res, next) => {
                 payment_method_id: LJSON.paymentData.payment_method_id,
                 payer: LJSON.paymentData.payer
             }
-            //console.log("paymentData", paymentData);
+            console.log("paymentData", paymentData);
             mercadopago.payment.save(paymentData)
                 .then(async function (data) {
                     const DataResponse = data.response;
@@ -316,7 +316,7 @@ module.exports.UpdateStatusMP = (req, res, next) => {
     try {
         const { id_usuario, gateway, status } = req.body;
         console.log(req.body);
-        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
+        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
