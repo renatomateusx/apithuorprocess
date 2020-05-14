@@ -33,6 +33,22 @@ module.exports.StartSessionPS = (req, res, next) => {
     }
 
 }
+function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.insertId);
+            })
+
+        } catch (error) {
+            reject(error);
+
+        }
+    });
+}
 
 module.exports.PublicKey = (req, res, next) => {
 
@@ -75,16 +91,25 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         //const LJSONCardToken = JSON.parse(CardToken)
         //console.log(LJSONCardToken);
         //LJSON.paymentData.payment_method.card = {encrypted: LJSONCardToken.encrypted};
-        console.log(LJSON.paymentData);
+        
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
         const Lurl = "https://sandbox.api.pagseguro.com/charges";
         //console.log(Lurl);
-
-        utilis.makeAPICallExternalParamsJSON(Lurl, "", LJSON.paymentData, "Authorization", "Bearer " + LJSON.token, "POST")
+        var LHeaderKey = [];
+        var LHeaderValue = [];
+        LHeaderKey.push('Authorization');
+        LHeaderValue.push('Bearer ' + LJSON.token);
+        LHeaderKey.push('X-api-version');
+        LHeaderValue.push('1.0');
+        LHeaderKey.push('X-idempotency-key');
+        LHeaderValue.push('');        
+        LJSON.paymentData.amount.value = parseFloat(LJSON.paymentData.amount.value);
+        //console.log(LJSON.paymentData);       
+        utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LJSON.paymentData, LHeaderKey, LHeaderValue, "POST")
             .then(async (resRet) => {
-                console.log("LID", resRet.body);
-                if (data.response.status.toUpperCase() == 'AUTHORIZED') {
+                //console.log("LID", JSON.parse(resRet.body).status);
+                if (JSON.parse(resRet.body).status.toUpperCase() == 'PAID') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -93,10 +118,10 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
+                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'aprovada')
                                 .then((retornoInsereTransacao) => {
                                     const response = {
-                                        dataGateway: DataResponse,
+                                        dataGateway: resRet.body,
                                         dataStore: RetornoShopifyJSON
                                     }
                                     res.status(200).send(response);
@@ -109,7 +134,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                             console.log("Erro ao enviar informação do checkout para a shopify", error);
                         })
                 }
-                else if (data.response.status.toUpperCase() == 'WAITING') {
+                else if (JSON.parse(resRet.body).status.toUpperCase() == 'WAITING') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -120,10 +145,10 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
+                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente')
                                 .then((retornoInsereTransacao) => {
                                     const response = {
-                                        dataGateway: DataResponse,
+                                        dataGateway: resRet.body,
                                         dataStore: RetornoShopifyJSON
                                     }
                                     res.status(200).send(response);
@@ -137,8 +162,8 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         })
                 }
                 else {
-                    console.log("Response", data.response);
-                    res.status(200).send(data.response);
+                    console.log("Response", resRet.body);
+                    res.status(200).send(resRet.body);
                 }
                 //res.status(200).send(JSON.parse(resRet.body).public_key);
                 //res.end();
@@ -147,9 +172,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                 console.log("Error", error);
                 res.status(422).send(error);
                 res.end();
-            })
-        res.status(200).send(error);
-        res.end();
+            })        
     } catch (error) {
         res.json(error);
         res.end();
@@ -234,4 +257,55 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+async function mountJSONShopifyOrder(Pjson, situacao) {
+    return new Promise(async (resolve, reject) => {        
+        try {
+            const LShopifyOrder = {
+                "order": {
+                    "line_items": Pjson.produtos,
+                    "customer": {
+                        "first_name": Pjson.dadosComprador.nome_completo,
+                        "last_name": "",
+                        "email": Pjson.dadosComprador.email
+                    },
+                    "billing_address": {
+                        "first_name": Pjson.dadosComprador.nome_completo,
+                        "last_name": "",
+                        "address1": Pjson.dadosComprador.endereco,
+                        "phone": Pjson.dadosComprador.telefone,
+                        "city": Pjson.dadosComprador.cidade,
+                        "province": Pjson.dadosComprador.estado,
+                        "country": "Brasil",
+                        "zip": Pjson.dadosComprador.cep
+                    },
+                    "shipping_address": {
+                        "first_name": Pjson.dadosComprador.nome_completo,
+                        "last_name": "",
+                        "address1": Pjson.dadosComprador.endereco,
+                        "phone": Pjson.dadosComprador.telefone,
+                        "city": Pjson.dadosComprador.cidade,
+                        "province": Pjson.dadosComprador.estado,
+                        "country": "Brasil",
+                        "zip": Pjson.dadosComprador.cep
+                    },
+                    "email": Pjson.dadosComprador.email,
+                    "transactions": [
+                        {
+                            "kind": "authorization",
+                            "status": "success",
+                            "amount": parseFloat(Pjson.paymentData.amount.value)
+                        }
+                    ],
+                    "financial_status": situacao
+                }
+            };
+            resolve(LShopifyOrder);
+
+        } catch (error) {
+            reject(error);
+
+        }
+    });
 }
