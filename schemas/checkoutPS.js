@@ -115,7 +115,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     return;
                 }
                 if (JSON.parse(resRet.body).status.toUpperCase() == 'PAID') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending'); // MUDAR O PENDING PARA PAID
+                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
                     var headerAditional = "X-Shopify-Access-Token";
