@@ -36,7 +36,7 @@ module.exports.StartSessionPS = (req, res, next) => {
 function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status,gateway], (error, results) => {
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -150,7 +150,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente',2)
+                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente', 2)
                                 .then((retornoInsereTransacao) => {
                                     const response = {
                                         dataGateway: resRet.body,
@@ -196,7 +196,6 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
             const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
             if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
-                mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
                 const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
                 const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
@@ -207,7 +206,18 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
                         "value": ValorRefund
                     }
                 };
-                utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, "Authorization", "Bearer " + LDadosGateway.token_acesso, "POST")
+                const Lurl = "https://sandbox.api.pagseguro.com/"+LResponseGW.id+"/cancel";
+                //console.log(Lurl);
+                var LHeaderKey = [];
+                var LHeaderValue = [];
+                LHeaderKey.push('Authorization');
+                LHeaderValue.push('Bearer ' + LJSON.token);
+                LHeaderKey.push('X-api-version');
+                LHeaderValue.push('1.0');
+                LHeaderKey.push('X-idempotency-key');
+                LHeaderValue.push('');
+
+                utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
                     .then(async (resRet) => {
                         var LRefoundShopify = {
                             "refund": {
