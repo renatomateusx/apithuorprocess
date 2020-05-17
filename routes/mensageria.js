@@ -8,6 +8,7 @@ router.post('/GetMensagens', mensageria.GetMensagens);
 router.post('/SaveMensagem', mensageria.SaveMensagem);
 router.post('/DeleteMensagensByID', mensageria.DeleteMensagensByID);
 router.post('/GetMensagemByID', mensageria.GetMensagemByID);
+router.post('/GetMensagensWhatsApp', mensageria.GetMensagensWhatsApp);
 
 
 module.exports = router;

@@ -68,3 +68,19 @@ module.exports.GetMensagemByID = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetMensagensWhatsApp = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        pool.query('SELECT * FROM mensagens where id_usuario = $1 and tipo_mensagem = 3', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
