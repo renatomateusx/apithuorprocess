@@ -36,6 +36,7 @@ var transacao = require('./routes/transacao');
 var webhookpagseguro = require('./webhooks/webhookpagseguro');
 var upsells = require('./routes/upsells');
 var mensageria = require('./routes/mensageria');
+var pixels = require('./routes/pixels');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -68,6 +69,7 @@ app.use('/transacoes', transacao);
 app.use('/webhookpagseguro', webhookpagseguro);
 app.use('/upsells', upsells);
 app.use('/mensageria', mensageria);
+app.use('/pixels', pixels);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
