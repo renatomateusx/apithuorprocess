@@ -24,8 +24,8 @@ module.exports.GetPixels = (req, res, next) => {
 
 module.exports.SavePixels = (req, res, next) => {
     try {
-        const { id_usuario, nome_pixel, facebook_id_pixel, marca_boleto, google_id_conversao, google_rotulo_conversao, status, array_produtos_id, tipo } = req.body;
-        pool.query('INSERT INTO pixels (id_usuario, nome_pixel, facebook_id_pixel, marca_boleto, google_id_conversao, google_rotulo_conversao, status, array_produtos_id, tipo) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9) ON CONFLICT (id_usuario, nome_pixel) DO UPDATE SET id_usuario=$1, nome_pixel=$2, facebook_id_pixel=$3, marca_boleto=$4, google_id_conversao=$5, google_rotulo_conversao=$6, status=$7, array_produtos_id=$8, tipo=$9', [id_usuario, nome_pixel, facebook_id_pixel, parseInt(marca_boleto), google_id_conversao, google_rotulo_conversao, parseInt(status), array_produtos_id, parseInt(tipo)], (error, results) => {
+        const { id_usuario, nome_pixel, facebook_id_pixel, marca_boleto, google_id_conversao, google_rotulo_conversao, status, array_produtos_id, tipo, google_analytics_id } = req.body;
+        pool.query('INSERT INTO pixels (id_usuario, nome_pixel, facebook_id_pixel, marca_boleto, google_id_conversao, google_rotulo_conversao, status, array_produtos_id, tipo, google_analytics_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9, $10) ON CONFLICT (id_usuario, nome_pixel) DO UPDATE SET id_usuario=$1, nome_pixel=$2, facebook_id_pixel=$3, marca_boleto=$4, google_id_conversao=$5, google_rotulo_conversao=$6, status=$7, array_produtos_id=$8, tipo=$9, google_analytics_id=$10', [id_usuario, nome_pixel, facebook_id_pixel, parseInt(marca_boleto), google_id_conversao, google_rotulo_conversao, parseInt(status), array_produtos_id, parseInt(tipo), google_analytics_id], (error, results) => {
             if (error) {
                 throw error
             }
