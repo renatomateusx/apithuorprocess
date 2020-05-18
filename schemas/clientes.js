@@ -1,0 +1,87 @@
+var pool = require('../db/queries');
+var jwt = require('jsonwebtoken');
+const mercadopago = require("mercadopago");
+const constantes = require('../resources/constantes');
+const utilis = require('../resources/util');
+const format = require('string-format');
+const transacoes = require('./transacao');
+
+module.exports.GetClientes = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        pool.query('SELECT * FROM up_sell where id_usuario = $1', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.SaveClientes = (req, res, next) => {
+    try {
+        const { id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, nome, status, tipo_checkout,quantidade, preco, assunto_email, mensagem_sms } = req.body;
+        pool.query('INSERT INTO up_sell (id_usuario, id_produto_from, id_produto_to, status, nome, tipo_checkout, quantidade, preco, assunto_email, mensagem_sms) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id_usuario, id_produto_from) DO UPDATE SET id_usuario=$1, id_produto_from=$2, id_produto_to=$3, status=$4, nome=$5, tipo_checkout=$6, quantidade=$7, preco=$8, assunto_email=$9, mensagem_sms=$10', [id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, status, nome, tipo_checkout,quantidade, preco, assunto_email, mensagem_sms], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+module.exports.DeleteClienteByID = (req, res, next) => {
+    try {
+        const { id, id_usuario } = req.body;
+        pool.query('DELETE FROM  up_sell WHERE id = $1 and id_usuario = $2', [id, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send();
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetClienteByID = (req, res, next) => {
+    try {
+        const { id_usuario, id_produto } = req.body;
+        pool.query('SELECT * FROM up_sell where id_usuario = $1 and id_produto_from = $2', [id_usuario, id_produto], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.SaveLead = (req, res, next) => {
+    try {
+        const { nome, email, id_usuario } = req.body;
+        console.log(nome);
+        pool.query('insert into lead (email, nome, id_usuario) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3', [email, nome, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows[0]);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
