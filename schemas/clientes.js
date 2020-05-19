@@ -71,9 +71,8 @@ module.exports.GetClienteByID = (req, res, next) => {
 
 module.exports.SaveLead = (req, res, next) => {
     try {
-        const { nome, email, id_usuario } = req.body;
-        console.log(nome);
-        pool.query('insert into lead (email, nome, id_usuario) VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3', [email, nome, id_usuario], (error, results) => {
+        const { nome, email, id_usuario, telefone } = req.body;
+        pool.query('insert into lead (email, nome, id_usuario, telefone) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4', [email, nome, id_usuario, telefone], (error, results) => {
             if (error) {
                 throw error
             }
