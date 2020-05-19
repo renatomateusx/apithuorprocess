@@ -5,7 +5,8 @@ module.exports = Object.freeze({
     PRODUCAO_BOX_MP_ACCESS_TOKEN: 'APP_USR-4338451460338304-120717-64a42a12fe590e1715881018b78df091-128404654',
 
 
-    WEBSITEAPI: 'https://thuor.com/webhooks/webhookshopify/rotas',
+    WEBSITEAPI: 'https://api.thuor.com/webhooks/webhookshopify/rotas',
+    WEB_HOOK_PAYU: 'https://api.thuor.com/webhooks/webhookpayu',
     WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
     VERSAO_API: '2020-04',
     RESOURCE_PRODUCTS: 'products',

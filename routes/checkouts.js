@@ -17,4 +17,7 @@ router.post('/UpdateAutoProcessamentoMP', checkoutsSchema.UpdateAutoProcessament
 router.post('/SessionPagSeguro', checkoutsPSSchema.PublicKey);
 router.post('/DoPayPagSeguroCard', checkoutsPSSchema.DoPayPagSeguroCard);
 
+router.post('/DoPayCardPayU', checkoutsPayUSchema.DoPay);
+router.post('/DoPayTicketPayU', checkoutsPayUSchema.DoPayTicket);
+
 module.exports = router;
