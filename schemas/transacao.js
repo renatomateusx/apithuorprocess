@@ -4,6 +4,7 @@ var integracaoShopify = require('./integracaoPlataformas');
 var checkoutsSchema = require('./checkouts');
 const utilis = require('../resources/util');
 const format = require('string-format');
+const fulfillments = require('../schemas/fulfillments');
 module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { shop, id_usuario } = req.body;
@@ -159,6 +160,32 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                         console.log("Erro ao efetuar o Refound", error);
                     })
             }
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateTransacaoShopifyOrder = (req, res, next) => {
+    try {
+        const { order_id, json_shopify_order } = req.body;
+        pool.query("select * from transacoes where json_shopify_response ->> 'id' = $1", [order_id], (error, results) => {
+            if (error) {
+                throw error
+            }
+            results.rows.forEach((obj, i) => {
+                pool.query("UPDATE transacoes SET json_shopify_response=$1 WHERE id=$2", [json_shopify_order, obj.id], (error, resultsUpdate) => {
+                    if (error) {
+                        throw error
+                    }
+                    req.body.id_usuario = obj.id_usuario;
+                    fulfillments.SaveFulFillment(req, res, next);
+                    res.status(200).send(results.rows);
+                    res.end();
+                });
+            })
+
         })
     } catch (error) {
         res.json(error);
