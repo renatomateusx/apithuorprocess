@@ -122,9 +122,12 @@ module.exports.DoPay = (req, res, next) => {
             console.log("paymentData", paymentData);
             mercadopago.payment.save(paymentData)
                 .then(async function (data) {
-                    const DataResponse = data.response;
+                    const DataResponse = data.response;                   
                     ///console.log(data.response);
                     if (data.response.status == 'approved') {
+                        LJSON.dadosComprador.data = data.response.date_created;
+                        LJSON.dadosComprador.id_transacao = data.response.id;
+                        LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
                         const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
                         const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                         const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -205,7 +208,12 @@ module.exports.DoPayTicket = (req, res, next) => {
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;
-                console.log(data.response);
+                LJSON.dadosComprador.barcode = data.response.barcode.content;
+                LJSON.dadosComprador.urlBoleto = data.response.transaction_details.external_resource_url;
+                LJSON.dadosComprador.vencimentoBoleto = data.response.date_of_expiration;
+                LJSON.dadosComprador.data = data.response.date_created;
+                LJSON.dadosComprador.id_transacao = data.response.id;
+                console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
@@ -294,11 +302,11 @@ module.exports.InsertCheckoutMP = (req, res, next) => {
         console.log(req.body);
 
         if (status == 1) {
-            pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario, gateway], (error, results) => {
+            pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario], (error, results) => {
                 if (error) {
                     throw error
                 }
-                pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9, merchan_id=$10, api_login=$11, api_key=$12, account_id=$13 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway, merchan_id, api_login, api_key, account_id], (error, results) => {
+                pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (gateway,id_usuario) DO UPDATE SET id_usuario=$1, status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9, merchan_id=$10, api_login=$11, api_key=$12, account_id=$13 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway, merchan_id, api_login, api_key, account_id], (error, results) => {
                     if (error) {
                         throw error
                     }
@@ -307,7 +315,7 @@ module.exports.InsertCheckoutMP = (req, res, next) => {
                 })
             })
         }
-        else{
+        else {
             pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9, merchan_id=$10, api_login=$11, api_key=$12, account_id=$13 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway, merchan_id, api_login, api_key, account_id], (error, results) => {
                 if (error) {
                     throw error

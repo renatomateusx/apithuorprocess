@@ -115,6 +115,9 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     return;
                 }
                 if (JSON.parse(resRet.body).status.toUpperCase() == 'PAID') {
+                    LJSON.dadosComprador.data = data.response.created_at;
+                    LJSON.dadosComprador.id_transacao = data.response.id;
+                    LJSON.dadosComprador.valorParcela = (parseFloat(data.response.amount.summary.paid) / data.response.payment_method.installments);
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -140,6 +143,11 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         })
                 }
                 else if (JSON.parse(resRet.body).status.toUpperCase() == 'WAITING') {
+                    LJSON.dadosComprador.barcode = data.response.payment_method.boleto.formatted_barcode;
+                    LJSON.dadosComprador.urlBoleto = data.response.links.find(x => x.media == 'application/pdf').href;
+                    LJSON.dadosComprador.vencimentoBoleto = data.response.payment_method.boleto.due_date;
+                    LJSON.dadosComprador.data = data.response.created_at;
+                    LJSON.dadosComprador.id_transacao = data.response.id;
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -206,7 +214,7 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
                         "value": ValorRefund
                     }
                 };
-                const Lurl = "https://sandbox.api.pagseguro.com/"+LResponseGW.id+"/cancel";
+                const Lurl = "https://sandbox.api.pagseguro.com/" + LResponseGW.id + "/cancel";
                 //console.log(Lurl);
                 var LHeaderKey = [];
                 var LHeaderValue = [];
@@ -232,7 +240,7 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
                                     {
                                         "amount": ValorRefund,
                                         "kind": "refund",
-                                        "gateway": "MP"
+                                        "gateway": "PS"
                                     }
                                 ]
                             }

@@ -6,6 +6,7 @@ const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
 var parser = require('xml2json-light');
+const moment = require('moment');
 
 function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
     return new Promise(async (resolve, reject) => {
@@ -37,11 +38,11 @@ module.exports.DoPay = (req, res, next) => {
 
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
-        const Lurl = "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi";        
+        const Lurl = "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi";
         //console.log(LJSON.paymentData);
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LJSON.paymentData, undefined, undefined, "POST")
             .then(async (resRet) => {
-                
+
                 var json = parser.xml2json(resRet.body);
                 console.log("LID", json.paymentResponse);
                 if (json.paymentResponse.error != null) {
@@ -50,6 +51,10 @@ module.exports.DoPay = (req, res, next) => {
                     return;
                 }
                 if (json.paymentResponse.transactionResponse.state.toUpperCase() == 'APPROVED') {
+                    LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
+                    LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
+                    LJSON.dadosComprador.id_transacao_payu = json.paymentResponse.transactionResponse.transactionId;
+                    LJSON.dadosComprador.valorParcela = (parseFloat(data.response.transaction.order.additionalValues.TX_VALUE.value) / data.response.transaction.extraParameters.INSTALLMENTS_NUMBER);
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid'); // MUDAR O PENDING PARA PAID
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -75,6 +80,11 @@ module.exports.DoPay = (req, res, next) => {
                         })
                 }
                 else if (json.paymentResponse.transactionResponse.state.toUpperCase() == 'PENDING') {
+                    LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
+                    LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
+                    LJSON.dadosComprador.barcode = json.paymentResponse.transactionResponse.extraParameters.BAR_CODE;
+                    LJSON.dadosComprador.urlBoleto = json.paymentResponse.transactionResponse.extraParameters.URL_BOLETO_BANCARIO;
+                    LJSON.dadosComprador.vencimentoBoleto = moment(json.paymentResponse.transactionResponse.extraParameters.EXPIRATION_DATE).format('YYYY-MM-DD HH:mm:ss');
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                     const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -108,7 +118,7 @@ module.exports.DoPay = (req, res, next) => {
                 else {
                     console.log("Response", json.paymentResponse);
                     res.status(200).send(json.paymentResponse);
-                }               
+                }
             })
             .catch((error) => {
                 console.log("Error", error);
@@ -132,29 +142,35 @@ module.exports.ReembolsarPedidoPayUByID = (req, res, next) => {
             const LRetornoPedido = results.rows[0];
             const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
-            if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
+            if (LDadosGateway.api_login != undefined && LDadosGateway.gateway == 3) {
+                const LFrontEnd = JSON.parse(LRetornoPedido.json_front_end_user_data);
                 const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
                 const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
                 const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
 
                 var LRefund = {
-                    "amount": {
-                        "value": ValorRefund
-                    }
-                };
-                const Lurl = "https://sandbox.api.pagseguro.com/"+LResponseGW.id+"/cancel";
-                //console.log(Lurl);
-                var LHeaderKey = [];
-                var LHeaderValue = [];
-                LHeaderKey.push('Authorization');
-                LHeaderValue.push('Bearer ' + LJSON.token);
-                LHeaderKey.push('X-api-version');
-                LHeaderValue.push('1.0');
-                LHeaderKey.push('X-idempotency-key');
-                LHeaderValue.push('');
+                    "language": "pt",
+                    "command": "SUBMIT_TRANSACTION",
+                    "merchant": {
+                        "apiKey": LDadosGateway.api_key,
+                        "apiLogin": LDadosGateway.api_login
+                    },
+                    "transaction": {
+                        "order": {
+                            "id": LFrontEnd.dadosComprador.id_transacao
+                        },
+                        "type": "REFUND",
+                        "reason": "Reembolso Solicitado á Pedido do Vendedor",
+                        "parentTransactionId": LFrontEnd.dadosComprador.id_transacao_payu
+                    },
+                    "test": false
 
-                utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
+                };
+                const Lurl = "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi";
+                //console.log(Lurl);
+                
+                utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, undefined, undefined, "POST")
                     .then(async (resRet) => {
                         var LRefoundShopify = {
                             "refund": {
@@ -169,7 +185,7 @@ module.exports.ReembolsarPedidoPayUByID = (req, res, next) => {
                                     {
                                         "amount": ValorRefund,
                                         "kind": "refund",
-                                        "gateway": "MP"
+                                        "gateway": "PayU"
                                     }
                                 ]
                             }
