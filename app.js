@@ -40,6 +40,7 @@ var upsells = require('./routes/upsells');
 var mensageria = require('./routes/mensageria');
 var pixels = require('./routes/pixels');
 var clientes = require('./routes/clientes');
+var services_shipment = require('./routes/services/serviceShippments');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -76,6 +77,7 @@ app.use('/upsells', upsells);
 app.use('/mensageria', mensageria);
 app.use('/pixels', pixels);
 app.use('/clientes', clientes);
+app.use('/servicesShipments', services_shipment);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

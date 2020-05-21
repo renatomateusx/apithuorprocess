@@ -17,11 +17,48 @@ module.exports = Object.freeze({
     RESOURCE_THUOR_SPNIPPET_LIQUID: 'snippets/ThuorSnippet.liquid',
     RESOURCE_THUOR_THEME_LIQUID: 'layout/theme.liquid',
     RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT: "<br/><!-- Não remova. Checkout Thuor. -->     {% capture thuor_snippet_content %}{% include 'ThuorSnippet' %}{% endcapture %} {% unless thuor_snippet_content contains 'Liquid error' %} {% include 'ThuorSnippet' %} {% endunless %}     <!-- Não remova. Checkout Thuor. --> <br/> </body>",
+   
+    URL_TRACK_CODE: 'http://localhost:8081/track/@',
+
+    URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
+    STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
+    attachmentsAux: [{
+        filename: 'facebook2x.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'facebook2x' //same cid value as in the html img src
+    }, {
+        filename: 'twitter2x.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'twitter2x' //same cid value as in the html img src
+    }, {
+        filename: 'instagram2x.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'linkedin2x' //same cid value as in the html img src
+    }, {
+        filename: 'linkedin2x.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'linkedin2x' //same cid value as in the html img src
+    }, {
+        filename: 'footer.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'footer' //same cid value as in the html img src
+    },],
+    attachmentsEmailRastreio: [{
+        filename: 'Img62x.jpg',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Img62x' //same cid value as in the html img src
+    }],
 
 
 
     CC_REJECTED_BAD_FILLED_CARD_NUMBER: 'Revise o número do cartão.',
 
+    HOST_SMTP: 'gmail.com',
+    HOST_SERVICE: 'gmail',
+    PORT_SMTP: '587',
+    USER_SMTP: 'tohrmoura@gmail.com',
+    PASS_SMTP: '02997841500',
+    EMAIL_FROM: "no-replay@thuor.com"
 
 
 
@@ -32,5 +69,5 @@ module.exports = Object.freeze({
 
 
 
-    
+
 });

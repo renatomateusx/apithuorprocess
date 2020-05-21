@@ -82,6 +82,7 @@ module.exports.DoPay = (req, res, next) => {
                 else if (json.paymentResponse.transactionResponse.state.toUpperCase() == 'PENDING') {
                     LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
                     LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
+                    LJSON.dadosComprador.id_transacao_payu = json.paymentResponse.transactionResponse.transactionId;
                     LJSON.dadosComprador.barcode = json.paymentResponse.transactionResponse.extraParameters.BAR_CODE;
                     LJSON.dadosComprador.urlBoleto = json.paymentResponse.transactionResponse.extraParameters.URL_BOLETO_BANCARIO;
                     LJSON.dadosComprador.vencimentoBoleto = moment(json.paymentResponse.transactionResponse.extraParameters.EXPIRATION_DATE).format('YYYY-MM-DD HH:mm:ss');
@@ -161,7 +162,7 @@ module.exports.ReembolsarPedidoPayUByID = (req, res, next) => {
                             "id": LFrontEnd.dadosComprador.id_transacao
                         },
                         "type": "REFUND",
-                        "reason": "Reembolso Solicitado á Pedido do Vendedor",
+                        "reason": "Reembolso Solicitado à Pedido do Vendedor",
                         "parentTransactionId": LFrontEnd.dadosComprador.id_transacao_payu
                     },
                     "test": false

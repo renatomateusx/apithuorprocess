@@ -19,22 +19,45 @@ module.exports.GetFretes = (req, res, next) => {
 module.exports.TrackingCode = (req, res, next) => {
     try {
         const { code } = req.body;
-        var LBody ={
+        var LBody = {
             locale: 'pt',
             trackingCode: code
-        }        
+        }
         const Lurl = "https://api-track.ebanx.com/production/track";
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, undefined, undefined, "POST")
-        .then((resRet) => {
-            ///console.log(resRet.body);
-            res.status(200).send(resRet.body);
-            res.end();
-        })
-        .catch((error)=>{
-            console.log("Erro", error);
-        })       
+            .then((resRet) => {
+                ///console.log(resRet.body);
+                res.status(200).send(resRet.body);
+                res.end();
+            })
+            .catch((error) => {
+                console.log("Erro", error);
+            })
     } catch (error) {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.TrackingCodeInternal = (code) => {
+    return new Promise((resolve, reject) => {
+        try {
+            var LBody = {
+                locale: 'pt',
+                trackingCode: code
+            }
+            const Lurl = "https://api-track.ebanx.com/production/track";
+            utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, undefined, undefined, "POST")
+                .then((resRet) => {
+                    ///console.log(resRet.body);
+                    resolve(resRet.body);
+                })
+                .catch((error) => {
+                    reject(error);
+                })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
 }

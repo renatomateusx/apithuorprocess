@@ -589,13 +589,17 @@ module.exports.WebHookShopify = async (req, res, next) => {
                 if (HTopic == 'orders/create') {
                     console.log("Orders Create");                
                     LBody.orders.forEach((obj,i)=>{
+                        req.body.email = obj.email;
+                        req.body.telefone = obj.phone;
                         obj.fulfillments.forEach((objF, i)=>{
                             req.body.order_id = obj.id;
                             req.body.fulfillment_id = objF.id;
                             req.body.json_shopify_order = objF;
+                            req.body.data = objF.created_at;
+                            req.body.updated = objF.updated_at;                            
                             req.body.status = 0;
                             //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
-                            ////fulfillments.SaveFulFillment(req, res, next);
+                            //////fulfillments.SaveFulFillment(req, res, next);
                             transacoes.UpdateTransacaoShopifyOrder(req, res, next);
                         })
                         
