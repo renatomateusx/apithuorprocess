@@ -10,7 +10,7 @@ const path = require("path");
 const constantes = require('../../resources/constantes');
 
 
-var j = schedule.scheduleJob('59 * * * * *', function () {
+var j = schedule.scheduleJob('* * 23 * * *', function () {
     fulfillments.GetFulFillmentList()
         .then((resFul) => {
             resFul.forEach(async (obj, i) => {
