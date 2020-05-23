@@ -31,5 +31,40 @@ module.exports.SendMail = (to, subject, html, arrayAttachments) => {
         });
     })
 
+}
 
+module.exports.getStatusRastreio = (actualStatus, status) => {
+    return new Promise((resolve, reject) => {
+        try {
+            if(status == undefined && status.length < 1){
+                resolve(actualStatus);
+            }
+            var LStatus = "";
+            if (status.toUpperCase() == "TRANSIT") { LStatus = "Em Trânsito - " };
+            if (status.toUpperCase() == "PICKUP") { LStatus = "Saiu para Entrega - " };
+            if (status.toUpperCase() == "DELIVERED") { LStatus = "Entregue - " };
+            resolve(LStatus);
+        }
+        catch (erro) {
+            console.log("Erro ao pegar status do objeto rastreio - Utilis - ", erro);
+            reject(erro);
+        }
+    })
+}
+
+module.exports.getDetail = (actualDetail, detail) => {
+    return new Promise((resolve, reject) => {
+        try {
+            if(detail != undefined && detail.length > 2){
+                resolve(detail);
+            }
+            else{
+                resolve(actualDetail);
+            }
+        }
+        catch (erro) {
+            console.log("Erro ao pegar status do objeto rastreio - Utilis - ", erro);
+            reject(erro);
+        }
+    })
 }

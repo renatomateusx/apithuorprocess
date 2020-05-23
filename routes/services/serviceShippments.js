@@ -26,6 +26,11 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                 last_updated = moment(obj.last_updated).format();
                 const diff = moment(actualDate).diff(last_updated);
                 const duration = moment.duration(diff);
+                var LDescriptionCheckPoint = "";
+                var LDateCheckPoint = "";
+                var LStatusCheckPoint = "";
+                var LDetailCheckPoint = "";
+                var self = this;
                 //console.log('diff', duration.asHours());
                 if (duration.asHours() >= 24) {
 
@@ -36,6 +41,18 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                     // console.log("Retorno", LReturnTracker);
                     if (LReturnTracker) {
                         LReturnTracker.forEach(async (objTrack, i) => {
+                            objTrack.checkpoints.forEach(async (objCheckPoint, i) => {
+                                self.LDescriptionCheckPoint = objCheckPoint.description + ' - ' || '';
+                                self.LDateCheckPoint = moment(objCheckPoint.date).format("DD/MM/YYYY HH:mm:ss");
+                                self.LStatusCheckPoint = await utilisEmail.getStatusRastreio(self.LStatusCheckPoint, objCheckPoint.status);
+                                self.LDetailCheckPoint = await utilisEmail.getDetail(self.LDateCheckPoint, objCheckPoint.details);
+                            });
+                            var LSTATUS = constantes.STRING_STATUS_EMAIL;
+                            LSTATUS = LSTATUS.replace("{STATUS}", self.LStatusCheckPoint || '');
+                            LSTATUS = LSTATUS.replace("{LOCAL}", self.LDescriptionCheckPoint || '');
+                            LSTATUS = LSTATUS.replace("{LOCAL_CIDADE}", self.LDetailCheckPoint || '');
+                            LSTATUS = LSTATUS.replace("{DATA}", self.LDateCheckPoint);
+                            console.log("STATUS", LSTATUS);
                             const LUpdateTracker = moment(objTrack.lastUpdateTime).format("DD/MM/YYYY hh:mm:ss");
                             //console.log("Upate", LUpdateTracker);
                             if (LUpdateTracker > moment(last_updated).format("DD/MM/YYYY hh:mm:ss")) {
@@ -50,13 +67,14 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                                     var URLTrack = constantes.URL_TRACK_CODE.replace('@', 'LB121347495SG');
                                     //console.log(URLTrack);
                                     LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
+                                    LHTML = LHTML.replace("@SATUS_ENCOMENDA", LSTATUS);
                                     //console.log(LHTML);
                                     var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
                                     arrayAttachments.forEach((obj, i) => {
                                         obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                                     });
 
-                                    const LReturnEmail = await utilisEmail.SendMail('renatomateusx@gmail.com', constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO, LHTML, arrayAttachments);
+                                    const LReturnEmail = await utilisEmail.SendMail(email, constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO, LHTML, arrayAttachments);
                                     if (LReturnEmail) {
                                         const updateFulFillment = await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusTracker, moment().format());
                                         if (updateFulFillment) {

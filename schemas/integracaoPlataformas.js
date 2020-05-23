@@ -586,8 +586,8 @@ module.exports.WebHookShopify = async (req, res, next) => {
                     produtos.UpdateProduto(req, res, next);
                    
                 }
-                if (HTopic == 'orders/create') {
-                    console.log("Orders Create");                
+                if (HTopic == 'orders/create' || HTopic == 'orders/update') {
+                    console.log("Orders", HTopic);                
                     LBody.orders.forEach((obj,i)=>{
                         req.body.email = obj.email;
                         req.body.telefone = obj.phone;

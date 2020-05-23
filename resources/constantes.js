@@ -22,6 +22,7 @@ module.exports = Object.freeze({
 
     URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
+    STRING_STATUS_EMAIL : '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
     attachmentsAux: [{
         filename: 'facebook2x.png',
         path: 'URL_PUBLIC_RESOURCES',

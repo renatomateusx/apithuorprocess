@@ -104,7 +104,7 @@ module.exports.GetCupomByProductID = (req, res, next) => {
 
 module.exports.GetCupomByCODE = (req, res, next) => {
     try {
-        const { id_usuario, id_produto, code } = req.body;
+        const { id_usuario, code } = req.body;
         pool.query('select * FROM cupons WHERE code = $2 and id_usuario=$1 and status = 1', [id_usuario, code], (error, results) => {
             if (error) {
                 throw error
