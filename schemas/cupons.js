@@ -73,7 +73,7 @@ module.exports.DeleteCupomByID = (req, res, next) => {
 module.exports.GetCupomByProductID = (req, res, next) => {
     try {
         const { id_usuario, id_produto } = req.body;
-        pool.query('SELECT * FROM cupons where id_usuario = $1 and id_produto_from = $2', [id_usuario, id_produto], (error, results) => {
+        pool.query('select * FROM cupons WHERE aplicar_regra_produtos_especificos @> \'[{"id_thuor":"$1"}]\' and id_usuario=$2', [id_produto,id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
