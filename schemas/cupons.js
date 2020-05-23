@@ -8,7 +8,23 @@ const transacoes = require('./transacao');
 module.exports.GetCupons = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
-        pool.query('SELECT * FROM cupons where id_usuario = $1', [id_usuario], (error, results) => {
+        pool.query('SELECT * FROM cupons where id_usuario = $1 and status = 1', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateNumeroUtilizacao = (req, res, next) => {
+    try {
+        const { id_usuario, numero_utilizacao, id } = req.body;
+        pool.query('UPDATE cupons SET numero_utilizacao = $2 where id=$3 id_usuario = $1', [id_usuario, numero_utilizacao, id], (error, results) => {
             if (error) {
                 throw error
             }
@@ -73,11 +89,27 @@ module.exports.DeleteCupomByID = (req, res, next) => {
 module.exports.GetCupomByProductID = (req, res, next) => {
     try {
         const { id_usuario, id_produto } = req.body;
-        pool.query('select * FROM cupons WHERE aplicar_regra_produtos_especificos @> \'[{"id_thuor":"$1"}]\' and id_usuario=$2', [id_produto,id_usuario], (error, results) => {
+        pool.query('select * FROM cupons WHERE aplicar_regra_produtos_especificos @> \'[{"id_thuor":"' + id_produto + '"}]\' and id_usuario=$1 and status = 1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows[0]);
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetCupomByCODE = (req, res, next) => {
+    try {
+        const { id_usuario, id_produto, code } = req.body;
+        pool.query('select * FROM cupons WHERE code = $2 and id_usuario=$1 and status = 1', [id_usuario, code], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
             res.end();
         })
     } catch (error) {
