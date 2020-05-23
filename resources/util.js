@@ -107,7 +107,32 @@ module.exports.makeAPICallExternalHeaders = function (url, path, headerAdditiona
     );
   });
 };
+module.exports.makeAPICallExternalParamsJSONHeadersArray = function (url, path, body, headerAdditional, valueHeaderAditional, type) {
+  return new Promise((resolve, reject) => {
+    //console.log("Body", body);
+    //var postData = querystring.stringify(body);
+    
+    var Lheader = {
+      'Content-Type': 'application/json'
+    };    
+    headerAdditional.forEach((obj, i)=>{
+      Lheader[obj] = valueHeaderAditional[i];
+    })    
+    request(
+      {
+        headers: Lheader,
+        uri: url + path,
+        body: JSON.stringify(body),
+        method: type || 'POST',
+      },
+      function (err, res, ret) {
+        if (err) reject(err);
+        resolve(res);
+      }
+    );
 
+  });
+};
 module.exports.makeAPICallExternalParamsJSON = function (url, path, body, headerAdditional, valueHeaderAditional, type) {
   return new Promise((resolve, reject) => {
     //console.log("Body", body);

@@ -9,5 +9,7 @@ var logisticaSchema = require('../schemas/logisticas');
 //utilis.verifyJWT,
 router.post('/GetFretes', logisticaSchema.GetFretes);
 
+router.post('/TrackingCode', logisticaSchema.TrackingCode);
+
 
 module.exports = router;

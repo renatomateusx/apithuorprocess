@@ -119,12 +119,15 @@ module.exports.DoPay = (req, res, next) => {
                 payment_method_id: LJSON.paymentData.payment_method_id,
                 payer: LJSON.paymentData.payer
             }
-            //console.log("paymentData", paymentData);
+            console.log("paymentData", paymentData);
             mercadopago.payment.save(paymentData)
                 .then(async function (data) {
-                    const DataResponse = data.response;
+                    const DataResponse = data.response;                   
                     ///console.log(data.response);
                     if (data.response.status == 'approved') {
+                        LJSON.dadosComprador.data = data.response.date_created;
+                        LJSON.dadosComprador.id_transacao = data.response.id;
+                        LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
                         const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
                         const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                         const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -133,7 +136,7 @@ module.exports.DoPay = (req, res, next) => {
                         utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                             .then(async retornoShopify => {
                                 const RetornoShopifyJSON = retornoShopify.body;
-                                transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada')
+                                insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada', 1)
                                     .then((retornoInsereTransacao) => {
                                         const response = {
                                             dataGateway: DataResponse,
@@ -205,7 +208,12 @@ module.exports.DoPayTicket = (req, res, next) => {
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;
-                console.log(data.response);
+                LJSON.dadosComprador.barcode = data.response.barcode.content;
+                LJSON.dadosComprador.urlBoleto = data.response.transaction_details.external_resource_url;
+                LJSON.dadosComprador.vencimentoBoleto = data.response.date_of_expiration;
+                LJSON.dadosComprador.data = data.response.date_created;
+                LJSON.dadosComprador.id_transacao = data.response.id;
+                console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
                     const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
                     const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
@@ -217,7 +225,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                     utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
-                            transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente')
+                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente', 1)
                                 .then((retornoInsereTransacao) => {
                                     const response = {
                                         dataGateway: DataResponse,
@@ -290,21 +298,32 @@ module.exports.GetIntegracaoCheckoutByID = (req, res, next) => {
 }
 module.exports.InsertCheckoutMP = (req, res, next) => {
     try {
-        const { id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, ativa_boleto, gateway } = req.body;
+        const { id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id } = req.body;
+        console.log(req.body);
 
-        console.log(ativa_boleto);
-        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
-            if (error) {
-                throw error
-            }
-            pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway], (error, results) => {
+        if (status == 1) {
+            pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (gateway,id_usuario) DO UPDATE SET id_usuario=$1, status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9, merchan_id=$10, api_login=$11, api_key=$12, account_id=$13 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway, merchan_id, api_login, api_key, account_id], (error, results) => {
+                    if (error) {
+                        throw error
+                    }
+                    res.status(200).send(results.rows[0]);
+                    res.end();
+                })
+            })
+        }
+        else {
+            pool.query('INSERT INTO checkouts (id_usuario, status, nome, nome_fatura, captura_auto, chave_publica, token_acesso, ativa_boleto, gateway, merchan_id, api_login, api_key, account_id)  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (gateway,id_usuario) DO UPDATE SET status=$2, nome=$3, nome_fatura=$4, captura_auto=$5, chave_publica=$6, token_acesso=$7, ativa_boleto=$8, gateway=$9, merchan_id=$10, api_login=$11, api_key=$12, account_id=$13 ', [id_usuario, status, nome, nome_fatura, processa_automaticamente, chave_publica, token_acesso, parseInt(ativa_boleto), gateway, merchan_id, api_login, api_key, account_id], (error, results) => {
                 if (error) {
                     throw error
                 }
                 res.status(200).send(results.rows[0]);
                 res.end();
             })
-        })
+        }
 
     } catch (error) {
         res.json(error);
@@ -316,7 +335,7 @@ module.exports.UpdateStatusMP = (req, res, next) => {
     try {
         const { id_usuario, gateway, status } = req.body;
         console.log(req.body);
-        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
+        pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
@@ -366,4 +385,21 @@ module.exports.UpdateAutoProcessamentoMP = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.insertId);
+            })
+
+        } catch (error) {
+            reject(error);
+
+        }
+    });
 }

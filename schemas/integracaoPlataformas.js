@@ -6,7 +6,8 @@ const DeferredPromise = require('@bitbar/deferred-promise');
 const componenteShopify = require('../routes/componentes/importarProdutosShopify');
 const WebHookShopify = require('../webhooks/webhookshopify');
 const produtos = require('../schemas/produtos');
-
+const transacoes = require('../schemas/transacao');
+const fulfillments = require('../schemas/fulfillments');
 const produto = "produto_option_id[@]=#&";
 const quantidade = "produto_option_quantity[@]=#&";
 const produto_variante = "produto_option_variante_id[@]=#&";
@@ -574,7 +575,7 @@ module.exports.WebHookShopify = async (req, res, next) => {
                     req.body.json_dados_produto = LBody;
                     req.body.titulo_produto = LBody.title;
                     req.body.id_usuario = LDadosLoja.id_usuario;
-                    produtos.AddProduto(req, res, any);
+                    produtos.AddProduto(req, res, next);
 
                 }
                 if (HTopic == 'products/update') {
@@ -582,12 +583,27 @@ module.exports.WebHookShopify = async (req, res, next) => {
                     req.body.json_dados_produto = LBody;
                     req.body.titulo_produto = LBody.title;
                     req.body.id_usuario = LDadosLoja.id_usuario;
-                    produtos.UpdateProduto(req, res, any);
+                    produtos.UpdateProduto(req, res, next);
                    
                 }
                 if (HTopic == 'orders/create') {
-                    console.log("Orders Create");
-                   
+                    console.log("Orders Create");                
+                    LBody.orders.forEach((obj,i)=>{
+                        req.body.email = obj.email;
+                        req.body.telefone = obj.phone;
+                        obj.fulfillments.forEach((objF, i)=>{
+                            req.body.order_id = obj.id;
+                            req.body.fulfillment_id = objF.id;
+                            req.body.json_shopify_order = objF;
+                            req.body.data = objF.created_at;
+                            req.body.updated = objF.updated_at;                            
+                            req.body.status = 0;
+                            //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
+                            //////fulfillments.SaveFulFillment(req, res, next);
+                            transacoes.UpdateTransacaoShopifyOrder(req, res, next);
+                        })
+                        
+                    })
                 }
                 res.status(200).send('Ok!');
                 res.end();
