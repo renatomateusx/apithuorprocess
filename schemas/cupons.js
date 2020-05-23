@@ -24,7 +24,8 @@ module.exports.GetCupons = (req, res, next) => {
 module.exports.UpdateNumeroUtilizacao = (req, res, next) => {
     try {
         const { id_usuario, numero_utilizacao, id } = req.body;
-        pool.query('UPDATE cupons SET numero_utilizacao = $2 where id=$3 id_usuario = $1', [id_usuario, numero_utilizacao, id], (error, results) => {
+        console.log(req.body);
+        pool.query('UPDATE cupons SET numero_utilizacao = $2 where id=$3 and id_usuario = $1', [id_usuario, numero_utilizacao, id], (error, results) => {
             if (error) {
                 throw error
             }
