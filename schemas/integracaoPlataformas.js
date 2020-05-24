@@ -203,6 +203,35 @@ module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
     }
     //});
 }
+
+
+module.exports.GetLojaByUsuario = (id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {           
+
+            pool.query('SELECT * FROM integracoes_plataformas WHERE id_usuario=$1', [id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                if (results.rows) {
+
+                    results.rows.forEach((loja, i) => {
+                        //console.log("Shop", loja);
+                        resolve(loja);
+                    })
+                }else{
+                    resolve(0);
+                }
+            });
+        }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+
+            reject(error);
+        }
+    });
+}
+
 function getDadosProduto(id_produto, variante_cart) {
     return new Promise((resolve, reject) => {
         try {
@@ -568,7 +597,7 @@ module.exports.WebHookShopify = async (req, res, next) => {
         var HVersion = req.headers['x-shopify-api-version'];
         //////console.log(HTopic, HShop);
         getDadosLoja(HShop)
-            .then((LDadosLoja) => {               
+            .then((LDadosLoja) => {
                 const LBody = req.body;
                 if (HTopic == 'products/create') {
                     req.body.id_produto_json = LBody.id;
@@ -584,25 +613,25 @@ module.exports.WebHookShopify = async (req, res, next) => {
                     req.body.titulo_produto = LBody.title;
                     req.body.id_usuario = LDadosLoja.id_usuario;
                     produtos.UpdateProduto(req, res, next);
-                   
+
                 }
                 if (HTopic == 'orders/create' || HTopic == 'orders/update') {
-                    console.log("Orders", HTopic);                
-                    LBody.orders.forEach((obj,i)=>{
+                    console.log("Orders", HTopic);
+                    LBody.orders.forEach((obj, i) => {
                         req.body.email = obj.email;
                         req.body.telefone = obj.phone;
-                        obj.fulfillments.forEach((objF, i)=>{
+                        obj.fulfillments.forEach((objF, i) => {
                             req.body.order_id = obj.id;
                             req.body.fulfillment_id = objF.id;
                             req.body.json_shopify_order = objF;
                             req.body.data = objF.created_at;
-                            req.body.updated = objF.updated_at;                            
+                            req.body.updated = objF.updated_at;
                             req.body.status = 0;
                             //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
                             //////fulfillments.SaveFulFillment(req, res, next);
                             transacoes.UpdateTransacaoShopifyOrder(req, res, next);
                         })
-                        
+
                     })
                 }
                 res.status(200).send('Ok!');

@@ -43,6 +43,7 @@ var clientes = require('./routes/clientes');
 var services_shipment = require('./routes/services/serviceShippments');
 var webhookshopify = require('./webhooks/webhookshopify');
 var cupons = require('./routes/cupons');
+var campanhas = require('./routes/integracaoCampanhas/campanhas');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -81,6 +82,7 @@ app.use('/pixels', pixels);
 app.use('/clientes', clientes);
 app.use('/servicesShipments', services_shipment);
 app.use('/cupons', cupons);
+app.use('/campanhas', campanhas);
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

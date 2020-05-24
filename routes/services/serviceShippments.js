@@ -8,7 +8,7 @@ const utilisEmail = require('../../routes/services/utilis');
 const fs = require('fs');
 const path = require("path");
 const constantes = require('../../resources/constantes');
-
+const loja = require('../../schemas/integracaoPlataformas');
 
 var j = schedule.scheduleJob('* * 23 * * *', function () {
     fulfillments.GetFulFillmentList()
@@ -31,6 +31,8 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                 var LStatusCheckPoint = "";
                 var LDetailCheckPoint = "";
                 var self = this;
+                const DadosLoja = await loja.GetLojaByUsuario(id_usuario);
+                var LSIT = " está chegando!";                
                 //console.log('diff', duration.asHours());
                 if (duration.asHours() >= 24) {
 
@@ -46,13 +48,19 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                                 self.LDateCheckPoint = moment(objCheckPoint.date).format("DD/MM/YYYY HH:mm:ss");
                                 self.LStatusCheckPoint = await utilisEmail.getStatusRastreio(self.LStatusCheckPoint, objCheckPoint.status);
                                 self.LDetailCheckPoint = await utilisEmail.getDetail(self.LDateCheckPoint, objCheckPoint.details);
+                                if(objCheckPoint.status == "DELIVERED"){
+                                    LSIT = " foi ENTREGUE!";
+                                }else{
+                                    LSIT = " está chegando";
+                                }
                             });
                             var LSTATUS = constantes.STRING_STATUS_EMAIL;
                             LSTATUS = LSTATUS.replace("{STATUS}", self.LStatusCheckPoint || '');
                             LSTATUS = LSTATUS.replace("{LOCAL}", self.LDescriptionCheckPoint || '');
                             LSTATUS = LSTATUS.replace("{LOCAL_CIDADE}", self.LDetailCheckPoint || '');
                             LSTATUS = LSTATUS.replace("{DATA}", self.LDateCheckPoint);
-                            console.log("STATUS", LSTATUS);
+                            //console.log("STATUS", LSTATUS);
+
                             const LUpdateTracker = moment(objTrack.lastUpdateTime).format("DD/MM/YYYY hh:mm:ss");
                             //console.log("Upate", LUpdateTracker);
                             if (LUpdateTracker > moment(last_updated).format("DD/MM/YYYY hh:mm:ss")) {
@@ -68,6 +76,8 @@ var j = schedule.scheduleJob('* * 23 * * *', function () {
                                     //console.log(URLTrack);
                                     LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
                                     LHTML = LHTML.replace("@SATUS_ENCOMENDA", LSTATUS);
+                                    LHTML = LHTML.replace("@NOME_LOJA", DadosLoja.nome_loja);
+                                    LHTML = LHTML.replace("@SIT", LSIT);
                                     //console.log(LHTML);
                                     var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
                                     arrayAttachments.forEach((obj, i) => {
