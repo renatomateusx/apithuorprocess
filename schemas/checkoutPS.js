@@ -5,6 +5,7 @@ const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
+const clientes = require('../schemas/clientes');
 
 module.exports.StartSessionPS = (req, res, next) => {
 
@@ -127,7 +128,8 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'aprovada', 2)
-                                .then((retornoInsereTransacao) => {
+                                .then(async (retornoInsereTransacao) => {
+                                    const LUpdate = await clientes.UpdateLead( LJSON.dadosComprador.email, LJSON.produtos);
                                     const response = {
                                         dataGateway: resRet.body,
                                         dataStore: RetornoShopifyJSON
@@ -159,7 +161,8 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente', 2)
-                                .then((retornoInsereTransacao) => {
+                                .then(async (retornoInsereTransacao) => {
+                                    const LUpdate = await clientes.UpdateLead( LJSON.dadosComprador.email, LJSON.produtos);
                                     const response = {
                                         dataGateway: resRet.body,
                                         dataStore: RetornoShopifyJSON

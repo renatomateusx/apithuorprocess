@@ -7,6 +7,7 @@ const format = require('string-format');
 const transacoes = require('./transacao');
 var parser = require('xml2json-light');
 const moment = require('moment');
+const clientes = require('../schemas/clientes');
 
 function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
     return new Promise(async (resolve, reject) => {
@@ -64,7 +65,8 @@ module.exports.DoPay = (req, res, next) => {
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, json.paymentResponse, LShopifyOrder, retornoShopify.body, 'aprovada', 2)
-                                .then((retornoInsereTransacao) => {
+                                .then(async (retornoInsereTransacao) => {
+                                    const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                     const response = {
                                         dataGateway: json.paymentResponse,
                                         dataStore: RetornoShopifyJSON
@@ -97,7 +99,8 @@ module.exports.DoPay = (req, res, next) => {
                         .then(async retornoShopify => {
                             const RetornoShopifyJSON = retornoShopify.body;
                             insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente', 2)
-                                .then((retornoInsereTransacao) => {
+                                .then(async (retornoInsereTransacao) => {
+                                    const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                     const response = {
                                         dataGateway: json.paymentResponse,
                                         dataStore: RetornoShopifyJSON
@@ -170,7 +173,7 @@ module.exports.ReembolsarPedidoPayUByID = (req, res, next) => {
                 };
                 const Lurl = "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi";
                 //console.log(Lurl);
-                
+
                 utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, undefined, undefined, "POST")
                     .then(async (resRet) => {
                         var LRefoundShopify = {
