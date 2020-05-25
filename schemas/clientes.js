@@ -73,7 +73,9 @@ module.exports.SaveLead = (req, res, next) => {
     try {
         const { nome, email, id_usuario, telefone, lead } = req.body;
         const Lead = JSON.parse(Buffer.from(lead, 'base64').toString());
-        pool.query('insert into lead (email, nome, id_usuario, telefone, lead) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4, lead=$5', [email, nome, id_usuario, telefone, Lead], (error, results) => {
+        const LData = moment().format();
+        const LCampanhaEnviar = 1;
+        pool.query('insert into lead (email, nome, id_usuario, telefone, lead, data_produtos_carrinho, campanha_enviar) VALUES ($1, $2, $3, $4, $5,$6,$7) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4, lead=$5, data_produtos_carrinho=$6, campanha_enviar=$7', [email, nome, id_usuario, telefone, Lead, LData, LCampanhaEnviar], (error, results) => {
             if (error) {
                 throw error
             }
