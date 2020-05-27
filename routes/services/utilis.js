@@ -26,7 +26,7 @@ module.exports.SendMail = (to, subject, html, arrayAttachments) => {
             if (error) {
                 reject(error);
             } else {
-                console.log("Email Enviado");
+                /*console.log("Email Enviado");*/
                 resolve(1);
             }
         });

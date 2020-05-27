@@ -61,7 +61,7 @@ lead.GetLeadCronJob()
                                     const LUltimoEmailEnviado = moment().format();
                                     const LCampanhaEmailEnviada = resCampanha.id;
                                     const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
-                                    const LUpdated = 0//await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
+                                    const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
                                     console.log("Updated", LUpdated);
                                 }
                                 //console.log(MensagemText);
