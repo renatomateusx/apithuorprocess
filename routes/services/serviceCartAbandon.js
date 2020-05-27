@@ -16,69 +16,75 @@ const produtos = require('../../schemas/produtos');
 const DeferredPromise = require('@bitbar/deferred-promise');
 var LURLCartEmail = "";
 //Vai rodar a cada 1 minuto
-//var jobCartAbandon = schedule.scheduleJob('*/1 * * * *', function () {
-var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
-    lead.GetLeadCronJob()
-        .then((resLead) => {
-            resLead.forEach((objLead, i) => {
-                campanhas.GetCampanhaByIDInternal(objLead.id_usuario, constantes.CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO)
-                    .then(async (resCampanha) => {
-                        LURLCartEmail = constantes.WEBSITE_CART;
-                        const LLead = objLead.lead;
-                        if (LLead != null) {
-                            const LData = moment(objLead.data_produtos_carrinho).format();
-                            const LCampanha = objLead.campanha_enviar;
-                            const LDataUltimoEnvio = objLead.data_ultimo_email_enviado || moment().format();
-                            var LSequenciEnviada = objLead.sequencia_enviada;
-                            const LSequencia = resCampanha.sequencia;
-                            const LUltimoComprados = objLead.ultimos_produtos_comprados;
-                            const LDataUltimaCompra = objLead.data_ultima_compra;
-                            const LEmail = LLead.dadosComprador.email;
-                            const LTelefone = LLead.dadosComprador.telefone;
-                            const LNome = LLead.dadosComprador.nome_completo.split(' ')[0];
-                            //console.log(LSequencia);
-                            if (LSequenciEnviada == null) { LSequenciEnviada = 0; }
-                            var LProdutosIguais = await ProcessaProdutos(LUltimoComprados, LLead.produtos);
-                            //console.log("LProdutos", LProdutosIguais);
-                            if (!LProdutosIguais) {
-                                const LNovaSequencia = parseInt(LSequenciEnviada) + 1;
-                                const LSequenciaEnviar = LSequencia.sequencia.find(x => x.id_sequencia = LNovaSequencia);
-                                const LPodeEnviar = await PodeEnviar(moment(LData, "YYYYMMDD HH:mm:ss"), moment(LDataUltimoEnvio, "YYYYMMDD HH:mm:ss"), LSequenciaEnviar);
-                                if (LPodeEnviar) {
-                                    const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
-                                    const MensagemText = LMensagem.mensagem;
-                                    const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
-                                    const LTemplate = await ProcessaTemplate(LMensagem, LLoja, LLead.produtos, LNome);
-                                    console.log(LTemplate.link);
-                                    const LRetornoMail = 0//await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, null);
-                                    if (LRetornoMail == 1) {
-                                        const LUltimoEmailEnviado = moment().format();
-                                        const LCampanhaEmailEnviada = resCampanha.id;
-                                        const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
-                                        const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
-                                        console.log("Updated", LUpdated);
-                                    }
-                                    //console.log(MensagemText);
-                                    //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
-                                    //MONTA O TEMPLATE
-                                    //ENVIA
-                                    //ATUALIZA A TABELA LEAD DAQUELE REGISTRO INFORMANDO 
+var jobCartAbandon = schedule.scheduleJob('*/1 * * * * ', function () {
+//var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
+lead.GetLeadCronJob()
+    .then((resLead) => {
+        resLead.forEach((objLead, i) => {
+            campanhas.GetCampanhaByIDInternal(objLead.id_usuario, constantes.CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO)
+                .then(async (resCampanha) => {
+                    LURLCartEmail = constantes.WEBSITE_CART;
+                    const LLead = objLead.lead;
+                    if (LLead != null) {
+                        const LData = moment(objLead.data_produtos_carrinho).format();
+                        const LCampanha = objLead.campanha_enviar;
+                        const LDataUltimoEnvio = objLead.data_ultimo_email_enviado || moment().format();
+                        var LSequenciEnviada = objLead.sequencia_enviada;
+                        const LSequencia = resCampanha.sequencia;
+                        const LUltimoComprados = objLead.ultimos_produtos_comprados;
+                        const LDataUltimaCompra = objLead.data_ultima_compra;
+                        const LEmail = LLead.dadosComprador.email;
+                        const LTelefone = LLead.dadosComprador.telefone;
+                        const LNome = LLead.dadosComprador.nome_completo.split(' ')[0];
+                        //console.log(LSequencia);
+                        if (LSequenciEnviada == null) { LSequenciEnviada = 0; }
+                        var LProdutosIguais = await ProcessaProdutos(LUltimoComprados, LLead.produtos);
+                        //console.log("LProdutos", LProdutosIguais);
+                        if (!LProdutosIguais) {
+                            const LNovaSequencia = parseInt(LSequenciEnviada) + 1;
+                            const LSequenciaEnviar = LSequencia.sequencia.find(x => x.id_sequencia = LNovaSequencia);
+                            const LPodeEnviar = await PodeEnviar(moment(LData, "YYYYMMDD HH:mm:ss"), moment(LDataUltimoEnvio, "YYYYMMDD HH:mm:ss"), LSequenciaEnviar);
+                            if (LPodeEnviar) {
+                                const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
+                                const MensagemText = LMensagem.mensagem;
+                                const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
+                                const LTemplate = await ProcessaTemplate(LMensagem, LLoja, LLead.produtos, LNome);
+                                //console.log('link', LTemplate.link);
+                                /*var LLEmail = 'renatomateusx@gmail.com' -- EMAIL TESTE*/
+                                var arrayAttachments = constantes.attachmentsAuxCartAbandon;
+                                arrayAttachments.forEach((obj, i) => {
+                                    obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
+                                });
+                                
+                                const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments);
+                                if (LRetornoMail == 1) {
+                                    const LUltimoEmailEnviado = moment().format();
+                                    const LCampanhaEmailEnviada = resCampanha.id;
+                                    const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
+                                    const LUpdated = 0//await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
+                                    console.log("Updated", LUpdated);
                                 }
+                                //console.log(MensagemText);
+                                //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
+                                //MONTA O TEMPLATE
+                                //ENVIA
+                                //ATUALIZA A TABELA LEAD DAQUELE REGISTRO INFORMANDO 
                             }
                         }
-                    })
-                    .catch((errorCamp) => {
-                        console.log("Erro ao pegar campanha pelo pelo id do usuário", errorCamp);
-                    })
-                //console.log(resLead);
-            })
-
-        })
-        .catch((errorLead) => {
-            console.log('Erro ao pegar o Lead', errorLead);
+                    }
+                })
+                .catch((errorCamp) => {
+                    console.log("Erro ao pegar campanha pelo pelo id do usuário", errorCamp);
+                })
+            //console.log(resLead);
         })
 
-    console.log('Serviço de Carrinho Abandonado Rodando!', moment().format('HH:mm:ss'));
+    })
+    .catch((errorLead) => {
+        console.log('Erro ao pegar o Lead', errorLead);
+    })
+
+console.log('Serviço de Carrinho Abandonado Rodando!', moment().format('HH:mm:ss'));
 
 });
 
@@ -143,29 +149,28 @@ function GetTipoTempo(tipo) {
 
 function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
     return new Promise((resolve, reject) => {
-        var lpromises = [];
-        //console.log("Shop", promises);
-        PProdutos.forEach((obj, i) => {
-            lpromises.push(
-                new DeferredPromise()
-            )
-        })
         try {
-            var Lindex = 0;
+            var lpromises = [];
+            //console.log("Shop", promises);
+            PProdutos.forEach((obj, i) => {
+                lpromises.push(
+                    new DeferredPromise()
+                )
+            });
             var produto_option_id = [], produto_option_quantity = [], produto_option_variante_id = [];
-            var LTemplate = {
-                template: '',
-                link: '',
-                titulo: '',
-            };
+            var LTemplate = {};
+            var LURL = constantes.WEBSITE_CART;
             var template = path.resolve('public/templates/email-abandon-cart.html');
+            var LHTML = '';
+            var HTMLArrayProd = '';
+            var LTitulo = '';
             fs.readFile(template, 'utf8', async function (err, html) {
                 if (err) {
                     throw err;
                 }
-                var LHTML = html;
+                LHTML = html;
                 var LMensagem = PMensagem.mensagem.replace("{first_name}", toCamelCase(PNomeComprador));
-                var LTitulo = PMensagem.titulo.replace("{first_name}", toCamelCase(PNomeComprador));
+                LTitulo = PMensagem.titulo.replace("{first_name}", toCamelCase(PNomeComprador));
                 LHTML = LHTML.replace("{merchant}", PDadosLoja.nome_loja);
                 LHTML = LHTML.replace("{mensagem}", LMensagem);
                 LHTML = LHTML.replace("{first_name}", toCamelCase(PNomeComprador));
@@ -174,9 +179,8 @@ function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
                 //NÃO IREI CONSIDERAR ISSO AGORA. SE ALGUÉM PEDIR PARA RETIRAR DO TEMPLATE, A GENTE FAZ.
                 //POR HORA, TODO E QUALQUER E-MAIL DE CARRINHO ABANDONADO IRÁ COM A LISTAGEM DE PRODUTOS.
                 // }
-                var HTMLArrayProd = '';
-                PProdutos.forEach((objProd, i) => {
-                    Lindex = i;
+
+                PProdutos.forEach(async (objProd, i) => {
                     var templateArray = path.resolve('public/templates/template_produto_array.html');
                     fs.readFile(templateArray, 'utf8', async function (err, htmlArray) {
                         if (err) {
@@ -187,24 +191,25 @@ function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
                         var ProdTitleOption = objProd.title + ' - ' + objProd.variant_title;
                         LProdArr = LProdArr.replace("{produto}", ProdTitleOption);
                         LProdArr = LProdArr.replace("{price}", objProd.variant_price);
-                        HTMLArrayProd = HTMLArrayProd + LProdArr + "<hr>";
-                        LTemplate.link = await MontaDadosProduto(PProdutos);
-                        
+                        HTMLArrayProd = HTMLArrayProd + LProdArr;
+                        const IDProduto = await MontaDadosProduto(objProd);
+                        LURL = LURL + await getURLProduto(IDProduto, objProd.quantity, objProd.variant_id, i);
+                        LURLCartEmail = LURLCartEmail + LURL;
+                        lpromises[i].resolve();
                     });
                     //"http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart", 
-                    LHTML = LHTML.replace("{products_list}", HTMLArrayProd);                   
-                    lpromises[i].resolve();
                 });
                 Promise.all(lpromises)
-                    .then(() => {    
-                        
-                        //LTemplate.link = LTemplate.link + "redirectTo=cart";                    
-                        resolve({ template: LHTML, titulo: LTitulo, link: LTemplate.link });
+                    .then(() => {
+                        LHTML = LHTML.replace("{products_list}", HTMLArrayProd);
+                        LURLCartEmail = LURLCartEmail + "redirectTo=cart";
+                        LHTML = LHTML.replace("{url_carrinho}", LURLCartEmail);
+                        //console.log(LURLCartEmail);
+                        resolve({ template: LHTML, titulo: LTitulo, link: LURLCartEmail });
                     })
                     .catch((error) => {
                         console.log("Error", error);
                     })
-
             });
         }
         catch (erro) {
@@ -215,43 +220,12 @@ function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
 }
 
 function MontaDadosProduto(PProduto) {
-    return new Promise((resolve, reject) => {
-        var promises = [];
-        //console.log("Shop", promises);
-        PProduto.forEach((obj, i) => {
-            promises.push(
-                new DeferredPromise()
-            )
-        })
-        // console.log(promises);
-        try {
-            var ltrue = false;
-            var LURL = constantes.WEBSITE_CART;
-            var Lindex = 0;
-            var self = this;
-            PProduto.forEach((obj, i) => {
-                produtos.GetProdutoByIDThuorInternal(obj.id_thuor)
-                    .then(async (LIDProdutoOption) => {
-                        //sconsole.log(LIDProdutoOption.id_produto_json); 
-                        LURL = LURL + await getURLProduto(LIDProdutoOption.id_produto_json, obj.quantity, obj.variant_id, i);
-                        // if (++i == PProduto.length) {
-                        //     LURLCartEmail = LURLCartEmail + "redirectTo=cart";
-                        // }
-                        LURLCartEmail = LURLCartEmail + LURL;
+    return new Promise(async (resolve, reject) => {
 
-                        promises[i].resolve();
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    })
-            })
-            Promise.all(promises)
-                .then(() => {
-                    resolve(LURLCartEmail);
-                })
-                .catch((error) => {
-                    console.log("Error", error);
-                })
+        try {
+            var LURL = constantes.WEBSITE_CART;
+            const LIDProdutoOption = await produtos.GetProdutoByIDThuorInternal(PProduto.id_thuor);
+            resolve(LIDProdutoOption.id_produto_json);
         }
         catch (error) {
             reject(error);

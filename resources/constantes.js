@@ -18,12 +18,12 @@ module.exports = Object.freeze({
     RESOURCE_THUOR_SPNIPPET_LIQUID: 'snippets/ThuorSnippet.liquid',
     RESOURCE_THUOR_THEME_LIQUID: 'layout/theme.liquid',
     RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT: "<br/><!-- Não remova. Checkout Thuor. -->     {% capture thuor_snippet_content %}{% include 'ThuorSnippet' %}{% endcapture %} {% unless thuor_snippet_content contains 'Liquid error' %} {% include 'ThuorSnippet' %} {% endunless %}     <!-- Não remova. Checkout Thuor. --> <br/> </body>",
-   
+
     URL_TRACK_CODE: 'http://localhost:8081/track/@',
 
     URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
-    STRING_STATUS_EMAIL : '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
+    STRING_STATUS_EMAIL: '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
     attachmentsAux: [{
         filename: 'facebook2x.png',
         path: 'URL_PUBLIC_RESOURCES',
@@ -45,6 +45,20 @@ module.exports = Object.freeze({
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'footer' //same cid value as in the html img src
     },],
+    attachmentsAuxCartAbandon: [{
+        filename: 'rounded_corner_1.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'rounded_corner_1' //same cid value as in the html img src
+    },
+    {
+        filename: 'Cart.gif',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Cart'
+    },{
+        filename: 'Bottom_round.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Bottom_round'
+    }],
     attachmentsEmailRastreio: [{
         filename: 'Img62x.jpg',
         path: 'URL_PUBLIC_RESOURCES',
@@ -61,6 +75,7 @@ module.exports = Object.freeze({
     USER_SMTP: 'tohrmoura@gmail.com',
     PASS_SMTP: '02997841500',
     EMAIL_FROM: "no-replay@thuor.com",
+    EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
 
 
     CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,

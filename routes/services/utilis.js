@@ -14,18 +14,19 @@ module.exports.SendMail = (to, subject, html, arrayAttachments) => {
                 pass: constantes.PASS_SMTP
             }
         });
+        if (arrayAttachments == null) { arrayAttachments = []; }
         var mailOptions = {
-            from: constantes.EMAIL_FROM,
+            from: constantes.EMAIL_FROM_TESTES,
             to: to,
             subject: subject,
             attachments: arrayAttachments,
             html: html
         };
-
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 reject(error);
             } else {
+                console.log("Email Enviado");
                 resolve(1);
             }
         });
@@ -36,7 +37,7 @@ module.exports.SendMail = (to, subject, html, arrayAttachments) => {
 module.exports.getStatusRastreio = (actualStatus, status) => {
     return new Promise((resolve, reject) => {
         try {
-            if(status == undefined && status.length < 1){
+            if (status == undefined && status.length < 1) {
                 resolve(actualStatus);
             }
             var LStatus = "";
@@ -55,10 +56,10 @@ module.exports.getStatusRastreio = (actualStatus, status) => {
 module.exports.getDetail = (actualDetail, detail) => {
     return new Promise((resolve, reject) => {
         try {
-            if(detail != undefined && detail.length > 2){
+            if (detail != undefined && detail.length > 2) {
                 resolve(detail);
             }
-            else{
+            else {
                 resolve(actualDetail);
             }
         }
