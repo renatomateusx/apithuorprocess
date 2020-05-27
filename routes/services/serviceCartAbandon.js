@@ -16,75 +16,79 @@ const produtos = require('../../schemas/produtos');
 const DeferredPromise = require('@bitbar/deferred-promise');
 var LURLCartEmail = "";
 //Vai rodar a cada 1 minuto
+
 var jobCartAbandon = schedule.scheduleJob('*/1 * * * * ', function () {
-//var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
-lead.GetLeadCronJob()
-    .then((resLead) => {
-        resLead.forEach((objLead, i) => {
-            campanhas.GetCampanhaByIDInternal(objLead.id_usuario, constantes.CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO)
-                .then(async (resCampanha) => {
-                    LURLCartEmail = constantes.WEBSITE_CART;
-                    const LLead = objLead.lead;
-                    if (LLead != null) {
-                        const LData = moment(objLead.data_produtos_carrinho).format();
-                        const LCampanha = objLead.campanha_enviar;
-                        const LDataUltimoEnvio = objLead.data_ultimo_email_enviado || moment().format();
-                        var LSequenciEnviada = objLead.sequencia_enviada;
-                        const LSequencia = resCampanha.sequencia;
-                        const LUltimoComprados = objLead.ultimos_produtos_comprados;
-                        const LDataUltimaCompra = objLead.data_ultima_compra;
-                        const LEmail = LLead.dadosComprador.email;
-                        const LTelefone = LLead.dadosComprador.telefone;
-                        const LNome = LLead.dadosComprador.nome_completo.split(' ')[0];
-                        //console.log(LSequencia);
-                        if (LSequenciEnviada == null) { LSequenciEnviada = 0; }
-                        var LProdutosIguais = await ProcessaProdutos(LUltimoComprados, LLead.produtos);
-                        //console.log("LProdutos", LProdutosIguais);
-                        if (!LProdutosIguais) {
-                            const LNovaSequencia = parseInt(LSequenciEnviada) + 1;
-                            const LSequenciaEnviar = LSequencia.sequencia.find(x => x.id_sequencia = LNovaSequencia);
-                            const LPodeEnviar = await PodeEnviar(moment(LData, "YYYYMMDD HH:mm:ss"), moment(LDataUltimoEnvio, "YYYYMMDD HH:mm:ss"), LSequenciaEnviar);
-                            if (LPodeEnviar) {
-                                const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
-                                const MensagemText = LMensagem.mensagem;
-                                const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
-                                const LTemplate = await ProcessaTemplate(LMensagem, LLoja, LLead.produtos, LNome);
-                                //console.log('link', LTemplate.link);
-                                /*var LLEmail = 'renatomateusx@gmail.com' -- EMAIL TESTE*/
-                                var arrayAttachments = constantes.attachmentsAuxCartAbandon;
-                                arrayAttachments.forEach((obj, i) => {
-                                    obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
-                                });
-                                
-                                const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments);
-                                if (LRetornoMail == 1) {
-                                    const LUltimoEmailEnviado = moment().format();
-                                    const LCampanhaEmailEnviada = resCampanha.id;
-                                    const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
-                                    const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
-                                    console.log("Updated", LUpdated);
+    //var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
+    lead.GetLeadCronJob()
+        .then((resLead) => {
+            resLead.forEach((objLead, i) => {
+                campanhas.GetCampanhaByIDInternal(objLead.id_usuario, constantes.CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO)
+                    .then(async (resCampanha) => {
+                        LURLCartEmail = constantes.WEBSITE_CART;
+                        const LLead = objLead.lead;
+                        if (LLead != null) {
+                            const LData = moment(objLead.data_produtos_carrinho).format();
+                            const LCampanha = objLead.campanha_enviar;
+                            const LDataUltimoEnvio = objLead.data_ultimo_email_enviado;
+                            var LSequenciEnviada = objLead.sequencia_enviada;
+                            const LSequencia = resCampanha.sequencia;
+                            const LUltimoComprados = objLead.ultimos_produtos_comprados;
+                            const LDataUltimaCompra = objLead.data_ultima_compra;
+                            const LEmail = LLead.dadosComprador.email;
+                            const LTelefone = LLead.dadosComprador.telefone;
+                            const LNome = LLead.dadosComprador.nome_completo.split(' ')[0];
+                            //console.log(LSequencia);
+                            if (LSequenciEnviada == null) { LSequenciEnviada = 0; }
+                            var LProdutosIguais = await ProcessaProdutos(LUltimoComprados, LLead.produtos);
+                            //console.log("LProdutos", LProdutosIguais);
+                            if (!LProdutosIguais) {
+                                const LNovaSequencia = parseInt(LSequenciEnviada) + 1;
+                                if (LNovaSequencia > LSequencia.sequencia.length) return;
+                                const LSequenciaEnviar = LSequencia.sequencia.find(x => x.id_sequencia == LNovaSequencia);
+                                if (LSequenciEnviada != undefined) {
+                                    const LPodeEnviar = await PodeEnviar(moment(LData, "YYYYMMDD HH:mm:ss"), LDataUltimoEnvio, LSequenciaEnviar);
+                                    if (LPodeEnviar) {
+                                        const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
+                                        const MensagemText = LMensagem.mensagem;
+                                        const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
+                                        const LTemplate = await ProcessaTemplate(LMensagem, LLoja, LLead.produtos, LNome);
+                                        //console.log('link', LTemplate.link);
+                                        /*var LLEmail = 'renatomateusx@gmail.com' -- EMAIL TESTE*/
+                                        var arrayAttachments = constantes.attachmentsAuxCartAbandon;
+                                        arrayAttachments.forEach((obj, i) => {
+                                            obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
+                                        });
+
+                                        const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments);
+                                        if (LRetornoMail == 1) {
+                                            const LUltimoEmailEnviado = moment().format();
+                                            const LCampanhaEmailEnviada = resCampanha.id;
+                                            const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
+                                            const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
+                                            console.log("Updated", LUpdated);
+                                        }
+                                        //console.log(MensagemText);
+                                        //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
+                                        //MONTA O TEMPLATE
+                                        //ENVIA
+                                        //ATUALIZA A TABELA LEAD DAQUELE REGISTRO INFORMANDO 
+                                    }
                                 }
-                                //console.log(MensagemText);
-                                //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
-                                //MONTA O TEMPLATE
-                                //ENVIA
-                                //ATUALIZA A TABELA LEAD DAQUELE REGISTRO INFORMANDO 
                             }
                         }
-                    }
-                })
-                .catch((errorCamp) => {
-                    console.log("Erro ao pegar campanha pelo pelo id do usuário", errorCamp);
-                })
-            //console.log(resLead);
+                    })
+                    .catch((errorCamp) => {
+                        console.log("Erro ao pegar campanha pelo pelo id do usuário", errorCamp);
+                    })
+                //console.log(resLead);
+            })
+
+        })
+        .catch((errorLead) => {
+            console.log('Erro ao pegar o Lead', errorLead);
         })
 
-    })
-    .catch((errorLead) => {
-        console.log('Erro ao pegar o Lead', errorLead);
-    })
-
-console.log('Serviço de Carrinho Abandonado Rodando!', moment().format('HH:mm:ss'));
+    console.log('Serviço de Carrinho Abandonado Rodando!', moment().format('HH:mm:ss'));
 
 });
 
@@ -112,10 +116,15 @@ function PodeEnviar(PDataCarrinho, PDataUltimoEnvio, PSequencia) {
     return new Promise(async (resolve, reject) => {
         try {
             var LResolve = false;
+            if (PDataUltimoEnvio == null) { resolve(true); }
+            PDataUltimoEnvio = moment(PDataUltimoEnvio, "YYYYMMDD HH:mm:ss")
             const TipoTempo = await GetTipoTempo(PSequencia.tipo_tempo);
             const Diff = PDataUltimoEnvio.diff(PDataCarrinho, TipoTempo.t);
-            //console.log("dIFF", TipoTempo.t, Diff);
-            if (Diff >= PSequencia.tempo) {
+            var TempoDiff = await GetTipoDiff(PSequencia.tipo_tempo, Diff);
+            TempoDiff = Math.round(TempoDiff);
+            //console.log("D", Diff);
+            //console.log("dIFF", TempoDiff);
+            if (TempoDiff >= PSequencia.tempo) {
                 LResolve = true;
             }
             resolve(LResolve);
@@ -138,6 +147,25 @@ function GetTipoTempo(tipo) {
             if (tipo == 5) { LResolve = { tipo: tipo, t: 'months' }; }
             if (tipo == 6) { LResolve = { tipo: tipo, t: 'years' }; }
 
+            resolve(LResolve);
+        }
+        catch (erro) {
+            console.log("Erro ao processar produtos", erro);
+            reject(erro);
+        }
+    })
+}
+
+function GetTipoDiff(tipo, diff) {
+    return new Promise((resolve, reject) => {
+        try {
+            var LResolve = false;
+            if (tipo == 1) { LResolve = moment.duration(diff).asSeconds() }
+            if (tipo == 2) { LResolve = moment.duration(diff).asMinutes() }
+            if (tipo == 3) { LResolve = moment.duration(diff).asHours() }
+            if (tipo == 4) { LResolve = moment.duration(diff).asDays() }
+            if (tipo == 5) { LResolve = moment.duration(diff).asMonths() }
+            if (tipo == 6) { LResolve = moment.duration(diff).asYears() }
             resolve(LResolve);
         }
         catch (erro) {
