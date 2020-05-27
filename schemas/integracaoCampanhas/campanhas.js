@@ -74,3 +74,18 @@ module.exports.GetCampanhaCarrinhoAbandonado = (req, res, next) => {
         }
     });
 }
+
+module.exports.GetCampanhaByIDInternal = (id_usuario, id) => {
+    return new Promise((resolve, reject) => {
+        try {    
+            pool.query('SELECT * FROM campanhas where id_usuario = $1 and campanha=$2', [id_usuario, id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    });
+}

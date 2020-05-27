@@ -130,8 +130,8 @@ function processaWebHooks(req, res, next, url, path, headerAditional, valueHeade
     utilis.makeAPICallExternalParamsJSON(url, path, json, headerAditional, valueHeaderAditional)
       .then(produtos => {
         console.log("WebHook Criado ", json.webhook.topic);
-        res.json({ mensagem: "Ok!" });
-        res.end();
+        ///res.json({ mensagem: "Ok!" });
+        ///res.end();
       })
       .catch(error => {
         console.log("Erro ao criar webhooks", error);

@@ -22,16 +22,16 @@
     <script type='text/javascript'>
 
         var currentPage = '{{ template.name }}';
-        var cartEndpoint = 'https://thuor.com.br/v1/public/shopify/cart';
-        var statusEndpoint = 'https://thuor.com.br/v2/public/shopify/status';
+        var cartEndpoint = 'https://api.thuor.com/integracaoShopify/CartShopify';
+        var statusEndpoint = 'https://api.thuor.com/integracaoShopify/Status';
         var shop = '{{ shop.secure_url }}';
         
       
         window.ThuorCheckoutUrl = '';
       
       
-        cartEndpoint = 'https://www.drivehq.com/file/DFPublishFile.aspx/FileID7102297365/Keymv0wrhmestoo/cart.json';
-		console.log("Shop", cartEndpoint);
+        /*cartEndpoint = 'https://www.drivehq.com/file/DFPublishFile.aspx/FileID7102297365/Keymv0wrhmestoo/cart.json';
+		console.log("Shop", cartEndpoint);*/
 
     function showThuorLoader() {
         var el = document.querySelector('.thuor-loader');

@@ -4,7 +4,8 @@ module.exports = Object.freeze({
     PRODUCAO_BOX_MP_PUBLICK_KEY: 'APP_USR-c97da455-7446-4595-968b-75677fcc12d1',
     PRODUCAO_BOX_MP_ACCESS_TOKEN: 'APP_USR-4338451460338304-120717-64a42a12fe590e1715881018b78df091-128404654',
 
-
+    WEBSITE: 'https://thuor.com',
+    WEBSITE_CART: 'https://thuor.com/cart/items?',
     WEBSITEAPI: 'https://api.thuor.com/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com/webhooks/webhookpayu',
     WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
@@ -59,10 +60,10 @@ module.exports = Object.freeze({
     PORT_SMTP: '587',
     USER_SMTP: 'tohrmoura@gmail.com',
     PASS_SMTP: '02997841500',
-    EMAIL_FROM: "no-replay@thuor.com"
+    EMAIL_FROM: "no-replay@thuor.com",
 
 
-
+    CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,
 
 
 

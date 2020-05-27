@@ -111,12 +111,28 @@ module.exports.GetProdutoIDThuor = async (req, res, next) => {
                 throw error
             }
             res.status(200).json(resultsProd.rows[0]);
-            
+
         })
     } catch (error) {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetProdutoByIDThuorInternal = (id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id], (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                resolve(resultsProd.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
 }
 
 module.exports.GetProdutoByIDImported = async (req, res, next) => {
