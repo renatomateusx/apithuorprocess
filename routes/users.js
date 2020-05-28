@@ -18,10 +18,13 @@ router.post('/EfetuaLogin', usersSchema.EfetuaLogin);
 
 router.post('/AddUser', usersSchema.AddUser);
 
+router.post('/VerificaEmailCadastro', usersSchema.GetUserByEmail);
+
 router.post('/AtivacaoEmail', usersSchema.EnviaAtivacaoEmail);
 
 router.post('/RedefinirSenha', usersSchema.VerificaRedefineSenha);
 
+router.post('/AlterarSenha', usersSchema.AlterarSenha);
 
 router.post('/AtivarEmail', usersSchema.AtivarEmail);
 

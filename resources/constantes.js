@@ -6,7 +6,7 @@ module.exports = Object.freeze({
 
     WEBSITE: 'https://thuor.com',
     WEBSITE_ACTIVATE_EMAIL: 'https://thuor.com/ativacao/',
-    WEBSITE_ACTIVATE_RESET_SENHA: 'https://thuor.com/redefinirsenha/',
+    WEBSITE_ACTIVATE_RESET_SENHA: 'https://thuor.com/redefinir/',
     WEBSITE_CART: 'https://thuor.com/cart/items?',
     WEBSITEAPI: 'https://api.thuor.com/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com/webhooks/webhookpayu',
@@ -26,6 +26,8 @@ module.exports = Object.freeze({
     URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
     STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',
+    STRING_SUBJECT_EMAIL_ESQUECEU_SENHA: 'Esqueceu a senha? Segue link para redefinição.',
+    STRING_SUBJECT_EMAIL_ALTEROU_SENHA: 'Alteração de Senha no Thuor.com',
     STRING_STATUS_EMAIL: '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
     attachmentsAux: [{
         filename: 'facebook2x.png',

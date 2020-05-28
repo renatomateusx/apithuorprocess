@@ -5,6 +5,10 @@ const utilisEmail = require('../routes/services/utilis');
 const constantes = require('../resources/constantes');
 const path = require("path");
 const fs = require('fs');
+
+
+
+
 module.exports.GetUserByID = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
@@ -45,7 +49,7 @@ module.exports.SolicitarProposta = (req, res, next) => {
             if (error) {
                 throw error
             }
-            response.status(201).send(`Proposta Adicionada: ${result.insertId}`)
+            res .status(201).send(`Proposta Adicionada: ${result.insertId}`)
         })
     } catch (error) {
         res.json(error);
@@ -61,7 +65,7 @@ module.exports.GetUserByProfile = (req, res, next) => {
             if (error) {
                 throw error
             }
-            response.status(200).json(results.rows)
+            res.status(200).json(results.rows)
         })
     } catch (error) {
         res.json(error);
@@ -71,19 +75,19 @@ module.exports.GetUserByProfile = (req, res, next) => {
 
 module.exports.VerificaRedefineSenha = (req, res, next) => {
     try {
-        const { nome, email } = req.body
+        const { email } = req.body
 
         pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (error, results) => {
             if (error) {
                 throw error
             }
-            if(results.rowCount > 0){
-                response.status(200).json('E-mail de Redefinição de Senha Enviado.');
-                this.EnviaEsqueceuSenhaEmail(email, nome);
-            }else{
-                response.status(422).json('Nenhuma Conta encontrada.');
+            if (results.rowCount > 0) {
+                res.status(200).json('E-mail de Redefinição de Senha Enviado.');
+                this.EnviaEsqueceuSenhaEmail(email, results.rows[0].nome);
+            } else {
+                res.status(422).json('Nenhuma Conta encontrada.');
             }
-            
+
         })
     } catch (error) {
         res.json(error);
@@ -93,13 +97,18 @@ module.exports.VerificaRedefineSenha = (req, res, next) => {
 
 module.exports.GetUserByEmail = (req, res, next) => {
     try {
-        const email = parseInt(req.params.email)
-
+        const { email } = req.body
         pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (error, results) => {
             if (error) {
                 throw error
             }
-            response.status(200).json(results.rows)
+            if(results.rowCount > 0){
+                res.status(200).json(true);
+            }
+            else{
+                res.status(200).json(false);
+            }
+           
         })
     } catch (error) {
         res.json(error);
@@ -152,8 +161,8 @@ module.exports.AddUser = (req, res, next) => {
             if (error) {
                 throw error
             }
-            if (results.insertId > 0) {
-                res.status(201).json(`Usuário Criado: ${result.insertId}`)
+            if (results.rowCount > 0) {
+                res.status(200).json(`Usuário Criado: ${results.insertId}`)
                 this.EnviaAtivacaoEmail(nome, email);
             }
             else {
@@ -180,6 +189,33 @@ module.exports.AtivarEmail = (req, res, next) => {
                 }
                 if (results.rowCount > 0) {
                     let LJSON = { status: 'Conta ativada com sucesso!', nome: LNome.split(' ')[0], email: LEmail };
+                    res.status(200).json(LJSON);
+                }
+                else {
+                    res.status(422).json('Conta não encontrada!');
+                }
+            })
+        } catch (error) {
+            console.log("Error", error);
+            res.status(422).json('Erro ao tentar ativar conta:' + error);
+        }
+    });
+}
+
+module.exports.AlterarSenha = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const { token, senha } = req.body;
+            var LToken = UTILIS.getDecrypto(token);
+            var LNome = LToken.split('|')[0];
+            var LEmail = LToken.split('|')[1];
+            pool.query('UPDATE usuarios SET senha = $1 WHERE email = $2 and nome = $3', [senha ,LEmail, LNome], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                if (results.rowCount > 0) {
+                    let LJSON = { status: 'Senha Alterada com Sucesso!', nome: LNome, email: LEmail };
+                    this.EnviaEmailInformandoAlteracaoSenha(LEmail, LNome);
                     res.status(200).json(LJSON);
                 }
                 else {
@@ -263,8 +299,8 @@ module.exports.EnviaAtivacaoEmailInternal = (req, res, next) => {
             });
         } catch (error) {
             console.log(error);
-             res.json(error);
-             res.end();
+            res.json(error);
+            res.end();
             //reject(error);
         }
     });
@@ -283,7 +319,7 @@ module.exports.EnviaEsqueceuSenhaEmail = (email, nome) => {
                 var LHTML = html;
                 var LNome = nome.split(' ')[0];
                 LHTML = LHTML.replace("{first_name}", UTILIS.toCamelCase(LNome));
-                LTitulo = constantes.STRING_SUBJECT_EMAIL_ATIVAR_CONTA;
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_ESQUECEU_SENHA;
                 var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRedefineSenha);
                 arrayAttachments.forEach((obj, i) => {
                     obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
@@ -293,15 +329,52 @@ module.exports.EnviaEsqueceuSenhaEmail = (email, nome) => {
 
                 const LRetornoMail = await utilisEmail.SendMail(email, LTitulo, LHTML, arrayAttachments);
                 if (LRetornoMail == 1) {
-                    res.status(200).send('E-mail de redefinição enviado');
-                    //resolve(1);
+                    //res.status(200).send('E-mail de redefinição enviado');
+                    resolve(1);
                 }
 
             });
         } catch (error) {
             console.log(error);
-             res.json(error);
-             res.end();
+            res.json(error);
+            res.end();
+            //reject(error);
+        }
+    });
+}
+
+module.exports.EnviaEmailInformandoAlteracaoSenha = (email, nome) => {
+    return new Promise((resolve, reject) => {
+        try {
+            //console.log(req.body);
+            var LSiteActivate = constantes.WEBSITE_ACTIVATE_RESET_SENHA;
+            var template = path.resolve('public/templates/template_alterou_senha.html');
+            fs.readFile(template, 'utf8', async function (err, html) {
+                if (err) {
+                    throw err;
+                }
+                var LHTML = html;
+                var LNome = nome.split(' ')[0];
+                LHTML = LHTML.replace("{first_name}", UTILIS.toCamelCase(LNome));
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_ALTEROU_SENHA;
+                var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRedefineSenha);
+                arrayAttachments.forEach((obj, i) => {
+                    obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
+                });
+                LSiteActivate = LSiteActivate + await UTILIS.getCrypto(nome, email);
+                LHTML = LHTML.replace("{link_ativacao}", '');
+
+                const LRetornoMail = await utilisEmail.SendMail(email, LTitulo, LHTML, arrayAttachments);
+                if (LRetornoMail == 1) {
+                    //res.status(200).send('E-mail de redefinição enviado');
+                    resolve(1);
+                }
+
+            });
+        } catch (error) {
+            console.log(error);
+            res.json(error);
+            res.end();
             //reject(error);
         }
     });
@@ -321,7 +394,7 @@ module.exports.EnviaEsqueceuSenhaEmailInternal = (req, res, next) => {
                 var LHTML = html;
                 var LNome = nome.split(' ')[0];
                 LHTML = LHTML.replace("{first_name}", UTILIS.toCamelCase(LNome));
-                LTitulo = constantes.STRING_SUBJECT_EMAIL_ATIVAR_CONTA;
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_ESQUECEU_SENHA;
                 var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRedefineSenha);
                 arrayAttachments.forEach((obj, i) => {
                     obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
@@ -338,8 +411,8 @@ module.exports.EnviaEsqueceuSenhaEmailInternal = (req, res, next) => {
             });
         } catch (error) {
             console.log(error);
-             res.json(error);
-             res.end();
+            res.json(error);
+            res.end();
             //reject(error);
         }
     });
