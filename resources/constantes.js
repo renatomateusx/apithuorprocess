@@ -5,6 +5,8 @@ module.exports = Object.freeze({
     PRODUCAO_BOX_MP_ACCESS_TOKEN: 'APP_USR-4338451460338304-120717-64a42a12fe590e1715881018b78df091-128404654',
 
     WEBSITE: 'https://thuor.com',
+    WEBSITE_ACTIVATE_EMAIL: 'https://thuor.com/ativacao/',
+    WEBSITE_ACTIVATE_RESET_SENHA: 'https://thuor.com/redefinirsenha/',
     WEBSITE_CART: 'https://thuor.com/cart/items?',
     WEBSITEAPI: 'https://api.thuor.com/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com/webhooks/webhookpayu',
@@ -23,6 +25,7 @@ module.exports = Object.freeze({
 
     URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
+    STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',
     STRING_STATUS_EMAIL: '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
     attachmentsAux: [{
         filename: 'facebook2x.png',
@@ -54,7 +57,7 @@ module.exports = Object.freeze({
         filename: 'Cart.gif',
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'Cart'
-    },{
+    }, {
         filename: 'Bottom_round.png',
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'Bottom_round'
@@ -63,6 +66,24 @@ module.exports = Object.freeze({
         filename: 'Img62x.jpg',
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'Img62x' //same cid value as in the html img src
+    }],
+    attachmentsEmailRedefineSenha: [{
+        filename: 'Img22x.jpg',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Img22x' //same cid value as in the html img src
+    }, {
+        filename: 'logoThuorBlue.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'logoThuorBlue' //same cid value as in the html img src
+    }],
+    attachmentsEmailAtivacao: [{
+        filename: 'logoThuorBlue.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'logoThuorBlue' //same cid value as in the html img src
+    }, {
+        filename: 'illo_welcome_1.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'illo_welcome_1' //same cid value as in the html img src
     }],
 
 

@@ -3,6 +3,7 @@ var request = require('request');
 const https = require('https');
 const querystring = require('querystring');
 const currencyFormatter = require('currency-formatter');
+const Hashids = require('hashids/cjs');
 /*DEIXEI COMENTADO PARA COLOCAR, SE FOR PRECISO, NO ARQUIVO VIEWS/LAYOUT.PUG script(src='https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js')*/
 module.exports.verifyJWT = function (req, res, next) {
   var token = req.headers['authorization'];
@@ -111,13 +112,13 @@ module.exports.makeAPICallExternalParamsJSONHeadersArray = function (url, path, 
   return new Promise((resolve, reject) => {
     //console.log("Body", body);
     //var postData = querystring.stringify(body);
-    
+
     var Lheader = {
       'Content-Type': 'application/json'
-    };    
-    headerAdditional.forEach((obj, i)=>{
+    };
+    headerAdditional.forEach((obj, i) => {
       Lheader[obj] = valueHeaderAditional[i];
-    })    
+    })
     request(
       {
         headers: Lheader,
@@ -137,13 +138,13 @@ module.exports.makeAPICallExternalParamsJSON = function (url, path, body, header
   return new Promise((resolve, reject) => {
     //console.log("Body", body);
     //var postData = querystring.stringify(body);
-    
+
     var Lheader = {
       'Content-Type': 'application/json'
-    };    
+    };
     if (headerAdditional && valueHeaderAditional) {
       Lheader[headerAdditional] = valueHeaderAditional;
-    }    
+    }
     request(
       {
         headers: Lheader,
@@ -194,3 +195,44 @@ module.exports.UnformatMoney = function (value) {
   return currencyFormatter.unformat(value, { code: 'USD' });
 };
 
+module.exports.toCamelCase = (str) => {
+  var LSTR2 = "";
+  if (str.indexOf(" ") > -1) {
+    var LSpace = str.split(" ");
+    LSpace.forEach((objS, i) => {
+      var LStr = objS.split("");
+      LStr.forEach((obj, i) => {
+        if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+        if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+      });
+      LSTR2 = LSTR2 + " ";
+    });
+  } else {
+    var LStr = str.split("");
+    LStr.forEach((obj, i) => {
+      if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+      if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+    });
+  }
+  return LSTR2;
+}
+module.exports.getCrypto = (str, strr) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const token = Buffer.from(str + '|' + strr).toString('base64');
+      resolve(token);
+    }
+    catch (error) {
+      reject(error);
+    }
+  })
+
+}
+module.exports.getDecrypto = (token) => {  
+    try {
+      return Buffer.from(token, 'base64').toString();
+    }
+    catch (error) {
+      console.log("Erro ao getDecrypto", error);
+    }
+}
