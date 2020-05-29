@@ -26,7 +26,7 @@ var extrasRouter = require('./routes/extras');
 var pagamentosRouter = require('./routes/pagamentos');
 var push = require('./routes/push');
 var notificacaoRouter = require('./routes/notificacao');
-var importarProdutosShopify = require('./routes/componentes/importarProdutosShopify');
+var integraFuncionalidadeShopify = require('./routes/componentes/Shopify/integracaoShopify');
 var produtos = require('./routes/produtos');
 var integracaoShopify = require('./routes/integracaoShopify');
 var logisticas = require('./routes/logisticas');
@@ -50,11 +50,11 @@ var reviews = require('./routes/reviews');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(bodyParser.json({limit: '15mb'}));
-app.use(express.urlencoded({limit: '15mb', extended: false}));
+app.use(bodyParser.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({credentials: true, origin: '*'}));
+app.use(cors({ credentials: true, origin: '*' }));
 app.options('*', cors());
 
 app.use('/', indexRouter);
@@ -69,7 +69,7 @@ app.use('/extras', extrasRouter);
 app.use('/pagamentos', pagamentosRouter);
 app.use('/push', push);
 app.use('/notificacao', notificacaoRouter);
-app.use('/importarProdutosShopify', importarProdutosShopify);
+app.use('/integraFuncionalidadeShopify', integraFuncionalidadeShopify);
 app.use('/integracaoShopify', integracaoShopify);
 app.use('/produtos', produtos);
 app.use('/logisticas', logisticas);
@@ -89,28 +89,28 @@ app.use('/campanhas', campanhas);
 app.use('/serviceCartAbandon', services_abandon_cart);
 app.use('/reviews', reviews);
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE, OPTIONS');
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
+    'Origin, Content-Type,Content-Length, Authorization, Accept, X-Requested-With'
   );
   res.header('Access-Control-Allow-Credentials', true);
   res.header(
-    'Acept',
+    'Accept',
     'application/vnd.pagseguro.com.br.v3+{xml,json};charset=ISO-8859-1'
-  );  
+  );
   next();
 });
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

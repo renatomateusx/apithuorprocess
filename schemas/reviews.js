@@ -24,13 +24,14 @@ module.exports.GetAllReviews = (req, res, next) => {
 
 module.exports.SaveReview = async (req, res, next) => {
     try {
-        const { url_loja, id_produto,nome,email,titulo,avaliacao,imagem } = req.body;
+        const { url_loja, id_produto, nome, email, titulo, avaliacao, imagem, plataforma, rating } = req.body;
         const LData = moment().format();
         const Prod = await produtos.GetProdutoByIDInternalShopify(id_produto);
-        if(imagem == undefined || imagem == null){
-            imagem = Prod.variant_img;
+        var img = imagem;
+        if (img.length == 0) {
+            img = Prod.variant_img;
         }
-        pool.query('INSERT INTO reviews (url_loja, id_produto,nome,email,titulo,avaliacao,imagem,data) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)', [url_loja, id_produto,nome,email,titulo,avaliacao,imagem,LData], (error, results) => {
+        pool.query('INSERT INTO reviews (url_loja, id_produto,nome,email,titulo,avaliacao,imagem,data, plataforma,rating) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9, $10)', [url_loja, id_produto, nome, email, titulo, avaliacao, img, LData, plataforma, rating], (error, results) => {
             if (error) {
                 throw error
             }
@@ -44,12 +45,12 @@ module.exports.SaveReview = async (req, res, next) => {
 }
 module.exports.GetReviewByID = (req, res, next) => {
     try {
-        const { id_produto, id_usuario } = req.body;
-        pool.query('SELECT * FROM reviews WHERE id_produto = $1 and id_usuario = $2', [id_produto, id_usuario], (error, results) => {
+        const { id_produto, url_loja } = req.body;
+        pool.query('SELECT * FROM reviews WHERE id_produto = $1 and url_loja = $2', [id_produto, url_loja], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send();
+            res.status(200).send(results.rows);
             res.end();
         })
     } catch (error) {
