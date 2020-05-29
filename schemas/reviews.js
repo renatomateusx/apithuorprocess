@@ -26,11 +26,11 @@ module.exports.SaveReview = async (req, res, next) => {
     try {
         const { url_loja, id_produto, nome, email, titulo, avaliacao, imagem, plataforma, rating } = req.body;
         const LData = moment().format();
-        const Prod = await produtos.GetProdutoByIDInternalShopify(id_produto);
+        //const Prod = await produtos.GetProdutoByIDInternalShopify(id_produto);
         var img = imagem;
-        if (img.length == 0) {
-            img = Prod.variant_img;
-        }
+        //if (img.length == 0) {
+            //img = Prod.variant_img;
+        //}
         pool.query('INSERT INTO reviews (url_loja, id_produto,nome,email,titulo,avaliacao,imagem,data, plataforma,rating) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9, $10)', [url_loja, id_produto, nome, email, titulo, avaliacao, img, LData, plataforma, rating], (error, results) => {
             if (error) {
                 throw error
