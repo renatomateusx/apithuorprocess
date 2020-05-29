@@ -103,6 +103,58 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
     }
 }
 
+module.exports.GetProdutoByIDInternalShopify = (id_produto) => {
+    return new Promise((resolve, reject)=>{
+        try {
+            const { id_produto } = req.body;
+            console.log(id_produto)
+            const LQuery = "select json_dados_produto FROM produtos WHERE json_dados_produto->'variants' @> \'[{\"id\":"+id_produto+"}]\' ";
+            pool.query(LQuery, (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                if (resultsProd.rows) {
+    
+                    resultsProd.rows.forEach(async (prod, ii) => {
+                        const ProdutoJSON = prod.json_dados_produto;
+                        const imgSRC = await GetImageVariantID(id_produto, ProdutoJSON.images);
+    
+                        ProdutoJSON.variants.forEach((variante, i) => {
+    
+                            if (variante.id == id_produto) {
+    
+                                var produto = {
+                                    title: ProdutoJSON.title,
+                                    variant_id: variante.id,
+                                    variant_title: variante.title,
+                                    quantity: quantity,
+                                    variant_price_ancora: variante.compare_at_price,
+                                    variant_price: variante.price,
+                                    variant_img: imgSRC,
+                                    id_thuor: prod.id_thuor,
+                                }
+                                resolve(produto);
+                                //res.status(200).json(produto);
+    
+                            }
+                        });
+    
+                    });
+                }
+                else {
+                    //res.status(200).json({ mensagem: "Nenhum produto encontrado" });
+                    resolve(0);
+                }
+                //
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+    
+}
+
+
 module.exports.GetProdutoIDThuor = async (req, res, next) => {
     try {
         const { id_produto } = req.body;
