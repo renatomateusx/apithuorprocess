@@ -92,8 +92,8 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
             console.log(url);
             utilis.makeAPICallExternalHTTPS(url)
               .then((retorno) => {
-                processaListaProdutos(retorno[0], req, res, next);
-                tratarRepostaPaginacao(url, retorno[1], req, res, next);
+                processaListaProdutos(retorno[0], req, res, next, 1);
+                tratarRepostaPaginacao(url, retorno[1], req, res, next, 1);
               });
           })
           .catch(error => {
@@ -112,12 +112,12 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
   }
 });
 
-function processaListaProdutos(produtos, req, res, next) {
+function processaListaProdutos(produtos, req, res, next, plataforma) {
   const prod = JSON.parse(produtos);
   var prods = prod.products;
   if (prods) {
     prods.forEach((obj, i) => {
-      InsereProduto(obj, req, res, next);
+      InsereProduto(obj, req, res, next, plataforma);
     });
     //res.json({ mensagem: 'Ok' });
     //res.end();
@@ -360,7 +360,7 @@ function InsereProduto(produto, req, res, next) {
   });
 }
 
-function tratarRepostaPaginacao(urlParams, headers, req, res, next) {
+function tratarRepostaPaginacao(urlParams, headers, req, res, next, plataforma) {
   var Llink = headers['link'];
   if (Llink && Llink.indexOf('next') > -1) {
     var urlLocal = Llink.replace('<', '');
@@ -370,8 +370,8 @@ function tratarRepostaPaginacao(urlParams, headers, req, res, next) {
     var URLFinal = urlParams + "&page_info=" + pageInfo;
     utilis.makeAPICallExternalHTTPS(URLFinal)
       .then((retorno) => {
-        processaListaProdutos(retorno[0], req, res, next);
-        tratarRepostaPaginacao(urlParams, retorno[1], req, res, next);
+        processaListaProdutos(retorno[0], req, res, next, plataforma);
+        tratarRepostaPaginacao(urlParams, retorno[1], req, res, next,plataforma);
       })
       .catch((error) => {
         console.log("Erro ao tentar pegar, pelo tratarRespostaPaginacao, o próximo registro", error);

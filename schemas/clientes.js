@@ -92,7 +92,7 @@ module.exports.UpdateLead = (email, produtos_comprados) => {
     return new Promise((resolve, reject) => {
         try {
             const data = moment().format();
-            pool.query('UPDATE lead set ultimos_produtos_comprados = $1, data_ultima_compra = $2 where email = $3', [email, data, email], (error, results) => {
+            pool.query('UPDATE lead set ultimos_produtos_comprados = $1, data_ultima_compra = $2 where email = $3', [produtos_comprados, data, email], (error, results) => {
                 if (error) {
                     throw error
                 }

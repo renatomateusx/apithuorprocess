@@ -10,7 +10,7 @@ const path = require("path");
 const constantes = require('../../resources/constantes');
 const loja = require('../../schemas/integracaoPlataformas');
 
-var j = schedule.scheduleJob('* * / 23 * * *', function () {
+var j = schedule.scheduleJob('* * */23 * * *', function () {
     fulfillments.GetFulFillmentList()
         .then((resFul) => {
             resFul.forEach(async (obj, i) => {
@@ -32,7 +32,7 @@ var j = schedule.scheduleJob('* * / 23 * * *', function () {
                 var LDetailCheckPoint = "";
                 var self = this;
                 const DadosLoja = await loja.GetLojaByUsuario(id_usuario);
-                var LSIT = " está chegando!";                
+                var LSIT = " está chegando!";
                 //console.log('diff', duration.asHours());
                 if (duration.asHours() >= 24) {
 
@@ -48,9 +48,9 @@ var j = schedule.scheduleJob('* * / 23 * * *', function () {
                                 self.LDateCheckPoint = moment(objCheckPoint.date).format("DD/MM/YYYY HH:mm:ss");
                                 self.LStatusCheckPoint = await utilisEmail.getStatusRastreio(self.LStatusCheckPoint, objCheckPoint.status);
                                 self.LDetailCheckPoint = await utilisEmail.getDetail(self.LDateCheckPoint, objCheckPoint.details);
-                                if(objCheckPoint.status == "DELIVERED"){
+                                if (objCheckPoint.status == "DELIVERED") {
                                     LSIT = " foi ENTREGUE!";
-                                }else{
+                                } else {
                                     LSIT = " está chegando";
                                 }
                             });
@@ -104,7 +104,7 @@ var j = schedule.scheduleJob('* * / 23 * * *', function () {
         .catch((error) => {
             console.log("Erro ao pegar o fulfillment", error);
         })
-    console.log('Serviço de Shipment Rodando!');
+    console.log('Serviço de Shipment Rodando!', moment().format('HH:mm:ss'));
 });
 
 

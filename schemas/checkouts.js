@@ -57,9 +57,10 @@ module.exports.GetCheckoutAtivoInternal = (req, res, next) => {
 async function mountJSONShopifyOrder(Pjson, situacao) {
     return new Promise(async (resolve, reject) => {
         try {
+            const LProd = Pjson.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
             const LShopifyOrder = {
                 "order": {
-                    "line_items": Pjson.produtos,
+                    "line_items": LProd,
                     "customer": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
@@ -123,50 +124,29 @@ module.exports.DoPay = (req, res, next) => {
             console.log("paymentData", paymentData);
             mercadopago.payment.save(paymentData)
                 .then(async function (data) {
-                    const DataResponse = data.response;                   
+                    const DataResponse = data.response;
                     ///console.log(data.response);
                     if (data.response.status == 'approved') {
-                        LJSON.dadosComprador.data = data.response.date_created;
-                        LJSON.dadosComprador.id_transacao = data.response.id;
-                        LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
-                        const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid');
-                        const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
-                        const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
-                        var headerAditional = "X-Shopify-Access-Token";
-                        var valueHeaderAditional = LJSON.dadosLoja.senha;
-                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
-                            .then(async retornoShopify => {
-                                const RetornoShopifyJSON = retornoShopify.body;
-                                insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada', 1)
-                                    .then(async (retornoInsereTransacao) => {
-                                        const LUpdate = await clientes.UpdateLead( LJSON.dadosComprador.email, LJSON.produtos);
-                                        const response = {
-                                            dataGateway: DataResponse,
-                                            dataStore: RetornoShopifyJSON
-                                        }
-                                        res.status(200).send(response);
-                                    })
-                                    .catch((error) => {
-                                        console.log("Erro ao inserir transação no banco", error);
-                                    })
-                            })
-                            .catch(error => {
-                                console.log("Erro ao enviar informação do checkout para a shopify", error);
-                            })
+                        var responseShopify = await enviaOrdemShopify(LJSON, data, paymentData, data.response.status);
+                        var plataformasResponse = {
+                            shopify: responseShopify,
+                            woo: 'notYet',
+                        }
+                        res.status(200).send(plataformasResponse);
                     }
                     else {
                         console.log("Response", data.response);
-                        res.status(200).send(data.response);
+                        res.status(422).send(data.response);
                     }
 
                 }).catch(function (error) {
                     console.log("Erro MP", error);
                     if (error.cause != undefined) {
                         console.log(error.cause[0].code);
-                        res.status(202).send(error.cause[0].code);
+                        res.status(422).send(error.cause[0].code);
                     }
                     else {
-                        res.status(202).send(error);
+                        res.status(422).send(error);
                     }
                 });
         }
@@ -181,7 +161,7 @@ module.exports.DoPayTicket = (req, res, next) => {
     try {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
-        console.log("Pay", LJSON);
+        //console.log("Pay", LJSON);
         mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
         var FirstLastName = LJSON.dadosComprador.nome_completo.split(" ");
         var paymentData = {
@@ -206,7 +186,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                 }
             }
         }
-        console.log("paymentData", paymentData);
+        //console.log("paymentData", paymentData);
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;
@@ -215,48 +195,28 @@ module.exports.DoPayTicket = (req, res, next) => {
                 LJSON.dadosComprador.vencimentoBoleto = data.response.date_of_expiration;
                 LJSON.dadosComprador.data = data.response.date_created;
                 LJSON.dadosComprador.id_transacao = data.response.id;
-                console.log(LJSON.dadosComprador);
+                //console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
-                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
-                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
-                    var headerAditional = "X-Shopify-Access-Token";
-                    var valueHeaderAditional = LJSON.dadosLoja.senha;
-                    //console.log(ordersShopify);
-                    //console.log(urlShopify);
-                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
-                        .then(async retornoShopify => {
-                            const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'pendente', 1)
-                                .then(async (retornoInsereTransacao) => {
-                                    const LUpdate = await clientes.UpdateLead( LJSON.dadosComprador.email, LJSON.produtos);
-                                    const response = {
-                                        dataGateway: DataResponse,
-                                        dataStore: RetornoShopifyJSON
-                                    }
-                                    res.status(200).send(response);
-                                })
-                                .catch((error) => {
-                                    console.log("Erro ao inserir transação no banco", error);
-                                })
-                        })
-                        .catch(error => {
-                            console.log("Erro ao enviar informação do checkout para a shopify", error);
-                        })
+                    var responseShopify = await enviaOrdemShopify(LJSON, data, paymentData, data.response.status);
+                    var plataformasResponse = {
+                        shopify: responseShopify,
+                        woo: 'notYet'
+                    }
+                    res.status(200).send(plataformasResponse);
                 }
                 else {
                     console.log("Response", data.response);
-                    res.status(200).send(data.response);
+                    res.status(422).send(data.response);
                 }
 
             }).catch(function (error) {
                 console.log("Erro MP", error);
                 if (error.cause != undefined) {
                     console.log(error.cause[0].code);
-                    res.status(202).send(error.cause[0].code);
+                    res.status(422).send(error.cause[0].code);
                 }
                 else {
-                    res.status(202).send(error);
+                    res.status(422).send(error);
                 }
             });
 
@@ -269,7 +229,6 @@ module.exports.DoPayTicket = (req, res, next) => {
 
 module.exports.GetIntegracaoCheckout = (req, res, next) => {
     try {
-        const { id_usuario } = req.body;
         pool.query('SELECT * FROM integracao_checkout', (error, results) => {
             if (error) {
                 throw error
@@ -405,4 +364,61 @@ function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackE
 
         }
     });
+}
+
+module.exports.GetIntegracaoCheckoutInternal = () => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM integracao_checkout', (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+function enviaOrdemShopify(LJSON, data, paymentData, status) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            //console.log("Ldata", LJSON.dadosLoja);
+            //ADICIONADO PARA PAREPARAR A PLATAFORMA PARA RECEBER OUTRAS INTEGRAÇÕES. WOOCOMMERCE, POR EXEMPLO
+            const LHaveShopifyProducts = LJSON.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
+            if (LHaveShopifyProducts) {
+                LJSON.dadosComprador.data = data.response.date_created;
+                LJSON.dadosComprador.id_transacao = data.response.id;
+                LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
+                const LShopifyOrder = await mountJSONShopifyOrder(LJSON, status);
+                const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
+                const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
+                var headerAditional = "X-Shopify-Access-Token";
+                var valueHeaderAditional = LJSON.dadosLoja.senha;
+                utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
+                    .then(async retornoShopify => {
+                        const RetornoShopifyJSON = retornoShopify.body;
+                        insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, 'aprovada', 1)
+                            .then(async (retornoInsereTransacao) => {
+                                const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
+                                const response = {
+                                    dataGateway: data.response,
+                                    dataStore: RetornoShopifyJSON
+                                }
+                                resolve(response);
+                            })
+                            .catch((error) => {
+                                console.log("Erro ao inserir transação no banco", error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log("Erro ao enviar informação do checkout para a shopify", error);
+                    })
+            }
+        }
+        catch (error) {
+            reject(error);
+        }
+    })
 }

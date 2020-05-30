@@ -68,10 +68,9 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
 
                 resultsProd.rows.forEach(async (prod, ii) => {
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
-                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
-
+                    const plataforma = prod.plataforma;
+                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);                    
                     ProdutoJSON.variants.forEach((variante, i) => {
-
                         if (variante.id == variant) {
 
                             var produto = {
@@ -83,6 +82,7 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                                 variant_price: variante.price,
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
+                                plataforma: plataforma
                             }
 
                             res.status(200).json(produto);
@@ -116,7 +116,7 @@ module.exports.GetProdutoByIDInternalShopify = (id_produto) => {
                     resultsProd.rows.forEach(async (prod, ii) => {
                         const ProdutoJSON = prod.json_dados_produto;
                         const imgSRC = await GetImageVariantID(id_produto, ProdutoJSON.images);
-
+                        const plataforma = prod.plataforma;
                         ProdutoJSON.variants.forEach((variante, i) => {
 
                             if (variante.id == id_produto) {
@@ -129,6 +129,7 @@ module.exports.GetProdutoByIDInternalShopify = (id_produto) => {
                                     variant_price: variante.price,
                                     variant_img: imgSRC,
                                     id_thuor: prod.id_thuor,
+                                    plataforma: plataforma
                                 }
                                 resolve(produto);
                                 //res.status(200).json(produto);
@@ -196,6 +197,7 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                 resultsProd.rows.forEach(async (prod, ii) => {
                     const ProdutoJSON = prod.json_dados_produto;
                     const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
+                    const plataforma = prod.plataforma;
                     ProdutoJSON.variants.forEach((variante, i) => {
                         if (variante.id == variant) {
                             var produto = {
@@ -207,7 +209,8 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                                 variant_price: variante.price,
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
-                                id_usuario: prod.id_usuario
+                                id_usuario: prod.id_usuario,
+                                plataforma: plataforma
                             }
                             res.status(200).json(produto);
                         }
