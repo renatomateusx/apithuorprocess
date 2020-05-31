@@ -65,7 +65,7 @@ var jobCartAbandon = schedule.scheduleJob('* */59 * * * * ', function () {
                                             const LCampanhaEmailEnviada = resCampanha.id;
                                             const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
                                             const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
-                                            console.log("Updated", LUpdated);
+                                            //console.log("Updated", LUpdated);
                                         }
                                         //console.log(MensagemText);
                                         //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
@@ -97,7 +97,7 @@ function ProcessaProdutos(produtosComprados, produtosCarrinho) {
         try {
             var LResolve = false
             if (produtosComprados != null && produtosCarrinho != null) {
-                console.log(produtosComprados, produtosCarrinho);
+                //console.log(produtosComprados, produtosCarrinho);
                 const LP = JSON.stringify(produtosComprados);
                 const LC = JSON.stringify(produtosCarrinho);
                 if (LP == LC) {

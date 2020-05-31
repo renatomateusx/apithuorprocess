@@ -21,6 +21,40 @@ module.exports.GetTransacoes = (req, res, next) => {
     }
 }
 
+module.exports.GetTransacoesByGatewayINTERNAL = (gateway) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM transacoes where gateway = $1', [gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+
+        }
+    })
+
+}
+
+module.exports.GetTransacoesPendentesByGatewayINTERNAL = (gateway) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query("SELECT * FROM transacoes where gateway = $1 and status = 'PENDING'", [gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+
+        }
+    })
+
+}
+
 module.exports.GetTransacoesByID = (req, res, next) => {
     try {
         const { shop, id_usuario, id } = req.body;
@@ -38,10 +72,10 @@ module.exports.GetTransacoesByID = (req, res, next) => {
 }
 
 
-async function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status) {
+module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status], (error, results) => {
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -191,6 +225,32 @@ module.exports.UpdateTransacaoShopifyOrder = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.UpdateTransacaoShopifyOrderStatus = (order_id, json_shopify_order, status) => {
+    return new Promise((resolve, reject) => {
+        try {
+            
+            const LQuery = "SELECT id, json_shopify_response, (json_shopify_response->'order'->>'id')::bigint as order_id FROM transacoes WHERE (json_shopify_response->'order'->>'id')::bigint = $1";
+            pool.query(LQuery, [order_id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                results.rows.forEach((obj, i) => {
+                    pool.query("UPDATE transacoes SET json_shopify_response=$1,  status = $3 WHERE id=$2", [json_shopify_order, obj.id, status], (error, resultsUpdate) => {
+                        if (error) {
+                            throw error
+                        }                       
+                        resolve(resultsUpdate.rowCount);
+                    });
+                })
+
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
 }
 
 
