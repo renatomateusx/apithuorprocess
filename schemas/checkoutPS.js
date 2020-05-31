@@ -61,7 +61,7 @@ module.exports.PublicKey = (req, res, next) => {
         }
         var LParams = "email=" + type;
         LParams = LParams + "&token=" + token;
-        const Lurl = "https://sandbox.api.pagseguro.com/public-keys";
+        const Lurl = constantes.API_PS.replace("{}", 'public-keys');
         console.log(LParams);
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, "Authorization", "Bearer " + token, "POST")
             .then(async (resRet) => {
@@ -96,7 +96,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
 
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
-        const Lurl = "https://sandbox.api.pagseguro.com/charges";
+        const Lurl = constantes.API_PS.replace("{}", 'charges');
         //console.log(Lurl);
         var LHeaderKey = [];
         var LHeaderValue = [];
@@ -233,7 +233,7 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
                         "value": ValorRefund
                     }
                 };
-                const Lurl = "https://sandbox.api.pagseguro.com/" + LResponseGW.id + "/cancel";
+                const Lurl = constantes.API_PS.replace("{}", LResponseGW.id + "/cancel");;
                 //console.log(Lurl);
                 var LHeaderKey = [];
                 var LHeaderValue = [];
@@ -303,53 +303,53 @@ module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
     }
 }
 
-async function mountJSONShopifyOrder(Pjson, situacao) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const LShopifyOrder = {
-                "order": {
-                    "line_items": Pjson.produtos,
-                    "customer": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "email": Pjson.dadosComprador.email
-                    },
-                    "billing_address": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
-                        "city": Pjson.dadosComprador.cidade,
-                        "province": Pjson.dadosComprador.estado,
-                        "country": "Brasil",
-                        "zip": Pjson.dadosComprador.cep
-                    },
-                    "shipping_address": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
-                        "city": Pjson.dadosComprador.cidade,
-                        "province": Pjson.dadosComprador.estado,
-                        "country": "Brasil",
-                        "zip": Pjson.dadosComprador.cep
-                    },
-                    "email": Pjson.dadosComprador.email,
-                    "transactions": [
-                        {
-                            "kind": "authorization",
-                            "status": "success",
-                            "amount": parseFloat(Pjson.paymentData.amount.value)
-                        }
-                    ],
-                    "financial_status": situacao
-                }
-            };
-            resolve(LShopifyOrder);
+// async function mountJSONShopifyOrder(Pjson, situacao) {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             const LShopifyOrder = {
+//                 "order": {
+//                     "line_items": Pjson.produtos,
+//                     "customer": {
+//                         "first_name": Pjson.dadosComprador.nome_completo,
+//                         "last_name": "",
+//                         "email": Pjson.dadosComprador.email
+//                     },
+//                     "billing_address": {
+//                         "first_name": Pjson.dadosComprador.nome_completo,
+//                         "last_name": "",
+//                         "address1": Pjson.dadosComprador.endereco,
+//                         "phone": Pjson.dadosComprador.telefone,
+//                         "city": Pjson.dadosComprador.cidade,
+//                         "province": Pjson.dadosComprador.estado,
+//                         "country": "Brasil",
+//                         "zip": Pjson.dadosComprador.cep
+//                     },
+//                     "shipping_address": {
+//                         "first_name": Pjson.dadosComprador.nome_completo,
+//                         "last_name": "",
+//                         "address1": Pjson.dadosComprador.endereco,
+//                         "phone": Pjson.dadosComprador.telefone,
+//                         "city": Pjson.dadosComprador.cidade,
+//                         "province": Pjson.dadosComprador.estado,
+//                         "country": "Brasil",
+//                         "zip": Pjson.dadosComprador.cep
+//                     },
+//                     "email": Pjson.dadosComprador.email,
+//                     "transactions": [
+//                         {
+//                             "kind": "authorization",
+//                             "status": "success",
+//                             "amount": parseFloat(Pjson.paymentData.amount.value)
+//                         }
+//                     ],
+//                     "financial_status": situacao
+//                 }
+//             };
+//             resolve(LShopifyOrder);
 
-        } catch (error) {
-            reject(error);
+//         } catch (error) {
+//             reject(error);
 
-        }
-    });
-}
+//         }
+//     });
+// }

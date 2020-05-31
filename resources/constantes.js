@@ -5,6 +5,7 @@ module.exports = Object.freeze({
     GATEWAY_MP: 1,
     GATEWAY_PS: 2,
     API_MP: 'https://api.mercadopago.com/v1/payments/{id}?access_token={token}',
+    API_PS: 'https://sandbox.api.pagseguro.com/{}',
     
 
     SAND_BOX_MP_PUBLICK_KEY: 'TEST-5e8249a3-5691-4ae9-bf45-8705c09b5c0e',
