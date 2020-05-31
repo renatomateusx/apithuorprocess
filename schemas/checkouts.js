@@ -58,6 +58,20 @@ module.exports.GetCheckoutAtivoInternal = (req, res, next) => {
 }
 
 
+module.exports.CheckStatusBoleto = (idTransaction, LDadosCheckout) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const URL = constantes.API_MP.replace("{id}", idTransaction).replace("{token}", LDadosCheckout.token_acesso);
+            const LConsultaPagamento = await utilis.makeAPICallExternal(URL);
+            resolve(LConsultaPagamento);
+        }
+        catch (error) {
+            console.log("Erro ao Verificar Status Boleto", error);
+            reject(error);
+        }
+    });
+}
+
 module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
@@ -84,7 +98,7 @@ module.exports.DoPay = (req, res, next) => {
                             shopify: responseShopify,
                             woo: 'notYet',
                         }
-                        res.status(200).send(plataformasResponse);
+                        res.status(200).send(responseShopify);
                     }
                     else {
                         console.log("Response", data.response);
@@ -149,7 +163,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                 LJSON.dadosComprador.id_transacao = data.response.id;
                 //console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
-                    var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, data, paymentData, data.response.status);                    
+                    var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, data, paymentData, data.response.status);
                     // var plataformasResponse = {
                     //     shopify: responseShopify,
                     //     woo: 'notYet'

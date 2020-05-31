@@ -23,6 +23,9 @@ var j = schedule.scheduleJob('*/15 * * * * *', async function () {
         if (obj.id == constantes.GATEWAY_MP) {
             processaConsultaMercadoPago();
         }
+        if(obj.id == constantes.GATEWAY_PS){
+            processaConsultaPagSeguro();
+        }
     });
     console.log('Serviço de Consulta Pagamentos Rodando!', moment().format('HH:mm:ss'));
 });
@@ -40,12 +43,12 @@ async function processaConsultaMercadoPago() {
             if (LDadosGw.status == "pending") {
                 idTransaction = LDadosGw.id;
 
-                const URL = constantes.API_MP.replace("{id}", idTransaction).replace("{token}", LDadosCheckout.token_acesso);
-                const LConsultaPagamento = await utilis.makeAPICallExternal(URL);
+                const LConsultaPagamento = await checkouts.CheckStatusBoleto(idTransaction, LDadosCheckout);
+                //console.log(LConsultaPagamento);
                 var LStatus = LConsultaPagamento.status;
                 if (LStatus == "approved") {
                     ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
-                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, true, LStatus, constantes.GATEWAY_MP, objTransaction.id);
+                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_MP, objTransaction.id);
                 }
 
             }
@@ -58,5 +61,36 @@ async function processaConsultaMercadoPago() {
     }
 }
 
+async function processaConsultaPagSeguro() {
+    try {
+        const LTransacoes = await transacoes.GetTransacoesPendentesByGatewayINTERNAL(constantes.GATEWAY_PS);
+        LTransacoes.forEach(async (objTransaction, i) => {
+
+            const LFrontEnd = objTransaction.json_front_end_user_data;
+            const LDadosCheckout = LFrontEnd.dadosCheckout;
+            const LDadosGw = objTransaction.json_gw_response;
+            const LDadosOrderResponse = objTransaction.json_shopify_response;
+            //console.log(LDadosOrderResponse);
+            if (LDadosGw.status == "pending") {
+                idTransaction = LDadosGw.id;
+
+                //const URL = constantes.API_MP.replace("{id}", idTransaction).replace("{token}", LDadosCheckout.token_acesso);
+                const LConsultaPagamento = await checkouts.CheckStatusBoleto(idTransaction, LDadosCheckout);
+                //console.log(LConsultaPagamento);
+                var LStatus = LConsultaPagamento.status;
+                if (LStatus == "approved") {
+                    ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
+                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_MP, objTransaction.id);
+                }
+
+            }
+            //console.log(LTransacoes);
+        })
+
+    }
+    catch (error) {
+        console.log("Erro ao tentar processar Pagamentos Mercado Pago", error);
+    }
+}
 
 module.exports = router;

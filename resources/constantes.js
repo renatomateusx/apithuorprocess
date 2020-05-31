@@ -3,6 +3,7 @@ module.exports = Object.freeze({
 
 
     GATEWAY_MP: 1,
+    GATEWAY_PS: 2,
     API_MP: 'https://api.mercadopago.com/v1/payments/{id}?access_token={token}',
     
 
@@ -115,7 +116,8 @@ module.exports = Object.freeze({
     CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,
 
 
-
+    /* TESTES */
+    CONSTANTE_TESTES: true,
 
 
 
