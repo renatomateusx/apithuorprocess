@@ -27,6 +27,7 @@ module.exports.GetCheckoutAtivo = (req, res, next) => {
 module.exports.GetCheckoutByID = (req, res, next) => {
     try {
         const { id_usuario, gateway } = req.body;
+        console.log(id_usuario, gateway);
         pool.query('SELECT * FROM checkouts where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
             if (error) {
                 throw error
