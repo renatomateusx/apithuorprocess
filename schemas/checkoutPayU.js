@@ -42,13 +42,13 @@ module.exports.DoPay = (req, res, next) => {
         //LParams = LParams + "&token=" + token;
         const Lurl = constantes.API_PAYU;
         LJSON.paymentData.test = constantes.CONSTANTE_TESTES;
-        //console.log(JSON.stringify(LJSON.paymentData));
-
-        // LJSON.paymentData.transaction.buyer.fullName = "APPROVED";  
+        //console.log(JSON.stringify(LJSON));
+        
+        LJSON.paymentData.transaction.creditCard.name = "APPROVED";  
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LJSON.paymentData, undefined, undefined, "POST")
             .then(async (resRet) => {
                 var json = parser.xml2json(resRet.body);
-                console.log("LID", json.paymentResponse);
+                //console.log("LID", JSON.stringify(json.paymentResponse));
                 if (json.paymentResponse.error != null) {
                     res.status(422).send(json.paymentResponse);
                     res.end();
@@ -86,7 +86,7 @@ module.exports.DoPay = (req, res, next) => {
                     LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
                     LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
                     LJSON.dadosComprador.id_transacao_payu = json.paymentResponse.transactionResponse.transactionId;
-                    LJSON.dadosComprador.valorParcela = (parseFloat(data.response.transaction.order.additionalValues.TX_VALUE.value) / data.response.transaction.extraParameters.INSTALLMENTS_NUMBER);
+                    LJSON.dadosComprador.valorParcela = (parseFloat(LJSON.dadosComprador.valor) / parseInt(LJSON.dadosComprador.parcela));
                     var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, json.paymentResponse, LJSON.paymentData, 'paid', constantes.GATEWAY_PayU);
                     var plataformasResponse = {
                         shopify: responseShopify,
