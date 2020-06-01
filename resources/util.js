@@ -108,6 +108,29 @@ module.exports.makeAPICallExternalHeaders = function (url, path, headerAdditiona
     );
   });
 };
+
+module.exports.makeAPICallExternalHeadersCustom = function (url, headerAdditional, valueHeaderAditional) {
+  return new Promise((resolve, reject) => {
+    var Lheader = {
+      'Content-Type': 'application/json'
+    };
+    headerAdditional.forEach((obj, i) => {
+      Lheader[obj] = valueHeaderAditional[i];
+    })
+    request(
+      {
+        headers: Lheader,
+        uri: url,
+        method: 'GET',
+      },
+      function (err, res, body) {
+        if (err) reject(err);
+        resolve(body);
+      }
+    );
+  });
+};
+
 module.exports.makeAPICallExternalParamsJSONHeadersArray = function (url, path, body, headerAdditional, valueHeaderAditional, type) {
   return new Promise((resolve, reject) => {
     //console.log("Body", body);
@@ -228,11 +251,11 @@ module.exports.getCrypto = (str, strr) => {
   })
 
 }
-module.exports.getDecrypto = (token) => {  
-    try {
-      return Buffer.from(token, 'base64').toString();
-    }
-    catch (error) {
-      console.log("Erro ao getDecrypto", error);
-    }
+module.exports.getDecrypto = (token) => {
+  try {
+    return Buffer.from(token, 'base64').toString();
+  }
+  catch (error) {
+    console.log("Erro ao getDecrypto", error);
+  }
 }

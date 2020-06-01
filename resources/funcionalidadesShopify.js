@@ -5,16 +5,14 @@ const transacoes = require('../schemas/transacao');
 const clientes = require('../schemas/clientes');
 
 
-module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status) => {
+module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) => {
     return new Promise(async (resolve, reject) => {
         try {
             //console.log("Ldata", LJSON.dadosLoja);
             //ADICIONADO PARA PAREPARAR A PLATAFORMA PARA RECEBER OUTRAS INTEGRAÇÕES. WOOCOMMERCE, POR EXEMPLO
             const LHaveShopifyProducts = LJSON.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
             if (LHaveShopifyProducts) {
-                LJSON.dadosComprador.data = data.response.date_created;
-                LJSON.dadosComprador.id_transacao = data.response.id;
-                LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
+                
                 const LShopifyOrder = await module.exports.mountJSONShopifyOrder(LJSON, status);
                 const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                 const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -23,12 +21,13 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status) => {
                 utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                     .then(async retornoShopify => {
                         const RetornoShopifyJSON = retornoShopify.body;
-                        transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data.response, LShopifyOrder, retornoShopify.body, status.toUpperCase(), 1)
+                        transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP)
                             .then(async (retornoInsereTransacao) => {
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                 const response = {
-                                    dataGateway: data.response,
-                                    dataStore: RetornoShopifyJSON
+                                    dataGateway: data,
+                                    dataStore: RetornoShopifyJSON,
+                                    dadosComprador: LJSON
                                 }
                                 resolve(response);
                             })
@@ -86,7 +85,7 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                         {
                             "kind": "authorization",
                             "status": "success",
-                            "amount": parseFloat(Pjson.paymentData.transaction_amount)
+                            "amount": parseFloat(Pjson.dadosComprador.valor)
                         }
                     ],
                     "financial_status": situacao
@@ -185,10 +184,10 @@ module.exports.refoundShopify = (JSON, LDadosLoja, ItemsRefound, ValorRefund, GW
             utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
                 .then(async retornoShopify => {
                     const RetornoShopifyJSON = retornoShopify.body;
-                    transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA')
+                    transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, GW, 'REEMBOLSADA')
                         .then((retornoInsereTransacao) => {
                             const response = {
-                                dataGateway: data.response,
+                                dataGateway: GW,
                                 dataStore: RetornoShopifyJSON
                             }
                             resolve(response);

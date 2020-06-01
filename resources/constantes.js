@@ -4,9 +4,11 @@ module.exports = Object.freeze({
 
     GATEWAY_MP: 1,
     GATEWAY_PS: 2,
+    GATEWAY_PayU: 3,
     API_MP: 'https://api.mercadopago.com/v1/payments/{id}?access_token={token}',
     API_PS: 'https://sandbox.api.pagseguro.com/{}',
-    
+    API_PAYU: 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
+    API_PAYU_REPORT: 'https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi',
 
     SAND_BOX_MP_PUBLICK_KEY: 'TEST-5e8249a3-5691-4ae9-bf45-8705c09b5c0e',
     SAND_BOX_MP_ACCESS_TOKEN: 'TEST-4338451460338304-120717-21b6daffeb2a7bd8ba4a59afb113f0fe-128404654',
