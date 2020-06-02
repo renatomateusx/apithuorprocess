@@ -5,7 +5,6 @@ var utilis = require('../resources/util');
 router.post('/ViaCEP', function(req, res, next) {
   try {
     let LCep = req.body.cep;
-    var db = require('../schemas/visitas');
     let URL = `https://viacep.com.br/ws/${LCep}/json/`;
     utilis
       .makeAPICallExternal(URL)

@@ -3,7 +3,7 @@ var utils = require('../resources/util');
 var constantes = require('../resources/constantes');
 const format = require('string-format');
 const DeferredPromise = require('@bitbar/deferred-promise');
-const componenteShopify = require('../routes/componentes/importarProdutosShopify');
+const componenteShopify = require('../routes/componentes/Shopify/integracaoShopify');
 const WebHookShopify = require('../webhooks/webhookshopify');
 const produtos = require('../schemas/produtos');
 const transacoes = require('../schemas/transacao');
@@ -44,8 +44,9 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
             segredo_compartilhado,
             quais_pedidos_enviar,
             id_usuario,
-            plataforma } = req.body;
-        pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9',
+            plataforma,
+            email_loja } = req.body;
+        pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma, email_loja) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11,$12) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, id_usuario=$10, plataforma=$11, email_loja=$12',
             [status,
                 auto_sincroniza,
                 pula_carrinho,
@@ -56,7 +57,8 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
                 segredo_compartilhado,
                 quais_pedidos_enviar,
                 id_usuario,
-                plataforma],
+                plataforma,
+                email_loja],
             (error, results) => {
                 if (error) {
                     throw error
@@ -82,8 +84,9 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
             chave_api_key,
             senha,
             segredo_compartilhado,
-            quais_pedidos_enviar } = req.body;
-        pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9) WHERE id=$10 and id_usuario = $11',
+            quais_pedidos_enviar,
+            email_loja } = req.body;
+        pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, email_loja=$12) WHERE id=$10 and id_usuario = $11',
             [status,
                 auto_sincroniza,
                 pula_carrinho,
@@ -94,7 +97,8 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
                 segredo_compartilhado,
                 quais_pedidos_enviar,
                 id,
-                id_usuario],
+                id_usuario,
+                email_loja],
             (error, results) => {
                 if (error) {
                     throw error
@@ -203,6 +207,35 @@ module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
     }
     //});
 }
+
+
+module.exports.GetLojaByUsuario = (id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {           
+
+            pool.query('SELECT * FROM integracoes_plataformas WHERE id_usuario=$1', [id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                if (results.rows) {
+
+                    results.rows.forEach((loja, i) => {
+                        //console.log("Shop", loja);
+                        resolve(loja);
+                    })
+                }else{
+                    resolve(0);
+                }
+            });
+        }
+        catch (error) {
+            console.log("Erro cart shopify", error);
+
+            reject(error);
+        }
+    });
+}
+
 function getDadosProduto(id_produto, variante_cart) {
     return new Promise((resolve, reject) => {
         try {
@@ -568,7 +601,7 @@ module.exports.WebHookShopify = async (req, res, next) => {
         var HVersion = req.headers['x-shopify-api-version'];
         //////console.log(HTopic, HShop);
         getDadosLoja(HShop)
-            .then((LDadosLoja) => {               
+            .then((LDadosLoja) => {
                 const LBody = req.body;
                 if (HTopic == 'products/create') {
                     req.body.id_produto_json = LBody.id;
@@ -584,25 +617,25 @@ module.exports.WebHookShopify = async (req, res, next) => {
                     req.body.titulo_produto = LBody.title;
                     req.body.id_usuario = LDadosLoja.id_usuario;
                     produtos.UpdateProduto(req, res, next);
-                   
+
                 }
-                if (HTopic == 'orders/create') {
-                    console.log("Orders Create");                
-                    LBody.orders.forEach((obj,i)=>{
+                if (HTopic == 'orders/create' || HTopic == 'orders/update') {
+                    console.log("Orders", HTopic);
+                    LBody.orders.forEach((obj, i) => {
                         req.body.email = obj.email;
                         req.body.telefone = obj.phone;
-                        obj.fulfillments.forEach((objF, i)=>{
+                        obj.fulfillments.forEach((objF, i) => {
                             req.body.order_id = obj.id;
                             req.body.fulfillment_id = objF.id;
                             req.body.json_shopify_order = objF;
                             req.body.data = objF.created_at;
-                            req.body.updated = objF.updated_at;                            
+                            req.body.updated = objF.updated_at;
                             req.body.status = 0;
                             //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
                             //////fulfillments.SaveFulFillment(req, res, next);
                             transacoes.UpdateTransacaoShopifyOrder(req, res, next);
                         })
-                        
+
                     })
                 }
                 res.status(200).send('Ok!');

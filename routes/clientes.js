@@ -9,6 +9,7 @@ router.post('/SaveClientes', clientes.SaveClientes);
 router.post('/DeleteClienteByID', clientes.DeleteClienteByID);
 router.post('/GetClienteByID', clientes.GetClienteByID);
 router.post('/SaveLead', clientes.SaveLead);
+router.post('/GetDadosCompradorLead', clientes.GetDadosCompradorLead);
 
 
 

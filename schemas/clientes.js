@@ -5,7 +5,7 @@ const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
-
+var moment = require("moment");
 module.exports.GetClientes = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -24,8 +24,8 @@ module.exports.GetClientes = (req, res, next) => {
 
 module.exports.SaveClientes = (req, res, next) => {
     try {
-        const { id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, nome, status, tipo_checkout,quantidade, preco, assunto_email, mensagem_sms } = req.body;
-        pool.query('INSERT INTO up_sell (id_usuario, id_produto_from, id_produto_to, status, nome, tipo_checkout, quantidade, preco, assunto_email, mensagem_sms) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id_usuario, id_produto_from) DO UPDATE SET id_usuario=$1, id_produto_from=$2, id_produto_to=$3, status=$4, nome=$5, tipo_checkout=$6, quantidade=$7, preco=$8, assunto_email=$9, mensagem_sms=$10', [id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, status, nome, tipo_checkout,quantidade, preco, assunto_email, mensagem_sms], (error, results) => {
+        const { id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, nome, status, tipo_checkout, quantidade, preco, assunto_email, mensagem_sms } = req.body;
+        pool.query('INSERT INTO up_sell (id_usuario, id_produto_from, id_produto_to, status, nome, tipo_checkout, quantidade, preco, assunto_email, mensagem_sms) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id_usuario, id_produto_from) DO UPDATE SET id_usuario=$1, id_produto_from=$2, id_produto_to=$3, status=$4, nome=$5, tipo_checkout=$6, quantidade=$7, preco=$8, assunto_email=$9, mensagem_sms=$10', [id_usuario, id_produto_selecionado_um, id_produto_selecionado_dois, status, nome, tipo_checkout, quantidade, preco, assunto_email, mensagem_sms], (error, results) => {
             if (error) {
                 throw error
             }
@@ -71,16 +71,88 @@ module.exports.GetClienteByID = (req, res, next) => {
 
 module.exports.SaveLead = (req, res, next) => {
     try {
-        const { nome, email, id_usuario, telefone } = req.body;
-        pool.query('insert into lead (email, nome, id_usuario, telefone) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4', [email, nome, id_usuario, telefone], (error, results) => {
+        const { nome, email, id_usuario, telefone, lead } = req.body;
+        const Lead = JSON.parse(Buffer.from(lead, 'base64').toString());
+        const LData = moment().format();
+        const LCampanhaEnviar = 1;
+        pool.query('insert into lead (email, nome, id_usuario, telefone, lead, data_produtos_carrinho, campanha_enviar) VALUES ($1, $2, $3, $4, $5,$6,$7) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4, lead=$5, data_produtos_carrinho=$6, campanha_enviar=$7', [email, nome, id_usuario, telefone, Lead, LData, LCampanhaEnviar], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows[0]);
+            res.status(200).send(results.rows);
             res.end();
         })
     } catch (error) {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.UpdateLead = (email, produtos_comprados) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const data = moment().format();
+            pool.query('UPDATE lead set ultimos_produtos_comprados = $1, data_ultima_compra = $2 where email = $3', [produtos_comprados, data, email], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+module.exports.UpdateLeadCampanha = (PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const data = moment().format();
+            pool.query('UPDATE lead set data_ultimo_email_enviado = $1, campanha_email_enviada = $2, sequencia_enviada = $3 where id = $4', [PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+module.exports.GetDadosCompradorLead = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const { email } = req.body;
+            pool.query('SELECT * FROM lead WHERE email = $1', [email], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows[0]);
+            res.end();
+            })
+        } catch (error) {
+            res.json(error);
+            res.end();
+        }
+    })
+
+}
+
+module.exports.GetLeadCronJob = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM lead WHERE campanha_enviar = 1', (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
 }

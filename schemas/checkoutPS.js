@@ -5,6 +5,8 @@ const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
+const clientes = require('../schemas/clientes');
+const funcionalidadesShopify = require('../resources/funcionalidadesShopify');
 
 module.exports.StartSessionPS = (req, res, next) => {
 
@@ -16,6 +18,7 @@ module.exports.StartSessionPS = (req, res, next) => {
         console.log(Lurl);
         utilis.makeAPICallExternalParamsPS(Lurl)
             .then(async (resRet) => {
+                console.log(resRet);
                 const LRetJson = xmlParser.xml2json(resRet, { compact: true });
                 const LIDSession = JSON.parse(LRetJson).session.id._text;
                 console.log("LID", LIDSession);
@@ -59,13 +62,14 @@ module.exports.PublicKey = (req, res, next) => {
         }
         var LParams = "email=" + type;
         LParams = LParams + "&token=" + token;
-        const Lurl = "https://sandbox.api.pagseguro.com/public-keys";
+        const Lurl = constantes.API_PS.replace("{}", 'public-keys');
         console.log(LParams);
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, "Authorization", "Bearer " + token, "POST")
             .then(async (resRet) => {
+
                 //const LRetJson = xmlParser.xml2json(resRet, {compact: true});
                 //const LIDSession = JSON.parse(LRetJson).session.id._text;
-                console.log("LID", JSON.parse(resRet.body).public_key);
+                //console.log("LID", JSON.parse(resRet.body).public_key);
                 res.status(200).send(JSON.parse(resRet.body).public_key);
                 res.end();
             })
@@ -94,7 +98,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
 
         //var LParams = "email=" + email;
         //LParams = LParams + "&token=" + token;
-        const Lurl = "https://sandbox.api.pagseguro.com/charges";
+        const Lurl = constantes.API_PS.replace("{}", 'charges');
         //console.log(Lurl);
         var LHeaderKey = [];
         var LHeaderValue = [];
@@ -105,85 +109,55 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         LHeaderKey.push('X-idempotency-key');
         LHeaderValue.push('');
         LJSON.paymentData.amount.value = parseFloat(LJSON.paymentData.amount.value);
-        //console.log(LJSON.paymentData);
+        ///console.log(LJSON.paymentData);
         utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LJSON.paymentData, LHeaderKey, LHeaderValue, "POST")
             .then(async (resRet) => {
-                //console.log("LID", resRet.body);
+                const Body = JSON.parse(resRet.body);
+                console.log("LID", Body);
                 if (resRet.body.indexOf('error_messages') > -1) {
-                    res.status(422).send(resRet.body);
+                    res.status(422).send(Body);
                     res.end();
                     return;
                 }
-                if (JSON.parse(resRet.body).status.toUpperCase() == 'PAID') {
-                    LJSON.dadosComprador.data = data.response.created_at;
-                    LJSON.dadosComprador.id_transacao = data.response.id;
-                    LJSON.dadosComprador.valorParcela = (parseFloat(data.response.amount.summary.paid) / data.response.payment_method.installments);
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'paid'); // MUDAR O PENDING PARA PAID
-                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
-                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
-                    var headerAditional = "X-Shopify-Access-Token";
-                    var valueHeaderAditional = LJSON.dadosLoja.senha;
-                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
-                        .then(async retornoShopify => {
-                            const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'aprovada', 2)
-                                .then((retornoInsereTransacao) => {
-                                    const response = {
-                                        dataGateway: resRet.body,
-                                        dataStore: RetornoShopifyJSON
-                                    }
-                                    res.status(200).send(response);
-                                })
-                                .catch((error) => {
-                                    console.log("Erro ao inserir transação no banco", error);
-                                })
-                        })
-                        .catch(error => {
-                            console.log("Erro ao enviar informação do checkout para a shopify", error);
-                        })
+
+                if (Body.status.toUpperCase() == 'PAID') {
+                    LJSON.dadosComprador.data = Body.created_at;
+                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid);
+                    LJSON.dadosComprador.id_transacao = Body.id;
+                    LJSON.dadosComprador.valorParcela = (parseFloat(Body.amount.summary.paid) / Body.payment_method.installments);
+                    var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, Body, LJSON.paymentData, 'paid', constantes.GATEWAY_PS);
+                    var plataformasResponse = {
+                        shopify: responseShopify,
+                        woo: 'notYet',
+                    }
+                    res.status(200).send(responseShopify);
                 }
-                else if (JSON.parse(resRet.body).status.toUpperCase() == 'WAITING') {
-                    LJSON.dadosComprador.barcode = data.response.payment_method.boleto.formatted_barcode;
-                    LJSON.dadosComprador.urlBoleto = data.response.links.find(x => x.media == 'application/pdf').href;
-                    LJSON.dadosComprador.vencimentoBoleto = data.response.payment_method.boleto.due_date;
-                    LJSON.dadosComprador.data = data.response.created_at;
-                    LJSON.dadosComprador.id_transacao = data.response.id;
-                    const LShopifyOrder = await mountJSONShopifyOrder(LJSON, 'pending');
-                    const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
-                    const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
-                    var headerAditional = "X-Shopify-Access-Token";
-                    var valueHeaderAditional = LJSON.dadosLoja.senha;
-                    //console.log(ordersShopify);
-                    //console.log(urlShopify);
-                    utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
-                        .then(async retornoShopify => {
-                            const RetornoShopifyJSON = retornoShopify.body;
-                            insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, LJSON.paymentData, resRet.body, LShopifyOrder, retornoShopify.body, 'pendente', 2)
-                                .then((retornoInsereTransacao) => {
-                                    const response = {
-                                        dataGateway: resRet.body,
-                                        dataStore: RetornoShopifyJSON
-                                    }
-                                    res.status(200).send(response);
-                                })
-                                .catch((error) => {
-                                    console.log("Erro ao inserir transação no banco", error);
-                                })
-                        })
-                        .catch(error => {
-                            console.log("Erro ao enviar informação do checkout para a shopify", error);
-                        })
+                else if (Body.status.toUpperCase() == 'WAITING') {
+                    LJSON.dadosComprador.barcode = Body.payment_method.boleto.formatted_barcode;
+                    LJSON.dadosComprador.urlBoleto = Body.links.find(x => x.media == 'application/pdf').href;
+                    LJSON.dadosComprador.vencimentoBoleto = Body.payment_method.boleto.due_date;
+                    LJSON.dadosComprador.data = Body.created_at;
+                    LJSON.dadosComprador.id_transacao = Body.id;
+
+                    var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, Body, LJSON.paymentData, 'pending', constantes.GATEWAY_PS);
+                    var plataformasResponse = {
+                        shopify: responseShopify,
+                        woo: 'notYet',
+                    }
+                    //console.log(responseShopify);
+                    res.status(200).send(responseShopify);
+
                 }
                 else {
-                    console.log("Response", resRet.body);
-                    res.status(200).send(resRet.body);
+                    console.log("Response", Body);
+                    res.status(422).send("Pagamento não realizado, tente novamente");
                 }
                 //res.status(200).send(JSON.parse(resRet.body).public_key);
                 //res.end();
             })
             .catch((error) => {
                 console.log("Error", error);
-                res.status(422).send(error);
+                res.status(422).send("Pagamento não realizado, tente novamente");
                 res.end();
             })
     } catch (error) {
@@ -193,142 +167,144 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
 
 }
 
-module.exports.ReembolsarPedidoPSByID = (req, res, next) => {
+module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
     try {
         const { shop, id_usuario, id, lvalue } = req.body;
-        pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2 and id=$3', [shop, id_usuario, id], async (error, results) => {
-            if (error) {
-                throw error
-            }
-            const LRetornoPedido = results.rows[0];
-            const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
-            const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
-            if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
-                const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-                const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
-                const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-                const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
+        const LRetornoPedido = await transacoes.GetTransacoesByID_IDUsuario(shop, id_usuario, id);
 
-                var LRefund = {
-                    "amount": {
-                        "value": ValorRefund
-                    }
-                };
-                const Lurl = "https://sandbox.api.pagseguro.com/" + LResponseGW.id + "/cancel";
-                //console.log(Lurl);
-                var LHeaderKey = [];
-                var LHeaderValue = [];
-                LHeaderKey.push('Authorization');
-                LHeaderValue.push('Bearer ' + LJSON.token);
-                LHeaderKey.push('X-api-version');
-                LHeaderValue.push('1.0');
-                LHeaderKey.push('X-idempotency-key');
-                LHeaderValue.push('');
+        const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
+        const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
+        if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
+            const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
+            const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+            const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
+            const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
 
-                utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
-                    .then(async (resRet) => {
-                        var LRefoundShopify = {
-                            "refund": {
-                                "currency": "BRL",
-                                "notify": true,
-                                "note": "Cancelada pelo Vendedor",
-                                "shipping": {
-                                    "full_refund": true
-                                },
-                                "refund_line_items": ItemsRefound,
-                                "transactions": [
-                                    {
-                                        "amount": ValorRefund,
-                                        "kind": "refund",
-                                        "gateway": "PS"
-                                    }
-                                ]
-                            }
-                        }
-                        const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.REFOUND_ORDER);
-                        const urlShopify = format("https://{}:{}@{}", LDadosLoja.chave_api_key, LDadosLoja.senha, LDadosLoja.url_loja);
-                        var headerAditional = "X-Shopify-Access-Token";
-                        var valueHeaderAditional = LDadosLoja.senha;
-                        utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
-                            .then(async retornoShopify => {
-                                const RetornoShopifyJSON = retornoShopify.body;
-                                transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
-                                    .then((retornoInsereTransacao) => {
-                                        const response = {
-                                            dataGateway: data.response,
-                                            dataStore: RetornoShopifyJSON
-                                        }
-                                        res.status(200).send(response);
-                                    })
-                                    .catch((error) => {
-                                        console.log("Erro ao inserir transação no banco", error);
-                                    })
-                            })
-                            .catch(error => {
-                                console.log("Erro ao enviar informação do checkout para a shopify", error);
-                            })
+            var LRefund = {
+                "amount": {
+                    "value": ValorRefund
+                }
+            };
+            const Lurl = constantes.API_PS.replace("{}", LResponseGW.id + "/cancel");;
+            //console.log(Lurl);
+            var LHeaderKey = [];
+            var LHeaderValue = [];
+            LHeaderKey.push('Authorization');
+            LHeaderValue.push('Bearer ' + LJSON.token);
+            LHeaderKey.push('X-api-version');
+            LHeaderValue.push('1.0');
+            LHeaderKey.push('X-idempotency-key');
+            LHeaderValue.push('');
 
-                        //const LUpdateTransacao = await this.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA');
+            utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
+                .then(async (resRet) => {
+                    const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2)
+                    res.status(200).send(LResponse);
+                    // var LRefoundShopify = {
+                    //     "refund": {
+                    //         "currency": "BRL",
+                    //         "notify": true,
+                    //         "note": "Cancelada pelo Vendedor",
+                    //         "shipping": {
+                    //             "full_refund": true
+                    //         },
+                    //         "refund_line_items": ItemsRefound,
+                    //         "transactions": [
+                    //             {
+                    //                 "amount": ValorRefund,
+                    //                 "kind": "refund",
+                    //                 "gateway": "PS"
+                    //             }
+                    //         ]
+                    //     }
+                    // }
+                    // const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.REFOUND_ORDER);
+                    // const urlShopify = format("https://{}:{}@{}", LDadosLoja.chave_api_key, LDadosLoja.senha, LDadosLoja.url_loja);
+                    // var headerAditional = "X-Shopify-Access-Token";
+                    // var valueHeaderAditional = LDadosLoja.senha;
+                    // utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
+                    //     .then(async retornoShopify => {
+                    //         const RetornoShopifyJSON = retornoShopify.body;
+                    //         transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA')
+                    //             .then((retornoInsereTransacao) => {
+                    //                 const response = {
+                    //                     dataGateway: data.response,
+                    //                     dataStore: RetornoShopifyJSON
+                    //                 }
+                    //                 res.status(200).send(response);
+                    //             })
+                    //             .catch((error) => {
+                    //                 console.log("Erro ao inserir transação no banco", error);
+                    //             })
+                    //     })
+                    //     .catch(error => {
+                    //         console.log("Erro ao enviar informação do checkout para a shopify", error);
+                    //     })
 
-                    })
-                    .catch(error => {
-                        console.log("Erro ao efetuar o Refound", error);
-                    })
-            }
-        })
+                    //const LUpdateTransacao = await this.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA');
+
+                })
+                .catch(error => {
+                    console.log("Erro ao efetuar o Refound", error);
+                })
+        }
+
     } catch (error) {
         res.json(error);
         res.end();
     }
 }
 
-async function mountJSONShopifyOrder(Pjson, situacao) {
-    return new Promise(async (resolve, reject) => {
+module.exports.PublicKeyInternal = (type, token) => {
+    return new Promise((resolve, reject) => {
         try {
-            const LShopifyOrder = {
-                "order": {
-                    "line_items": Pjson.produtos,
-                    "customer": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "email": Pjson.dadosComprador.email
-                    },
-                    "billing_address": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
-                        "city": Pjson.dadosComprador.cidade,
-                        "province": Pjson.dadosComprador.estado,
-                        "country": "Brasil",
-                        "zip": Pjson.dadosComprador.cep
-                    },
-                    "shipping_address": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
-                        "city": Pjson.dadosComprador.cidade,
-                        "province": Pjson.dadosComprador.estado,
-                        "country": "Brasil",
-                        "zip": Pjson.dadosComprador.cep
-                    },
-                    "email": Pjson.dadosComprador.email,
-                    "transactions": [
-                        {
-                            "kind": "authorization",
-                            "status": "success",
-                            "amount": parseFloat(Pjson.paymentData.amount.value)
-                        }
-                    ],
-                    "financial_status": situacao
-                }
-            };
-            resolve(LShopifyOrder);
+            const { type, token } = req.body;
+            var LBody = {
+                "type": type
+            }
+            var LParams = "email=" + type;
+            LParams = LParams + "&token=" + token;
+            const Lurl = constantes.API_PS.replace("{}", 'public-keys');
+            console.log(LParams);
+            utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, "Authorization", "Bearer " + token, "POST")
+                .then(async (resRet) => {
 
+                    //const LRetJson = xmlParser.xml2json(resRet, {compact: true});
+                    //const LIDSession = JSON.parse(LRetJson).session.id._text;
+                    //console.log("LID", JSON.parse(resRet.body).public_key);
+                    resolve(JSON.parse(resRet.body).public_key);
+                })
+                .catch((error) => {
+                    console.log("Error", error);
+                    reject(error);
+                })
         } catch (error) {
             reject(error);
+        }
+    })
 
+}
+
+module.exports.CheckStatusBoleto = (idTransaction, LDadosCheckout) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            var LHeaderKey = [];
+            var LHeaderValue = [];
+            LHeaderKey.push('Authorization');
+            LHeaderValue.push('Bearer ' + LDadosCheckout.token_acesso);
+            LHeaderKey.push('X-api-version');
+            LHeaderValue.push('1.0');
+            LHeaderKey.push('X-idempotency-key');
+            LHeaderValue.push('');
+
+            const URL = constantes.API_PS.replace("{}", "charges/" + idTransaction);
+            //console.log(URL);
+            const LConsultaPagamento = await utilis.makeAPICallExternalHeadersCustom(URL, LHeaderKey, LHeaderValue);
+            resolve(LConsultaPagamento);
+        }
+        catch (error) {
+            console.log("Erro ao Verificar Status Boleto", error);
+            reject(error);
         }
     });
 }
