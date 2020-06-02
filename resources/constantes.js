@@ -39,9 +39,11 @@ module.exports = Object.freeze({
     URL_TRACK_CODE: 'http://localhost:8081/track/@',
 
     URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
+    FROM_MAIL:'{nome_loja} <{email_loja}>',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
     STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',
     STRING_SUBJECT_EMAIL_ESQUECEU_SENHA: 'Esqueceu a senha? Segue link para redefinição.',
+    STRING_SUBJECT_EMAIL_BOLETO: 'Seu pedido #{pedido} vence {data_vencimento}.',
     STRING_SUBJECT_EMAIL_ALTEROU_SENHA: 'Alteração de Senha no Thuor.com',
     STRING_STATUS_EMAIL: '{STATUS} {LOCAL} {LOCAL_CIDADE} {DATA}',
     attachmentsAux: [{
@@ -102,7 +104,15 @@ module.exports = Object.freeze({
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'illo_welcome_1' //same cid value as in the html img src
     }],
-
+    attachmentsEmailBoleto: [{
+        filename: 'Img7_2x.jpg',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Img7_2x' //same cid value as in the html img src
+    }, {
+        filename: 'logoThuorBlue.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'logoThuorBlue' //same cid value as in the html img src
+    }],
 
 
     CC_REJECTED_BAD_FILLED_CARD_NUMBER: 'Revise o número do cartão.',

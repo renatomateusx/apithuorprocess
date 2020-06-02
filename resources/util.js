@@ -259,3 +259,5 @@ module.exports.getDecrypto = (token) => {
     console.log("Erro ao getDecrypto", error);
   }
 }
+
+
