@@ -25,6 +25,7 @@ module.exports.GetApps = (req, res, next) => {
 module.exports.GetStatusApp = (req, res, next) => {
     try {
         const { id_usuario, app } = req.body;
+        console.log(id_usuario, app);
         pool.query('SELECT * FROM apps_integracao where id_usuario = $1 and app = $2',[id_usuario, app], (error, results) => {
             if (error) {
                 throw error
