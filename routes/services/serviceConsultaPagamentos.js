@@ -25,12 +25,12 @@ var j = schedule.scheduleJob('* * */24 * * *', async function () {
         if (obj.id == constantes.GATEWAY_MP) {
             processaConsultaMercadoPago();
         }
-        if(obj.id == constantes.GATEWAY_PS){
+        if (obj.id == constantes.GATEWAY_PS) {
             processaConsultaPagSeguro();
         }
         if (obj.id == constantes.GATEWAY_PayU) {
             processaConsultaPayU();
-        }  
+        }
     });
     console.log('Serviço de Consulta Pagamentos Rodando!', moment().format('HH:mm:ss'));
 });
@@ -58,18 +58,22 @@ async function processaConsultaMercadoPago() {
             const LDadosCheckout = LFrontEnd.dadosCheckout;
             const LDadosGw = objTransaction.json_gw_response;
             const LDadosOrderResponse = objTransaction.json_shopify_response;
-            //console.log(LDadosOrderResponse);
-            if (LDadosGw.status == "pending") {
-                idTransaction = LDadosGw.id;
+            const LVencimentoBoleto = moment(LFrontEnd.dadosComprador.vencimentoBoleto).format();
+            const LToday = moment().format();
+            if (LToday <= LVencimentoBoleto) {
+                //console.log(LDadosOrderResponse);
+                if (LDadosGw.status == "pending") {
+                    idTransaction = LDadosGw.id;
 
-                const LConsultaPagamento = await checkouts.CheckStatusBoleto(idTransaction, LDadosCheckout);
-                //console.log(LConsultaPagamento);
-                var LStatus = LConsultaPagamento.status;
-                if (LStatus == "approved") {
-                    ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
-                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_MP, objTransaction.id);
+                    const LConsultaPagamento = await checkouts.CheckStatusBoleto(idTransaction, LDadosCheckout);
+                    //console.log(LConsultaPagamento);
+                    var LStatus = LConsultaPagamento.status;
+                    if (LStatus == "approved") {
+                        ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
+                        const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_MP, objTransaction.id);
+                    }
+
                 }
-
             }
             //console.log(LTransacoes);
         })
@@ -89,21 +93,25 @@ async function processaConsultaPagSeguro() {
             const LDadosCheckout = LFrontEnd.dadosCheckout;
             const LDadosGw = objTransaction.json_gw_response;
             const LDadosOrderResponse = objTransaction.json_shopify_response;
-            //console.log(LDadosOrderResponse);
-            if (LDadosGw.status.toUpperCase() == "WAITING") {
-                idTransaction = LDadosGw.id;
+            const LVencimentoBoleto = moment(LFrontEnd.dadosComprador.vencimentoBoleto).format();
+            const LToday = moment().format();
+            if (LToday <= LVencimentoBoleto) {
+                //console.log(LDadosOrderResponse);
+                if (LDadosGw.status.toUpperCase() == "WAITING") {
+                    idTransaction = LDadosGw.id;
 
-                //const URL = constantes.API_MP.replace("{id}", idTransaction).replace("{token}", LDadosCheckout.token_acesso);
-                var LConsultaPagamento = await checkoutsPS.CheckStatusBoleto(idTransaction, LDadosCheckout);
-                var LConsultaPagamento = JSON.parse(LConsultaPagamento);
-                //console.log(LConsultaPagamento);
-                var LStatus = LConsultaPagamento.status;
-                if(objTransaction.id == 70) LStatus = "APPROVED";
-                if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
-                    ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
-                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PS, objTransaction.id);
+                    //const URL = constantes.API_MP.replace("{id}", idTransaction).replace("{token}", LDadosCheckout.token_acesso);
+                    var LConsultaPagamento = await checkoutsPS.CheckStatusBoleto(idTransaction, LDadosCheckout);
+                    var LConsultaPagamento = JSON.parse(LConsultaPagamento);
+                    //console.log(LConsultaPagamento);
+                    var LStatus = LConsultaPagamento.status;
+                    if (objTransaction.id == 70) LStatus = "APPROVED";
+                    if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
+                        ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
+                        const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PS, objTransaction.id);
+                    }
+
                 }
-
             }
             //console.log(LTransacoes);
         })
@@ -131,14 +139,17 @@ async function processaConsultaPayU() {
                 var LConsultaPagamento = await checkoutPayU.CheckStatusBoleto(idTransaction, LDadosCheckout);
                 var LConsultaPagamento = JSON.parse(LConsultaPagamento);
                 //console.log(LConsultaPagamento);
-                var LStatus = LConsultaPagamento.result.payload.status;
-                if(objTransaction.id == 75) LStatus = "APPROVED";
-                if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
-                    ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
-                    const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PayU, objTransaction.id);
-                    console.log(LTellShopify);
+                const LVencimentoBoleto = moment(LFrontEnd.dadosComprador.vencimentoBoleto).format();
+                const LToday = moment().format();
+                if (LToday <= LVencimentoBoleto) {
+                    var LStatus = LConsultaPagamento.result.payload.status;
+                    if (objTransaction.id == 75) LStatus = "APPROVED";
+                    if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
+                        ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
+                        const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PayU, objTransaction.id);
+                        console.log(LTellShopify);
+                    }
                 }
-
             }
             //console.log(LTransacoes);
         })
