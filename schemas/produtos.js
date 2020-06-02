@@ -68,10 +68,9 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
 
                 resultsProd.rows.forEach(async (prod, ii) => {
                     const ProdutoJSON = JSON.parse(prod.json_dados_produto);
-                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
-
+                    const plataforma = prod.plataforma;
+                    const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);                    
                     ProdutoJSON.variants.forEach((variante, i) => {
-
                         if (variante.id == variant) {
 
                             var produto = {
@@ -83,6 +82,7 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
                                 variant_price: variante.price,
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
+                                plataforma: plataforma
                             }
 
                             res.status(200).json(produto);
@@ -103,6 +103,56 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
     }
 }
 
+module.exports.GetProdutoByIDInternalShopify = (id_produto) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const LQuery = "select json_dados_produto FROM produtos WHERE json_dados_produto->'variants' @> \'[{\"id\":" + id_produto + "}]\' ";
+            pool.query(LQuery, (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                if (resultsProd.rows) {
+
+                    resultsProd.rows.forEach(async (prod, ii) => {
+                        const ProdutoJSON = prod.json_dados_produto;
+                        const imgSRC = await GetImageVariantID(id_produto, ProdutoJSON.images);
+                        const plataforma = prod.plataforma;
+                        ProdutoJSON.variants.forEach((variante, i) => {
+
+                            if (variante.id == id_produto) {
+
+                                var produto = {
+                                    title: ProdutoJSON.title,
+                                    variant_id: variante.id,
+                                    variant_title: variante.title,                                  
+                                    variant_price_ancora: variante.compare_at_price,
+                                    variant_price: variante.price,
+                                    variant_img: imgSRC,
+                                    id_thuor: prod.id_thuor,
+                                    plataforma: plataforma
+                                }
+                                resolve(produto);
+                                //res.status(200).json(produto);
+
+                            }
+                        });
+
+                    });
+                }
+                else {
+                    //res.status(200).json({ mensagem: "Nenhum produto encontrado" });
+                    resolve(0);
+                }
+                //
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+
 module.exports.GetProdutoIDThuor = async (req, res, next) => {
     try {
         const { id_produto } = req.body;
@@ -111,12 +161,28 @@ module.exports.GetProdutoIDThuor = async (req, res, next) => {
                 throw error
             }
             res.status(200).json(resultsProd.rows[0]);
-            
+
         })
     } catch (error) {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetProdutoByIDThuorInternal = (id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id], (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                resolve(resultsProd.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
 }
 
 module.exports.GetProdutoByIDImported = async (req, res, next) => {
@@ -131,6 +197,7 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                 resultsProd.rows.forEach(async (prod, ii) => {
                     const ProdutoJSON = prod.json_dados_produto;
                     const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);
+                    const plataforma = prod.plataforma;
                     ProdutoJSON.variants.forEach((variante, i) => {
                         if (variante.id == variant) {
                             var produto = {
@@ -142,7 +209,8 @@ module.exports.GetProdutoByIDImported = async (req, res, next) => {
                                 variant_price: variante.price,
                                 variant_img: imgSRC,
                                 id_thuor: prod.id_thuor,
-                                id_usuario: prod.id_usuario
+                                id_usuario: prod.id_usuario,
+                                plataforma: plataforma
                             }
                             res.status(200).json(produto);
                         }

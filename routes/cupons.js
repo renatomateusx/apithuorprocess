@@ -9,6 +9,7 @@ router.post('/GetCupomByID', cupons.GetCupomByID);
 router.post('/SaveCupom', cupons.SaveCupom);
 router.post('/DeleteCupomByID', cupons.DeleteCupomByID);
 router.post('/GetCupomByProductID', cupons.GetCupomByProductID);
+router.post('/GetCupomByCODE', cupons.GetCupomByCODE);
 router.post('/UpdateNumeroUtilizacao', cupons.UpdateNumeroUtilizacao);
 
 

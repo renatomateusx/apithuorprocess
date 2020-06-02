@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- <link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/load-awesome/1.1.0/ball-scale-ripple-multiple.min.css"
+		crossorigin="anonymous"> -->
+
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css"
+		crossorigin="anonymous">
+
+
+	<title>Thuor Reviews</title>
+
+	<style scoped>
+		.loader {
+			position: relative;
+			display: inline-block;
+			width: 50px;
+			height: 50px;
+			vertical-align: middle;
+		}
+
+		.loader-bars span,
+		.loader-bars:after,
+		.loader-bars:before {
+			content: '';
+			display: block;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 10px;
+			height: 30px;
+			background-color: #23b7e5;
+			-webkit-animation: grow 1.5s linear infinite;
+			animation: grow 1.5s linear infinite
+		}
+
+		.loader-bars:after {
+			left: 15px;
+			-webkit-animation: grow 1.5s linear -.5s infinite;
+			animation: grow 1.5s linear -.5s infinite
+		}
+
+		.loader-bars span {
+			left: 30px;
+			-webkit-animation: grow 1.5s linear -1s infinite;
+			animation: grow 1.5s linear -1s infinite
+		}
+
+		@-webkit-keyframes grow {
+			0% {
+				-webkit-transform: scaleY(0);
+				transform: scaleY(0);
+				opacity: 0
+			}
+
+			50% {
+				-webkit-transform: scaleY(1);
+				transform: scaleY(1);
+				opacity: 1
+			}
+
+			100% {
+				-webkit-transform: scaleY(0);
+				transform: scaleY(0);
+				opacity: 0
+			}
+		}
+
+		@keyframes grow {
+			0% {
+				-webkit-transform: scaleY(0);
+				transform: scaleY(0);
+				opacity: 0
+			}
+
+			50% {
+				-webkit-transform: scaleY(1);
+				transform: scaleY(1);
+				opacity: 1
+			}
+
+			100% {
+				-webkit-transform: scaleY(0);
+				transform: scaleY(0);
+				opacity: 0
+			}
+		}
+
+		@-webkit-keyframes spin {
+			0% {
+				-webkit-transform: rotate(0);
+				tranform: rotate(0)
+			}
+
+			100% {
+				-webkit-transform: rotate(360deg);
+				tranform: rotate(360deg)
+			}
+		}
+
+		@keyframes spin {
+			0% {
+				-webkit-transform: rotate(0);
+				transform: rotate(0)
+			}
+
+			100% {
+				-webkit-transform: rotate(360deg);
+				transform: rotate(360deg)
+			}
+		}
+
+		@-webkit-keyframes spinreverse {
+			0% {
+				-webkit-transform: rotate(0);
+				tranform: rotate(0)
+			}
+
+			100% {
+				-webkit-transform: rotate(-360deg);
+				tranform: rotate(-360deg)
+			}
+		}
+
+		@keyframes spinreverse {
+			0% {
+				-webkit-transform: rotate(0);
+				transform: rotate(0)
+			}
+
+			100% {
+				-webkit-transform: rotate(-360deg);
+				transform: rotate(-360deg)
+			}
+		}
+
+		.swal-wide {
+			width: 280px !important;
+			height: 150px;
+		}
+
+		.loadingSwall {
+			border-color: #23b7e5 !important;
+			width: 80px !important;
+			height: 80px !important;
+			margin-bottom: 20px;
+		}
+
+		.widthLoadingDiv {
+			display: block;
+			width: 15% !important;
+			margin: 0 auto !important;
+		}
+
+		.text-aguard {
+			font-size: 35px;
+			top: 0px !important;
+			position: relative;
+			margin: 0 auto;
+			padding: 0;
+			color: #23b7e5 !important;
+		}
+
+		.card-flat {
+			margin-top: 80px !important;
+		}
+
+		.bg-dark {
+			background-color: #23b7e5 !important;
+		}
+
+		.footerText {
+			font-size: 12px !important;
+		}
+
+		.custom-file-label::after {
+			content: "Procurar" !important;
+			height: 100% !important;
+		}
+
+		.cursorP {
+			cursor: pointer !important;
+		}
+
+		.starFulFill {
+			color: gold;
+			margin-left: 5px !important;
+		}
+
+		.starNotFulFill {
+			color: white;
+		}
+
+		.alertErros {
+			margin-top: 0px !important;
+			padding: 5px !important;
+		}
+
+		.success {
+			color: green;
+			font-size: 15px !important;
+		}
+
+		.danger {
+			color: red;
+			font-size: 15px !important;
+		}
+
+		input[file-upload-button] {
+
+			background-color: #3498db;
+			border-radius: 5px;
+			color: #fff;
+			cursor: pointer;
+			margin: 10px;
+			padding: 6px 20px
+		}
+
+		/* Aparência que terá o seletor de arquivo */
+		.hidden {
+			display: none !important;
+		}
+
+		.checkedBuy {
+			color: green;
+			font-size: 20px !important;
+		}
+
+		.noopen {
+			text-decoration: none !important;
+		}
+
+		.fontName {
+			font-size: 21px !important;
+			margin-left: 0px !important;
+			left: 0 !important;
+		}
+
+		.imageThumb {
+			margin: 0 auto !important;
+			display: block !important;
+		}
+
+		fieldset,
+		label {
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			margin: 20px;
+		}
+
+		h1 {
+			font-size: 1.5em;
+			margin: 10px;
+		}
+
+		/****** Style Star Rating Widget *****/
+
+		.rating {
+			border: none;
+			float: left;
+		}
+
+		.rating>input {
+			display: none;
+		}
+
+		.rating>label:before {
+			margin: 5px;
+			font-size: 1.25em;
+			font-family: FontAwesome;
+			display: inline-block;
+			content: "\f005";
+		}
+
+		.rating>.half:before {
+			content: "\f089";
+			position: absolute;
+		}
+
+		.rating>label {
+			color: #ddd;
+			float: right;
+		}
+
+		/***** CSS Magic to Highlight Stars on Hover *****/
+
+		.rating>input:checked~label,
+		/* show gold star when clicked */
+		.rating:not(:checked)>label:hover,
+		/* hover current star */
+		.rating:not(:checked)>label:hover~label {
+			color: gold;
+		}
+
+		/* hover previous stars in list */
+
+		.rating>input:checked+label:hover,
+		/* hover current star when changing rating */
+		.rating>input:checked~label:hover,
+		.rating>label:hover~input:checked~label,
+		/* lighten current selection */
+		.rating>input:checked~label:hover~label {
+			color: gold;
+		}
+
+		.fontf {
+			color: gold;
+		}
+		.imageDisplayOff{
+			display: none!important;
+		}
+		.imageDisplayOn{
+			display: block!important;
+		}
+	</style>
+
+</head>
+
+<body>
+	<div class="col-md-12 mt-5">
+		<div class="row card-header text-center rounded">
+			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_avaliacao"><span class="fa fa-star fontf mr-2"></span><span clas="ml-2">Seja o
+				primeiro a <a href="">escrever uma avaliação</a></span></span>
+			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_mais_avaliacao"><span class="fa fa-star fontf mr-2"></span><span
+				clas="ml-1"><span class="qtd ml-2 mr-2" id="qtd"></span>Deixe sua avaliação e ajude outras pessoas a se
+				decidirem. <a href="">Escrever uma avaliação</a></span></span>
+		</div>
+		<div class="row" id="divResult">
+			<!-- <div class="col-md-1"></div>
+			<div class="col-xl-3 ml-1 card card-default">
+				<a href="#">
+					<img class="img-fluid" src="{img}" alt="{titulo}" />
+				</a>
+				<div class="card-body">
+					<p class="d-flex">
+						<span>
+							<small class="mr-1">
+								<a class="ml-1 fontName" href="#">
+									{nome}
+									<span class="ml-2 fa fa-check-circle checkedBuy" title="Compra Verificada"></span>
+								</a>
+							</small>
+						</span>
+					</p>
+					<h4>
+						<a href="#" class="noopen">
+							<span class="fa fa-star starFulFill"></span>
+							<span class="fa fa-star starFulFill"></span>
+							<span class="fa fa-star starFulFill"></span>
+							<span class="fa fa-star starFulFill"></span>
+							<span class="fa fa-star starFulFill"></span>
+						</a>
+					</h4>
+					<p><b>{titulo}</b></p>
+					<p>{avaliacao}</p>
+				</div>
+			</div>
+			<div class="col-md-1"></div> -->
+		</div>
+		<div class="row mt-2">
+
+			<div class="col-md-3 mr-0 pr-0 pl-0"></div>
+			<div class="col-xl-6 ml-0 mr-0 pr-0 pl-0">
+				<form>
+					<!-- START card-->
+					<form name="form" id="form">
+						<div class="card card-default">
+							<div class="card-header">
+								<div class="card-title">Diga-nos se você gostou do produto</div>
+							</div>
+							<div class="card-body">
+								<div class="form-group">
+									<label class="col-form-label">Nome *</label>
+									<input type="text" class="form-control" id="nome" placeholder="Seu nome" />
+								</div>
+								<div class="form-group">
+									<label class="col-form-label">E-mail *</label>
+									<input type="text" class="form-control" id="email" placeholder="Seu e-mail" />
+								</div>
+								<div class="form-group">
+									<label class="col-form-label" id="labelUpload">Deseja enviar uma imagem?</label>
+									<div class="ml-0 mr-0 p-0 col-xl-10 cursorP">
+										<label class="btn btn-primary" type="button" for="fileUpload">Clique para enviar
+											uma imagem</label>
+										<label class="btn btn-link" id="labelFileSelecionado"></label>
+										<input type="file" class="form-control-file hidden" id="fileUpload"
+											onchange="getFileData(this.files)" accept="image/jpeg, image/png, image/gif"
+											placeholder="Escolha uma imagem...">
+									</div>
+
+								</div>
+								<div class="form-group">
+									<fieldset class="rating">
+										<input type="radio" onClick="setStarValue(this.value);" id="star5" name="rating"
+											value="5" /><label class="full" for="star5"
+											title="Awesome - 5 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star4half"
+											name="rating" value="4 and a half" /><label class="half" for="star4half"
+											title="Pretty good - 4.5 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star4" name="rating"
+											value="4" /><label class="full" for="star4"
+											title="Pretty good - 4 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star3half"
+											name="rating" value="3 and a half" /><label class="half" for="star3half"
+											title="Meh - 3.5 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star3" name="rating"
+											value="3" /><label class="full" for="star3" title="Meh - 3 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star2half"
+											name="rating" value="2 and a half" /><label class="half" for="star2half"
+											title="Kinda bad - 2.5 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star2" name="rating"
+											value="2" /><label class="full" for="star2"
+											title="Kinda bad - 2 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star1half"
+											name="rating" value="1 and a half" /><label class="half" for="star1half"
+											title="Meh - 1.5 stars"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="star1" name="rating"
+											value="1" /><label class="full" for="star1"
+											title="Sucks big time - 1 star"></label>
+										<input type="radio" onClick="setStarValue(this.value);" id="starhalf"
+											name="rating" value="half" /><label class="half" for="starhalf"
+											title="Sucks big time - 0.5 stars"></label>
+									</fieldset>
+									<label class="col-form-label"></label>
+								</div>
+								<div class="form-group">
+									<label class="col-form-label">O que você achou do produto? *</label>
+									<input type="text" class="form-control" id="titulo" placeholder="Ex: Muito bom!" />
+								</div>
+								<div class="form-group">
+									<label class="col-form-label">Descreva sua avaliação</label>
+									<textarea class="form-control" type="text" id="avaliacao"
+										placeholder="Ex: Chegou com 20 dias. Tem qualidade."></textarea>
+								</div>
+								<div class="required">* Campos Obrigatórios</div>
+							</div>
+
+							<div class="card-footer">
+								<div class="clearfix alertErros">
+									<div class="float-left" id="alertReturn"><span id="alertErros"
+											class="alertErros alert "></span></div>
+									<div class="float-right">
+										<button class="btn btn-primary" type="button"
+											onclick="validateMyForm();">Salvar</button>
+									</div>
+									<div class="float-left pull-left mt-1">
+										<strong><a href="https://thuor.com" target="_blank">Thuor - Integrando Ideias e Negócios</a></strong>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+					<!-- END card-->
+				</form>
+			</div>
+
+			<div class="col-md-3 mr-0 pr-0 pl-0"></div>
+		</div>
+	</div>
+
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+		integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		crossorigin="anonymous"></script>
+	<script src="https://use.fontawesome.com/aa8f958ac7.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
+
+
+
+	<script type="text/javascript">
+
+		const TEMPLATE_INICIAL = '<div class="col-md-1"></div>';
+		const TEMPLATE = '<div class="col-xl-3 ml-1 card card-default"><a href="#"><img class="img-thumbnail thumb128 rounded imageThumb {image_display}" src="{img}" alt="{titulo}"/></a><div class="card-body"><p class="d-flex"><span><small class="mr-1"><a class="ml-1 fontName" href="#">{nome}<span class="ml-2 fa fa-check-circle checkedBuy" title="Compra Verificada"></span></a></small></span></p><h4><a href="#" class="noopen"><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span></a></h4><p><b>{titulo}</b></p><p>{avaliacao}</p></div></div>';
+		const URL_END_POINT = "http://localhost:3000/reviews/GetReviewByID";
+		const URL_END_POINT_SAVE_REVIEW = "http://localhost:3000/reviews/SaveReview";
+		var isShowingLoading = false;
+		var formValidate = [];
+		var errors = [];
+		var base64Image = '';
+		var plataforma = '';
+		var url_loja = window.location.host;
+		var id_produto_geral = '';
+		var rating = '';
+		$(document).ready(function () {
+
+			ShowLoading();
+			formValidate.push({ nome: 'nome', type: 'text', required: true, value: '' });
+			formValidate.push({ nome: 'email', type: 'text', required: true, value: '' });
+			formValidate.push({ nome: 'titulo', type: 'text', required: true, value: '' });
+			formValidate.push({ nome: 'avaliacao', type: 'text', required: true, value: '' });
+			formValidate.push({ nome: 'imagem', type: 'text', required: false, value: '' });
+
+			var url = new URL(window.location.href);
+			var shopifyVariantID = url.searchParams.get("variant");
+			var wooVariantID = url.searchParams.get("product");
+			//console.log(shopifyVariantID);
+			if (shopifyVariantID != null && shopifyVariantID != undefined) {
+				id_produto_geral = shopifyVariantID;
+				getReviews(id_produto_geral, url_loja);
+				plataforma = 'shopify';
+				HideLoading();
+			}
+			if (wooVariantID != null && wooVariantID != undefined) {
+				id_produto_geral = wooVariantID;
+				getReviews(id_produto_geral);
+				plataforma = 'woo';
+				HideLoading();
+			}
+			// Swal.fire({
+			// 	type: 'success',
+			// 	title: 'Your work has been done',
+			// 	showConfirmButton: false,
+			// 	timer: 1500
+			// })
+
+		});
+
+		function ShowLoading() {
+			this.isShowingLoading = true;
+			Swal.fire({
+				customClass: 'swal-wide',
+				title: '<span class="text-aguard">Aguarde...</span>',
+				html: " <div class='card-body align-items-center justify-content-center'>             <div class='loader loader-bars widthLoadingDiv'>    </div>        </div>",
+				showConfirmButton: false,
+				showCancelButton: false,
+				allowEnterKey: false,
+				allowEscapeKey: false,
+				allowOutsideClick: false,
+				timerProgressBar: true,
+				onBeforeOpen: () => {
+					// Swal.showLoading();          
+				},
+				onClose: () => {
+
+				}
+			})
+		}
+		function HideLoading() {
+			if (this.isShowingLoading) {
+				Swal.close();
+				this.isShowingLoading = false;
+			}
+		}
+		async function SaveReview() {
+			try {
+				ShowLoading();
+				let LBody = {
+					url_loja: url_loja,
+					id_produto: id_produto_geral,
+					nome: await getFieldValue('nome'),
+					email: await getFieldValue('email'),
+					titulo: await getFieldValue('titulo'),
+					avaliacao: await getFieldValue('avaliacao'),
+					imagem: base64Image,
+					rating: rating,
+					plataforma: plataforma
+
+				}
+				postAxios(URL_END_POINT_SAVE_REVIEW, LBody, () => {
+					getReviews(id_produto_geral, url_loja);
+					showNotification('Avaliação Enviada!', 'success');
+				})
+				// postAjax(URL_END_POINT_SAVE_REVIEW, LBody, () => {
+
+				// })
+			}
+			catch (error) {
+				showNotificationW('Oops!', 'Ocorreu um erro. Tente novamente', 'error');
+			}
+		}
+		function getFieldValue(campo) {
+			return new Promise((resolve, reject) => {
+				try {
+					const LFV = document.getElementById(campo);
+					if (LFV && LFV.value) { console.log(LFV.value); resolve(LFV.value); }
+					resolve(null);
+				}
+				catch (error) {
+					console.log("Erro ao pegar o valor do campo: ", campo, error);
+					reject(error);
+				}
+			})
+
+		}
+
+		function checkField(campo) {
+			const LV = document.getElementById(campo);
+			return LV && !LV.value;
+		}
+		function getFieldName(nome) {
+			if (nome == 'avaliacao') return 'Avaliação';
+			return toCamelCase(nome);
+		}
+		function toCamelCase(str) {
+			var LSTR2 = "";
+			if (str.indexOf(" ") > -1) {
+				var LSpace = str.split(" ");
+				LSpace.forEach((objS, i) => {
+					var LStr = objS.split("");
+					LStr.forEach((obj, i) => {
+						if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+						if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+					});
+					LSTR2 = LSTR2 + " ";
+				});
+			} else {
+				var LStr = str.split("");
+				LStr.forEach((obj, i) => {
+					if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+					if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+				});
+			}
+			return LSTR2;
+		}
+		async function getFileData(files) {
+			ShowLoading();
+			var file = files[0];
+			document.getElementById("labelFileSelecionado").innerHTML = file.name;
+			this.base64Image = await toBase64(file);
+			HideLoading();
+		}
+		const toBase64 = file => new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = error => reject(error);
+		});
+		function validateMyForm() {
+			errors = [];
+			formValidate.forEach((obj, i) => {
+				if (obj.required == true && checkField(obj.nome)) {
+					errors.push({ field: obj.nome, mensagem: 'Campo ' + getFieldName(obj.nome) + ' é Obrigatório.' });
+				}
+			});
+			const alertErros = document.getElementById("alertErros");
+			const alert = document.getElementById("alertReturn");
+			if (errors.length > 0) {
+				alertErros.classList.remove('success');
+				alertErros.classList.add('danger');
+				alertErros.innerHTML = errors[0].mensagem;
+				return false;
+			}
+			else {
+				alertErros.classList.remove('danger');
+				alertErros.classList.add('success');
+				SaveReview();
+				return true;
+			}
+
+		}
+
+		function getAjax(url, success) {
+			var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+			xhr.open('GET', url);
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState > 3 && xhr.status == 200) success(xhr.responseText);
+			};
+			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			xhr.send();
+			return xhr;
+		}
+
+		function postAxios(url, data, success) {
+			axios.post(url, data)
+				.then(function (response) {
+					success(response);
+				})
+				.catch(function (error) {
+					console.log('Erro ao executar Axios', error);
+				});
+		}
+
+		function getAxios(url, success) {
+			axios.get(url)
+				.then(function (response) {
+					// handle success
+					console.log(response);
+				})
+				.catch(function (error) {
+					// handle error
+					console.log(error);
+				})
+				.finally(function () {
+					// always executed
+				});
+		}
+
+		function postAjax(url, data, success) {
+			var params = typeof data == 'string' ? data : Object.keys(data).map(
+				function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
+			).join('&');
+
+			var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+
+			xhr.open('POST', url);
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState > 3 && xhr.status == 200) { success(xhr.responseText); }
+			};
+			xhr.setRequestHeader('Host', window.location.host);
+			xhr
+			xhr.setRequestHeader('Origin', 'localhost:3000');
+			xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+			xhr.setRequestHeader('Access-Control-Allow-Headers', '*');
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.send(params);
+
+			return xhr;
+		}
+
+		function ShowLoadingT(text) {
+			this.isShowingLoading = true;
+			Swal.fire({
+				customClass: 'swal-wide',
+				title: '<span class="text-aguard">' + text + '</span>',
+				html: " <div class='card-body align-items-center justify-content-center'>             <div class='ball-scale-ripple-multiple widthLoadingDiv'>                <div class='loadingSwall'></div>               <div class='loadingSwall'></div>                <div class='loadingSwall'></div>            </div>        </div>",
+				showConfirmButton: false,
+				showCancelButton: false,
+				allowEnterKey: false,
+				allowEscapeKey: false,
+				allowOutsideClick: false,
+				timerProgressBar: true,
+				onBeforeOpen: () => {
+					// Swal.showLoading();          
+				},
+				onClose: () => {
+
+				}
+			})
+		}
+
+		function showNotification(message, type) {
+			const Toast = Swal.mixin({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3500,
+				timerProgressBar: true,
+				onOpen: (toast) => {
+					toast.addEventListener('mouseenter', Swal.stopTimer)
+					toast.addEventListener('mouseleave', Swal.resumeTimer)
+				}
+			})
+
+			Toast.fire({
+				icon: type,
+				title: message
+			})
+		}
+
+		function showNotificationW(title, message, type) {
+			Swal.fire(
+				title,
+				message,
+				type
+			);
+		}
+
+		function getReviews(id_produto, url_loja) {
+			try {
+				var LBody = {
+					id_produto: id_produto,
+					url_loja: url_loja
+				}
+				const LDiv = document.getElementById('divResult');
+				LDiv.insertAdjacentHTML('beforeend', TEMPLATE_INICIAL);
+				postAxios(URL_END_POINT, LBody, (response) => {
+					const LData = response.data;
+					const LQTD = LData.length;
+					console.log(LQTD);
+					document.getElementById("qtd").innerText = LQTD;
+					if (LQTD > 0) {
+						document.getElementById("escrever_mais_avaliacao").style.display = "";
+						document.getElementById("escrever_avaliacao").style.display = "none;";
+					}else{
+						document.getElementById("escrever_mais_avaliacao").style.display = "none;";
+						document.getElementById("escrever_avaliacao").style.display = "";
+					}
+					LData.forEach((obj, i) => {
+						var LTemp = TEMPLATE.replace("{img}", obj.imagem);
+						LTemp = LTemp.replace("{nome}", toAsterisk(obj.nome));
+						LTemp = LTemp.replace("{titulo}", obj.titulo);
+						LTemp = LTemp.replace("{titulo}", obj.titulo);
+						LTemp = LTemp.replace("{avaliacao}", obj.avaliacao);
+						if(obj.imagem != undefined && obj.imagem != null && obj.imagem.length > 0){
+							LTemp = LTemp.replace("{image_display}", "imageDisplayOn");
+						}
+						else{
+							LTemp = LTemp.replace("{image_display}", "imageDisplayOff");
+						}
+
+						LDiv.insertAdjacentHTML('beforeend', LTemp);
+						if (i >= 3 && i % 3 == 0) {
+							LDiv.insertAdjacentHTML('beforeend', TEMPLATE_INICIAL);
+						}
+						console.log("I", i);
+					})
+
+				});
+			}
+			catch (error) {
+				console.log("Erro ao obter reviews", error);
+			}
+		}
+
+		function getErrorField(field) {
+			const errorF = errors.find(x => x.field == field);
+			if (errorF != undefined) return errorF.mensagem;
+		}
+
+		function toAsterisk(str) {
+			var LSTR2 = "";
+			if (str.indexOf(" ") > -1) {
+				var LSpace = str.split(" ");
+				LSpace.forEach((objS, i) => {
+					var LStr = objS.split("");
+					LStr.forEach((obj, i) => {
+						if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+						if (i > 0) LSTR2 = LSTR2 + '*';
+					});
+					LSTR2 = LSTR2 + " ";
+				});
+			} else {
+				var LStr = str.split("");
+				LStr.forEach((obj, i) => {
+					if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+					if (i > 0) LSTR2 = LSTR2 + '*';
+				});
+			}
+			return LSTR2;
+		}
+		function setStarValue(value) {
+			rating = value;
+			console.log(value);
+		}
+
+	</script>
+</body>
+
+</html>

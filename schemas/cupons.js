@@ -24,7 +24,8 @@ module.exports.GetCupons = (req, res, next) => {
 module.exports.UpdateNumeroUtilizacao = (req, res, next) => {
     try {
         const { id_usuario, numero_utilizacao, id } = req.body;
-        pool.query('UPDATE cupons SET numero_utilizacao = $2 where id=$3 id_usuario = $1', [id_usuario, numero_utilizacao, id], (error, results) => {
+        console.log(req.body);
+        pool.query('UPDATE cupons SET numero_utilizacao = $2 where id=$3 and id_usuario = $1', [id_usuario, numero_utilizacao, id], (error, results) => {
             if (error) {
                 throw error
             }
@@ -104,12 +105,13 @@ module.exports.GetCupomByProductID = (req, res, next) => {
 
 module.exports.GetCupomByCODE = (req, res, next) => {
     try {
-        const { id_usuario, id_produto, code } = req.body;
+        const { id_usuario, code } = req.body;
+        console.log(req.body);
         pool.query('select * FROM cupons WHERE code = $2 and id_usuario=$1 and status = 1', [id_usuario, code], (error, results) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows);
+            res.status(200).send(results.rows[0]);
             res.end();
         })
     } catch (error) {
