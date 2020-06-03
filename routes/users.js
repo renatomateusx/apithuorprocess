@@ -14,6 +14,8 @@ router.post('/GetUserByProfile', utilis.verifyJWT, usersSchema.GetUserByProfile)
 
 router.post('/GetUserByID', usersSchema.GetUserByID);
 
+router.post('/GetUserByIDExternal', usersSchema.GetUserByIDExternal);
+
 router.post('/EfetuaLogin', usersSchema.EfetuaLogin);
 
 router.post('/AddUser', usersSchema.AddUser);
@@ -27,6 +29,8 @@ router.post('/RedefinirSenha', usersSchema.VerificaRedefineSenha);
 router.post('/AlterarSenha', usersSchema.AlterarSenha);
 
 router.post('/AtivarEmail', usersSchema.AtivarEmail);
+
+router.post('/UpdateUser', usersSchema.UpdateUser);
 
 router.get('/VerificaToken', function (req, res, next) {
   var token = req.headers['authorization'];

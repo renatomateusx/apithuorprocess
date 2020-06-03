@@ -49,6 +49,7 @@ var reviews = require('./routes/reviews');
 var apps = require('./routes/apps');
 var servicesConsultaPagamento = require('./routes/services/serviceConsultaPagamentos');
 var utilisEmail = require('./routes/utilisEmail');
+var checkoutThuorComission = require('./routes/checkoutsThuorComission');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -93,6 +94,7 @@ app.use('/reviews', reviews);
 app.use('/apps', apps);
 app.use('/servicesConsultaPagamento', servicesConsultaPagamento);
 app.use('/utilisEmail', utilisEmail);
+app.use('/checkoutThuorComission', checkoutThuorComission);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
