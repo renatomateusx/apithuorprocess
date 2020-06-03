@@ -6,9 +6,15 @@ const fulfillments = require('../../schemas/fulfillments');
 const logistica = require('../../schemas/logisticas');
 const utilisEmail = require('../../routes/services/utilis');
 const fs = require('fs');
+var vm = require("vm");
 const path = require("path");
 const constantes = require('../../resources/constantes');
 const loja = require('../../schemas/integracaoPlataformas');
+//const mpExternal = require('../../public/scripts/mercadopago');
+
+
+
+
 
 var j = schedule.scheduleJob('* * */23 * * *', function () {
     fulfillments.GetFulFillmentList()
@@ -108,11 +114,5 @@ var j = schedule.scheduleJob('* * */23 * * *', function () {
 });
 
 
-router.get('/StartShipmentServices', function (req, res, next) {
-
-    var interval = setInterval(function () {
-        // execute your request here
-    }, 1000);
-});
 
 module.exports = router;

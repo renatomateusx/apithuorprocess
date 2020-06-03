@@ -17,7 +17,7 @@ const transacoes = require('../../schemas/transacao');
 const utilis = require('../../resources/util');
 const jp = require('jsonpath');
 const funcionalidadesShopify = require('../../resources/funcionalidadesShopify');
-
+const users = require('../../schemas/users');
 var j = schedule.scheduleJob('* * */24 * * *', async function () {
 
     const LIntegracoes = await checkouts.GetIntegracaoCheckoutInternal();
@@ -36,16 +36,16 @@ var j = schedule.scheduleJob('* * */24 * * *', async function () {
 });
 
 /**PARA TESTES- APAGUE DEPOIS A FUNÇÃO ABAIXO - PARA RODAR EM MODO TESTE */
-// var j = schedule.scheduleJob('*/15 * * * * *', async function () {
+var j = schedule.scheduleJob('*/15 * * * * *', async function () {
 
-//     const LIntegracoes = await checkouts.GetIntegracaoCheckoutInternal();
-//     LIntegracoes.forEach((obj, i) => {
-//         if (obj.id == constantes.GATEWAY_PayU) {
-//             processaConsultaPayU();
-//         }        
-//     });
-//     console.log('Serviço TESTE de Consulta Pagamentos Rodando!', moment().format('HH:mm:ss'));
-// });
+    const LIntegracoes = await checkouts.GetIntegracaoCheckoutInternal();
+    LIntegracoes.forEach((obj, i) => {
+        if (obj.id == constantes.GATEWAY_MP) {
+            processaConsultaMercadoPago();
+        }        
+    });
+    console.log('Serviço TESTE de Consulta Pagamentos Rodando!', moment().format('HH:mm:ss'));
+});
 /**PARA TESTES- APAGUE DEPOIS A FUNÇÃO ACIMA */
 
 
@@ -56,6 +56,7 @@ async function processaConsultaMercadoPago() {
 
             const LFrontEnd = objTransaction.json_front_end_user_data;
             const LDadosCheckout = LFrontEnd.dadosCheckout;
+            const LBackEnd = objTransaction.json_back_end_payment
             const LDadosGw = objTransaction.json_gw_response;
             const LDadosOrderResponse = objTransaction.json_shopify_response;
             const LVencimentoBoleto = moment(LFrontEnd.dadosComprador.vencimentoBoleto).format();
@@ -68,9 +69,17 @@ async function processaConsultaMercadoPago() {
                     const LConsultaPagamento = await checkouts.CheckStatusBoleto(idTransaction, LDadosCheckout);
                     //console.log(LConsultaPagamento);
                     var LStatus = LConsultaPagamento.status;
-                    if (LStatus == "approved") {
+                    if (objTransaction.id == 77) LStatus = "APPROVED";
+                    if (LStatus.toUpperCase() == "APPROVED") {
+                        console.log(objTransaction.id);
                         ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
                         const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_MP, objTransaction.id);
+                        const LDataProcess = moment().format();
+                        const UsuarioDado = await users.GetUserByIDInternal(LFrontEnd.dadosLoja.id_usuario);
+                        const LComissaoValue = 0.00;
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LComissaoValue, constantes.GATEWAY_MP);
+                        console.log(LTellShopify);
+                        console.log(InsereTransacaoInterna);
                     }
 
                 }
@@ -91,6 +100,7 @@ async function processaConsultaPagSeguro() {
 
             const LFrontEnd = objTransaction.json_front_end_user_data;
             const LDadosCheckout = LFrontEnd.dadosCheckout;
+            const LBackEnd = objTransaction.json_back_end_payment
             const LDadosGw = objTransaction.json_gw_response;
             const LDadosOrderResponse = objTransaction.json_shopify_response;
             const LVencimentoBoleto = moment(LFrontEnd.dadosComprador.vencimentoBoleto).format();
@@ -105,10 +115,14 @@ async function processaConsultaPagSeguro() {
                     var LConsultaPagamento = JSON.parse(LConsultaPagamento);
                     //console.log(LConsultaPagamento);
                     var LStatus = LConsultaPagamento.status;
-                    if (objTransaction.id == 70) LStatus = "APPROVED";
+                    // if (objTransaction.id == 70) LStatus = "APPROVED";
                     if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
                         ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
                         const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PS, objTransaction.id);
+                        const LDataProcess = moment().format();
+                        const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
+                        const LComissaoValue = 0.00;
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LComissaoValue, constantes.GATEWAY_PS);
                     }
 
                 }
@@ -128,6 +142,7 @@ async function processaConsultaPayU() {
         LTransacoes.forEach(async (objTransaction, i) => {
 
             const LFrontEnd = objTransaction.json_front_end_user_data;
+            const LBackEnd = objTransaction.json_back_end_payment
             const LDadosCheckout = LFrontEnd.dadosCheckout;
             const LDadosGw = objTransaction.json_gw_response;
             const LDadosOrderResponse = objTransaction.json_shopify_response;
@@ -143,10 +158,15 @@ async function processaConsultaPayU() {
                 const LToday = moment().format();
                 if (LToday <= LVencimentoBoleto) {
                     var LStatus = LConsultaPagamento.result.payload.status;
-                    if (objTransaction.id == 75) LStatus = "APPROVED";
+                    // if (objTransaction.id == 75) LStatus = "APPROVED";
                     if (LStatus.toUpperCase() == "APPROVED" || LStatus.toUpperCase() == "AUTHORIZED") {
                         ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
-                        const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PayU, objTransaction.id);
+                        const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, 'paid', constantes.GATEWAY_PayU, objTransaction.id);
+                        const LDataProcess = moment().format();
+                        const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
+                        const LComissaoValue = 0.00;
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LComissaoValue, constantes.GATEWAY_PayU);
+
                         console.log(LTellShopify);
                     }
                 }

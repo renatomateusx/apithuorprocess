@@ -102,6 +102,22 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
     });
 }
 
+module.exports.insereTransacaoInterna = (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 async function updateTransacao(id_usuario, url_loja, JSON_CancelReembolsaResponse, status) {
     return new Promise(async (resolve, reject) => {
         try {

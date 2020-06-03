@@ -3,7 +3,8 @@ const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('../schemas/transacao');
 const clientes = require('../schemas/clientes');
-
+const users = require('../schemas/users');
+const moment = require('moment');
 
 module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) => {
     return new Promise(async (resolve, reject) => {
@@ -12,7 +13,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
             //ADICIONADO PARA PAREPARAR A PLATAFORMA PARA RECEBER OUTRAS INTEGRAÇÕES. WOOCOMMERCE, POR EXEMPLO
             const LHaveShopifyProducts = LJSON.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
             if (LHaveShopifyProducts) {
-                
+
                 const LShopifyOrder = await module.exports.mountJSONShopifyOrder(LJSON, status);
                 const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.RESOURCE_ORDERS);
                 const urlShopify = format("https://{}:{}@{}", LJSON.dadosLoja.chave_api_key, LJSON.dadosLoja.senha, LJSON.dadosLoja.url_loja);
@@ -23,6 +24,12 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                         const RetornoShopifyJSON = retornoShopify.body;
                         transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP)
                             .then(async (retornoInsereTransacao) => {
+                                const LDataProcess = moment().format();
+                                const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
+                                const LComissaoValue = 0.00;
+                                if (status == 'paid') {
+                                    const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LComissaoValue, gatewayP);
+                                }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                 const response = {
                                     dataGateway: data,

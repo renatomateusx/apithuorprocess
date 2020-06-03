@@ -14,34 +14,25 @@ module.exports.DoPay = (req, res, next) => {
         const { pay } = req.body;
         console.log("Pay", pay);
 
-        mercadopago.configurations.setAccessToken(constantes.SAND_BOX_MP_ACCESS_TOKEN);
-        var paymentData = {
-            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
-            token: LJSON.paymentData.token,
-            description: LJSON.paymentData.description,
-            installments: parseInt(LJSON.paymentData.installments),
-            payment_method_id: LJSON.paymentData.payment_method_id,
-            payer: LJSON.paymentData.payer
-        }
-        console.log("paymentData", paymentData);
-        mercadopago.payment.save(paymentData)
+        mercadopago.configurations.setAccessToken(constantes.SAND_BOX_MP_ACCESS_TOKEN);        
+        mercadopago.payment.save(pay)
             .then(async function (data) {
                 const DataResponse = data.response;
                 ///console.log(data.response);
                 if (data.response.status == 'approved') {
-                    LJSON.dadosComprador.data = data.response.date_created;
-                    LJSON.dadosComprador.id_transacao = data.response.id;
-                    LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
-                    var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, data.response.status, constantes.GATEWAY_MP);
-                    var plataformasResponse = {
-                        shopify: responseShopify,
-                        woo: 'notYet',
-                    }
-                    res.status(200).send(responseShopify);
+                    pay.data = data.response.date_created;
+                    pay.id_transacao = data.response.id;
+                    pay.valorParcela = data.response.transaction_details.installment_amount;
+                    // var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, data.response.status, constantes.GATEWAY_MP);
+                    // var plataformasResponse = {
+                    //     shopify: responseShopify,
+                    //     woo: 'notYet',
+                    // }
+                    res.status(200).send(pay);
                 }
                 else {
                     console.log("Response", data.response);
-                    res.status(422).send("Pagamento não realizado, tente novamente");
+                    res.status(200).send(data.response);
                 }
 
             }).catch(function (error) {
@@ -57,7 +48,7 @@ module.exports.DoPay = (req, res, next) => {
 
 
     } catch (error) {
-        res.json(error);
+        res.status(422).send(error);
         res.end();
     }
 }
