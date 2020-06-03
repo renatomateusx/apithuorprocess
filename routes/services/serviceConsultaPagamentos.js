@@ -120,7 +120,7 @@ async function processaConsultaPagSeguro() {
                         ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
                         const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, LStatus, constantes.GATEWAY_PS, objTransaction.id);
                         const LDataProcess = moment().format();
-                        const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
+                        const UsuarioDado = await users.GetUserByIDInternal(LFrontEnd.dadosLoja.id_usuario);
                         const LComissaoValue = 0.00;
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LComissaoValue, constantes.GATEWAY_PS);
                     }
@@ -163,7 +163,7 @@ async function processaConsultaPayU() {
                         ///INFORMA AO SHOPIFY E ATUALIZA TABELA.
                         const LTellShopify = await funcionalidadesShopify.tellShopifyPaymentStatus(LFrontEnd.dadosLoja, LFrontEnd.dadosComprador, LDadosOrderResponse, constantes.CONSTANTE_TESTES, 'paid', constantes.GATEWAY_PayU, objTransaction.id);
                         const LDataProcess = moment().format();
-                        const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
+                        const UsuarioDado = await users.GetUserByIDInternal(LFrontEnd.dadosLoja.id_usuario);
                         const LComissaoValue = 0.00;
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LComissaoValue, constantes.GATEWAY_PayU);
 
