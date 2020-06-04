@@ -111,7 +111,7 @@ module.exports.DoPay = (req, res, next) => {
                         LJSON.dadosComprador.data = data.response.date_created;
                         LJSON.dadosComprador.id_transacao = data.response.id;
                         LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
-                        var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, data.response.status, constantes.GATEWAY_MP);
+                        var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'paid', constantes.GATEWAY_MP);
                         var plataformasResponse = {
                             shopify: responseShopify,
                             woo: 'notYet',
@@ -181,7 +181,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                 LJSON.dadosComprador.id_transacao = data.response.id;
                 //console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
-                    var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, data.response.status, constantes.GATEWAY_MP);
+                    var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'pending', constantes.GATEWAY_MP);
                     // var plataformasResponse = {
                     //     shopify: responseShopify,
                     //     woo: 'notYet'
