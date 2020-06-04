@@ -26,6 +26,39 @@ module.exports.GetUserByID = (req, res, next) => {
     });
 }
 
+module.exports.GetUserByIDExternal = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const { id } = req.body;
+            pool.query('SELECT * FROM usuarios WHERE id = $1', [id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+
+        }
+    });
+}
+
+module.exports.GetUserByIDInternal = (id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM usuarios WHERE id = $1', [id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+
+        }
+    });
+}
+
 module.exports.GetUsers = (req, res, next) => {
     try {
         pool.query('SELECT * FROM usuarios', (error, results) => {
@@ -164,6 +197,27 @@ module.exports.AddUser = (req, res, next) => {
             if (results.rowCount > 0) {
                 res.status(200).json(`Usuário Criado: ${results.insertId}`)
                 this.EnviaAtivacaoEmail(nome, email);
+            }
+            else {
+                res.status(422).json('Erro ao criar usuário', results);
+            }
+
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateUser = (req, res, next) => {
+    try {
+        const { id, plano, json_plano_pagamento, proximo_pagamento } = req.body;
+        pool.query('UPDATE usuarios SET plano=$1, json_pagamento=$2, proximo_pagamento=$4 WHERE id=$3', [plano, json_plano_pagamento, id, proximo_pagamento], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rowCount > 0) {
+                res.status(200).json(`Usuário Atualizado`);
             }
             else {
                 res.status(422).json('Erro ao criar usuário', results);
