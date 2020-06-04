@@ -50,6 +50,7 @@ var apps = require('./routes/apps');
 var servicesConsultaPagamento = require('./routes/services/serviceConsultaPagamentos');
 var utilisEmail = require('./routes/utilisEmail');
 var checkoutThuorComission = require('./routes/checkoutsThuorComission');
+var planos = require('./routes/planos');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -95,6 +96,7 @@ app.use('/apps', apps);
 app.use('/servicesConsultaPagamento', servicesConsultaPagamento);
 app.use('/utilisEmail', utilisEmail);
 app.use('/checkoutThuorComission', checkoutThuorComission);
+app.use('/planos', planos);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

@@ -5,10 +5,61 @@ var checkoutsSchema = require('./checkouts');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const fulfillments = require('../schemas/fulfillments');
+const moment = require('moment');
+
 module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { shop, id_usuario } = req.body;
+        console.log(shop, id_usuario);
         pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2', [shop, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+module.exports.SetPaymentComissionDone = (req, res, next) => {
+    try {
+        const { json_cobranca_comissao, json_response_comissao, id_usuario, data_processar } = req.body;
+        pool.query("UPDATE transacoes_internas SET status = 'PAID', json_cobranca_comissao= $1, json_response_comissao=$2 WHERE id_usuario = $3 and data_processar = $4", [json_cobranca_comissao, json_response_comissao, id_usuario, data_processar], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(1);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+
+module.exports.GetTransacoesInternas = (req, res, next) => {
+    try {
+        
+        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc    ", (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetTransacoesInternasPorLoja = (req, res, next) => {
+    try {
+        const data_processar = moment().format('YYYY-MM-DD');
+        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 ORDER BY id_usuario ASC",[data_processar], (error, results) => {
             if (error) {
                 throw error
             }

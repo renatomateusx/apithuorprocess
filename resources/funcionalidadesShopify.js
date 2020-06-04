@@ -5,6 +5,7 @@ const transacoes = require('../schemas/transacao');
 const clientes = require('../schemas/clientes');
 const users = require('../schemas/users');
 const moment = require('moment');
+const planos = require('../schemas/planos');
 
 module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) => {
     return new Promise(async (resolve, reject) => {
@@ -28,7 +29,12 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                                 const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
                                 const LComissaoValue = 0.00;
                                 if (status == 'paid') {
-                                    const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LComissaoValue, gatewayP);
+                                    const LPlano = await planos.GetUserByIDInternalByID(UsuarioDado.plano);
+                                    var LPercentComission = LPlano.json.addon.replace("%", "");
+                                    LPercentComission = parseFloat(LPercentComission);
+                                    const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LJSON.dadosComprador.valor);
+                                    LValorComissao = parseFloat(LValCom);
+                                    const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                 const response = {

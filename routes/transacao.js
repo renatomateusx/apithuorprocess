@@ -13,6 +13,8 @@ router.post('/GetPedidosByID', transacaoSchema.GetTransacoesByID);
 router.post('/ReembolsarPedidoByID', transacaoSchema.ReembolsarPedidoByID);
 router.post('/ReembolsarPedidoPSByID', checkoutPSSchema.ReembolsarPedidoPSByID);
 router.post('/ReembolsarPedidoPayUID', checkoutPayUSchema.ReembolsarPedidoPayUByID);
-
+router.post('/GetTransacoesInternas', transacaoSchema.GetTransacoesInternas);
+router.post('/GetTransacoesInternasPorLoja', transacaoSchema.GetTransacoesInternasPorLoja);
+router.post('/SetPaymentComissionDone', transacaoSchema.SetPaymentComissionDone);
 
 module.exports = router;
