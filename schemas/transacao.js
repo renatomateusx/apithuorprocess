@@ -23,6 +23,22 @@ module.exports.GetTransacoes = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
+    try {
+        const { shop, id_usuario } = req.body;
+        pool.query('SELECT * FROM transacoes_internas where url_loja = $1 and id_usuario =$2', [shop, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
 module.exports.SetPaymentComissionDone = (req, res, next) => {
     try {
         const { json_cobranca_comissao, json_response_comissao, id_usuario, data_processar } = req.body;
@@ -30,12 +46,10 @@ module.exports.SetPaymentComissionDone = (req, res, next) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(1);
-            res.end();
+            res.json(200);
         })
     } catch (error) {
         res.json(error);
-        res.end();
     }
 }
 

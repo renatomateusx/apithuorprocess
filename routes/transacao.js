@@ -16,5 +16,7 @@ router.post('/ReembolsarPedidoPayUID', checkoutPayUSchema.ReembolsarPedidoPayUBy
 router.post('/GetTransacoesInternas', transacaoSchema.GetTransacoesInternas);
 router.post('/GetTransacoesInternasPorLoja', transacaoSchema.GetTransacoesInternasPorLoja);
 router.post('/SetPaymentComissionDone', transacaoSchema.SetPaymentComissionDone);
+router.post('/GetPagamentosEfetuadosPorSeller', transacaoSchema.GetPagamentosEfetuadosPorSeller);
+
 
 module.exports = router;
