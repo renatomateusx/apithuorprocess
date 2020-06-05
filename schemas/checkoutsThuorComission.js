@@ -28,7 +28,7 @@ module.exports.DoPay = (req, res, next) => {
                     //     shopify: responseShopify,
                     //     woo: 'notYet',
                     // }
-                    res.status(200).send(pay);
+                    res.status(200).send(data.response);
                 }
                 else {
                     console.log("Response", data.response);

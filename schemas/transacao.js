@@ -56,8 +56,8 @@ module.exports.SetPaymentComissionDone = (req, res, next) => {
 
 module.exports.GetTransacoesInternas = (req, res, next) => {
     try {
-        
-        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc    ", (error, results) => {
+        const LHoje = moment().format("YYYY-MM-DD");
+        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc ",[hoje], (error, results) => {
             if (error) {
                 throw error
             }
