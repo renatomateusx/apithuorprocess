@@ -5,7 +5,7 @@ const utilisEmail = require('../routes/services/utilis');
 const constantes = require('../resources/constantes');
 const path = require("path");
 const fs = require('fs');
-
+const moment = require('moment');
 
 
 
@@ -26,6 +26,23 @@ module.exports.GetUserByID = (req, res, next) => {
     });
 }
 
+module.exports.GetUsersMensalidades = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const LData = moment().format('YYYY-MM-DD');
+            pool.query('SELECT * FROM usuarios WHERE proximo_pagamento_mensalidade = $1 and plano > 1', [LData], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+
+        }
+    });
+}
+
 module.exports.GetUserByIDExternal = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
@@ -37,7 +54,7 @@ module.exports.GetUserByIDExternal = (req, res, next) => {
                 res.status(200).send(results.rows[0]);
             })
         } catch (error) {
-            reject(error);
+            res.status(422).send(error);
 
         }
     });
@@ -211,8 +228,29 @@ module.exports.AddUser = (req, res, next) => {
 
 module.exports.UpdateUser = (req, res, next) => {
     try {
-        const { id, plano, json_plano_pagamento, proximo_pagamento } = req.body;
-        pool.query('UPDATE usuarios SET plano=$1, json_pagamento=$2, proximo_pagamento=$4 WHERE id=$3', [plano, json_plano_pagamento, id, proximo_pagamento], (error, results) => {
+        const { id, plano, json_plano_pagamento, proximo_pagamento, proximo_pagamento_mensalidade } = req.body;
+        pool.query('UPDATE usuarios SET plano=$1, json_pagamento=$2, proximo_pagamento=$4, proximo_pagamento_mensalidade=$5 WHERE id=$3', [plano, json_plano_pagamento, id, proximo_pagamento, proximo_pagamento_mensalidade], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rowCount > 0) {
+                res.status(200).json(`Usuário Atualizado`);
+            }
+            else {
+                res.status(422).json('Erro ao criar usuário', results);
+            }
+
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.UpdateUltimoPagamentoUser = (req, res, next) => {
+    try {
+        const { id, ultimo_pagamento_mensalidade } = req.body;
+        pool.query('UPDATE usuarios SET ultimo_pagamento_mensalidade=$1 WHERE id=$2', [ultimo_pagamento_mensalidade, id], (error, results) => {
             if (error) {
                 throw error
             }

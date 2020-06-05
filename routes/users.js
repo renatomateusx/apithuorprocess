@@ -32,6 +32,14 @@ router.post('/AtivarEmail', usersSchema.AtivarEmail);
 
 router.post('/UpdateUser', usersSchema.UpdateUser);
 
+router.post('/GetUsersMensalidades', usersSchema.GetUsersMensalidades);
+
+router.post('/UpdateUltimoPagamentoUser', usersSchema.UpdateUltimoPagamentoUser);
+
+
+
+
+
 router.get('/VerificaToken', function (req, res, next) {
   var token = req.headers['authorization'];
   if (!token)

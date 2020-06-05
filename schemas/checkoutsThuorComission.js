@@ -13,7 +13,7 @@ module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
         console.log("Pay", pay);
-
+        
         mercadopago.configurations.setAccessToken(constantes.SAND_BOX_MP_ACCESS_TOKEN);        
         mercadopago.payment.save(pay)
             .then(async function (data) {
@@ -27,7 +27,8 @@ module.exports.DoPay = (req, res, next) => {
                     // var plataformasResponse = {
                     //     shopify: responseShopify,
                     //     woo: 'notYet',
-                    // }
+                    // }                    
+
                     res.status(200).send(data.response);
                 }
                 else {

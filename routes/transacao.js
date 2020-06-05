@@ -19,4 +19,5 @@ router.post('/SetPaymentComissionDone', transacaoSchema.SetPaymentComissionDone)
 router.post('/GetPagamentosEfetuadosPorSeller', transacaoSchema.GetPagamentosEfetuadosPorSeller);
 
 
+
 module.exports = router;

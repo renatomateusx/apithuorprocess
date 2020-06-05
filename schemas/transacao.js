@@ -57,7 +57,7 @@ module.exports.SetPaymentComissionDone = (req, res, next) => {
 module.exports.GetTransacoesInternas = (req, res, next) => {
     try {
         const LHoje = moment().format("YYYY-MM-DD");
-        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc ",[hoje], (error, results) => {
+        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc ", [hoje], (error, results) => {
             if (error) {
                 throw error
             }
@@ -73,7 +73,7 @@ module.exports.GetTransacoesInternas = (req, res, next) => {
 module.exports.GetTransacoesInternasPorLoja = (req, res, next) => {
     try {
         const data_processar = moment().format('YYYY-MM-DD');
-        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 ORDER BY id_usuario ASC",[data_processar], (error, results) => {
+        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 ORDER BY id_usuario ASC", [data_processar], (error, results) => {
             if (error) {
                 throw error
             }
@@ -166,6 +166,9 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
         }
     });
 }
+
+
+
 
 module.exports.insereTransacaoInterna = (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
@@ -324,7 +327,7 @@ module.exports.UpdateTransacaoShopifyOrder = (req, res, next) => {
 module.exports.UpdateTransacaoShopifyOrderStatus = (order_id, json_shopify_order, status) => {
     return new Promise((resolve, reject) => {
         try {
-            
+
             const LQuery = "SELECT id, json_shopify_response, (json_shopify_response->'order'->>'id')::bigint as order_id FROM transacoes WHERE (json_shopify_response->'order'->>'id')::bigint = $1";
             pool.query(LQuery, [order_id], (error, results) => {
                 if (error) {
@@ -334,7 +337,7 @@ module.exports.UpdateTransacaoShopifyOrderStatus = (order_id, json_shopify_order
                     pool.query("UPDATE transacoes SET json_shopify_response=$1,  status = $3 WHERE id=$2", [json_shopify_order, obj.id, status], (error, resultsUpdate) => {
                         if (error) {
                             throw error
-                        }                       
+                        }
                         resolve(resultsUpdate.rowCount);
                     });
                 })

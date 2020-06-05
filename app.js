@@ -51,6 +51,7 @@ var servicesConsultaPagamento = require('./routes/services/serviceConsultaPagame
 var utilisEmail = require('./routes/utilisEmail');
 var checkoutThuorComission = require('./routes/checkoutsThuorComission');
 var planos = require('./routes/planos');
+var mensalidades = require('./routes/mensalidades');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -97,6 +98,7 @@ app.use('/servicesConsultaPagamento', servicesConsultaPagamento);
 app.use('/utilisEmail', utilisEmail);
 app.use('/checkoutThuorComission', checkoutThuorComission);
 app.use('/planos', planos);
+app.use('/mensalidades', mensalidades);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
