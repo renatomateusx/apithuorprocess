@@ -28,7 +28,7 @@ module.exports.GetAjudaByID = (req, res, next) => {
             if (error) {
                 throw error
             }
-            res.status(200).send(results.rows);
+            res.status(200).send(results.rows[0]);
             res.end();
         })
     } catch (error) {
@@ -39,8 +39,8 @@ module.exports.GetAjudaByID = (req, res, next) => {
 
 module.exports.SaveAjuda = (req, res, next) => {
     try {
-        const { titulo, texto, tag } = req.body;
-        pool.query('INSERT INTO ajuda (titulo, texto, tag) VALUES ($1,$2,$3) ON CONFLICT (titulo) DO UPDATE SET titulo=$1, texto=$2, tag=$3', [titulo, texto, tag], (error, results) => {
+        const { titulo, texto, tag, status } = req.body;
+        pool.query('INSERT INTO ajuda (titulo, texto, tag, status) VALUES ($1,$2,$3, $4) ON CONFLICT (titulo) DO UPDATE SET titulo=$1, texto=$2, tag=$3, status =$4', [titulo, texto, tag, status], (error, results) => {
             if (error) {
                 throw error
             }
