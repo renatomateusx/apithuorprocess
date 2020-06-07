@@ -11,13 +11,13 @@ image: node:9.4.0
 cache:
   paths:
     - node_modules/
-    - .yarn
 
 # We tell GitLab to install all the packages
 # before running anything.
 # Docker images come with yarn preinstalled
 before_script:  
   - apt-get update -qq && apt-get install
+  - npm install
 
 # You specify the stages. Those are the steps that GitLab will go through 
 # Order matters. 
@@ -31,8 +31,7 @@ Build:
   tags:
     - node
   before_script: 
-    - yarn config set cache-folder .yarn
-    - yarn install 
+    - npm install 
   script:
     - npm run build
 
@@ -41,8 +40,7 @@ Test:
   tags:
   - node
   before_script: 
-    - yarn config set cache-folder .yarn
-    - yarn install --frozen-lockfile
+    - npm install
   script:
   # Installs Chrome
     - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |  apt-key add -
