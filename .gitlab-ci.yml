@@ -19,7 +19,6 @@ testing_testing:
 before_script:
   - apt-get update -qy
   - apt-get install -y lftp
-
 deploy:
   script:
     # Sync to FTP
