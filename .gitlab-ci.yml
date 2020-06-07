@@ -25,8 +25,6 @@ stages:
   - build
   - test
   - staging
-  - openMr
-  - production
 
 Build:
   stage: build
