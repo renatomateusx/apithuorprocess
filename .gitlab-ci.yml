@@ -1,33 +1,21 @@
-image: api:1.0.0
+image: node:latest
 
-cache:
-  paths:
-    - node_modules/
+    stages:
+      - build
+      - test
 
-stages:
-  - deploy
+    cache:
+      paths:
+        - node_modules/
 
-before_script:
-  # Check for ssh-agent + rsync and install if not present
-  - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y  )"
-  - "which rsync || ( apt-get update -y && apt-get install rsync -y )"
-  - eval $(ssh-agent -s)
-  # Inject the remote's private key
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\\r' | ssh-add - > /dev/null
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  # Append keyscan output into known hosts
-  - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
-  - chmod 644 ~/.ssh/known_hosts
-  - npm install
-  - npm run build
+    install_dependencies:
+      stage: build
+      script:
+        - npm install
+      artifacts:
+        paths:
+          - node_modules/
 
-deploy:
-  stage: deploy
-  script:
-    - rsync -avuz --exclude=".*" $CI_PROJECT_DIR/dist/ $SERVER_USER@$SERVER_IP:/var/www/watchcrypto.today
-    # Non interactive ssh gracefully reloads server
-    - ssh $SERVER_USER@$SERVER_IP '. /etc/profile; pm2 reload all'
-  only:
-    # Trigger deployments only from production branch
-    - production
+    testing_testing:
+      stage: test
+      script: npm test
