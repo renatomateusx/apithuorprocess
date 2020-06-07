@@ -1,51 +1,10 @@
-# Reference: https://www.exclamationlabs.com/blog/continuous-deployment-to-npm-using-gitlab-ci/
+image: ubuntu:18.04
 
-# GitLab uses docker in the background, so we need to specify the 
-# image versions. This is useful because we're freely to use
-# multiple node versions to work with it. They come from the docker
-# repo.
-# Uses NodeJS V 9.4.0
-image: node:9.4.0
+before_script:
+  - apt-get update -qy
+  - apt-get install -y lftp
 
-# And to cache them as well.
-cache:
-  paths:
-    - node_modules/
-
-# We tell GitLab to install all the packages
-# before running anything.
-# Docker images come with yarn preinstalled
-before_script:  
-  - apt-get update -qq && apt-get install
-  - npm install
-
-# You specify the stages. Those are the steps that GitLab will go through 
-# Order matters. 
-stages:
-  - build
-  - test
-  - staging
-
-Build:
-  stage: build
-  tags:
-    - node
-  before_script: 
-    - npm install 
+build:
   script:
-    - npm run build
-
-Test:
-  stage: test
-  tags:
-  - node
-  before_script: 
-    - npm install
-  script:
-  # Installs Chrome
-    - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |  apt-key add -
-    - echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' |  tee /etc/apt/sources.list.d/google-chrome.list
-    - apt-get update 
-    - apt-get install google-chrome-stable -y
-  # Runs the tests.
-    - npm run test:karma-headless
+    # Sync to FTP
+    - lftp -e "open ftp.thuor.com; user $FTP_USERNAME_FRONT_END $FTP_PASSWORD_FRONT_END; mirror -X .* -X .*/ --reverse --verbose --delete local-folder/ destination-folder/; bye"
