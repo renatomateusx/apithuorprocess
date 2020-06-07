@@ -1,10 +1,26 @@
 image: ubuntu:18.04
-
+ stages:
+  - build
+  - test
+  - deploy
+cache:
+  paths:
+    - node_modules/
+install_dependencies:
+  stage: build
+  script:
+    - npm install
+  artifacts:
+    paths:
+      - node_modules/
+testing_testing:
+  stage: test
+  script: npm test
 before_script:
   - apt-get update -qy
   - apt-get install -y lftp
 
-build:
+deploy:
   script:
     # Sync to FTP
     - lftp -e "open 161.35.125.194; user $FTP_USERNAME_BACK_END $FTP_PASSWORD_BACK_END; mirror -X .* -X .*/ --reverse --verbose --delete dist/ public_html/; bye"
