@@ -7,4 +7,4 @@ before_script:
 build:
   script:
     # Sync to FTP
-    - lftp -e "open 161.35.125.194; user $FTP_USERNAME_FRONT_END $FTP_PASSWORD_FRONT_END; mirror -X .* -X .*/ --reverse --verbose --delete dist/ public_html/; bye"
+    - lftp -e "open 161.35.125.194; user $FTP_USERNAME_BACK_END $FTP_PASSWORD_BACK_END; mirror -X .* -X .*/ --reverse --verbose --delete dist/ public_html/; bye"
