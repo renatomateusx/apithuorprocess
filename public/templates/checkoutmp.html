@@ -1,0 +1,1896 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- <link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/load-awesome/1.1.0/ball-scale-ripple-multiple.min.css"
+		crossorigin="anonymous"> -->
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css"
+        crossorigin="anonymous">
+
+
+    <title>Thuor Checkout</title>
+
+    <style scoped>
+        .marginCenter {
+            margin: 0 auto !important;
+        }
+
+        .loader {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            vertical-align: middle;
+        }
+
+        .loader-bars span,
+        .loader-bars:after,
+        .loader-bars:before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 10px;
+            height: 30px;
+            background-color: #23b7e5;
+            -webkit-animation: grow 1.5s linear infinite;
+            animation: grow 1.5s linear infinite
+        }
+
+        .loader-bars:after {
+            left: 15px;
+            -webkit-animation: grow 1.5s linear -.5s infinite;
+            animation: grow 1.5s linear -.5s infinite
+        }
+
+        .loader-bars span {
+            left: 30px;
+            -webkit-animation: grow 1.5s linear -1s infinite;
+            animation: grow 1.5s linear -1s infinite
+        }
+
+        @-webkit-keyframes grow {
+            0% {
+                -webkit-transform: scaleY(0);
+                transform: scaleY(0);
+                opacity: 0
+            }
+
+            50% {
+                -webkit-transform: scaleY(1);
+                transform: scaleY(1);
+                opacity: 1
+            }
+
+            100% {
+                -webkit-transform: scaleY(0);
+                transform: scaleY(0);
+                opacity: 0
+            }
+        }
+
+        @keyframes grow {
+            0% {
+                -webkit-transform: scaleY(0);
+                transform: scaleY(0);
+                opacity: 0
+            }
+
+            50% {
+                -webkit-transform: scaleY(1);
+                transform: scaleY(1);
+                opacity: 1
+            }
+
+            100% {
+                -webkit-transform: scaleY(0);
+                transform: scaleY(0);
+                opacity: 0
+            }
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0);
+                tranform: rotate(0)
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                tranform: rotate(360deg)
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                -webkit-transform: rotate(0);
+                transform: rotate(0)
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg)
+            }
+        }
+
+        @-webkit-keyframes spinreverse {
+            0% {
+                -webkit-transform: rotate(0);
+                tranform: rotate(0)
+            }
+
+            100% {
+                -webkit-transform: rotate(-360deg);
+                tranform: rotate(-360deg)
+            }
+        }
+
+        @keyframes spinreverse {
+            0% {
+                -webkit-transform: rotate(0);
+                transform: rotate(0)
+            }
+
+            100% {
+                -webkit-transform: rotate(-360deg);
+                transform: rotate(-360deg)
+            }
+        }
+
+        .swal-wide {
+            width: 280px !important;
+            height: 150px;
+        }
+
+        .loadingSwall {
+            border-color: #23b7e5 !important;
+            width: 80px !important;
+            height: 80px !important;
+            margin-bottom: 20px;
+        }
+
+        .widthLoadingDiv {
+            display: block;
+            width: 15% !important;
+            margin: 0 auto !important;
+        }
+
+        .text-aguard {
+            font-size: 35px;
+            top: 0px !important;
+            position: relative;
+            margin: 0 auto;
+            padding: 0;
+            color: #23b7e5 !important;
+        }
+
+        .card-flat {
+            margin-top: 80px !important;
+        }
+
+        .bg-dark {
+            background-color: #23b7e5 !important;
+        }
+
+        .footerText {
+            font-size: 12px !important;
+        }
+
+        .custom-file-label::after {
+            content: "Procurar" !important;
+            height: 100% !important;
+        }
+
+        .cursorP {
+            cursor: pointer !important;
+        }
+
+        .starFulFill {
+            color: gold;
+            margin-left: 5px !important;
+        }
+
+        .starNotFulFill {
+            color: white;
+        }
+
+        .alertErros {
+            margin-top: 0px !important;
+            padding: 5px !important;
+        }
+
+        .success {
+            color: green;
+            font-size: 15px !important;
+        }
+
+        .danger {
+            color: red;
+            font-size: 15px !important;
+        }
+
+        input[file-upload-button] {
+
+            background-color: #3498db;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            margin: 10px;
+            padding: 6px 20px
+        }
+
+        /* Aparência que terá o seletor de arquivo */
+        .hidden {
+            display: none !important;
+        }
+
+        .checkedBuy {
+            color: green;
+            font-size: 20px !important;
+        }
+
+        .noopen {
+            text-decoration: none !important;
+        }
+
+        .fontName {
+            font-size: 21px !important;
+            margin-left: 0px !important;
+            left: 0 !important;
+        }
+
+        .imageThumb {
+            margin: 0 auto !important;
+            display: block !important;
+        }
+
+        fieldset,
+        label {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 20px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin: 10px;
+        }
+
+        /****** Style Star Rating Widget *****/
+
+        .rating {
+            border: none;
+            float: left;
+        }
+
+        .rating>input {
+            display: none;
+        }
+
+        .rating>label:before {
+            margin: 5px;
+            font-size: 1.25em;
+            font-family: FontAwesome;
+            display: inline-block;
+            content: "\f005";
+        }
+
+        .rating>.half:before {
+            content: "\f089";
+            position: absolute;
+        }
+
+        .rating>label {
+            color: #ddd;
+            float: right;
+        }
+
+        /***** CSS Magic to Highlight Stars on Hover *****/
+
+        .rating>input:checked~label,
+        /* show gold star when clicked */
+        .rating:not(:checked)>label:hover,
+        /* hover current star */
+        .rating:not(:checked)>label:hover~label {
+            color: gold;
+        }
+
+        /* hover previous stars in list */
+
+        .rating>input:checked+label:hover,
+        /* hover current star when changing rating */
+        .rating>input:checked~label:hover,
+        .rating>label:hover~input:checked~label,
+        /* lighten current selection */
+        .rating>input:checked~label:hover~label {
+            color: gold;
+        }
+
+        .fontf {
+            color: gold;
+        }
+
+        .imageDisplayOff {
+            display: none !important;
+        }
+
+        .imageDisplayOn {
+            display: block !important;
+        }
+
+        .card-flat {
+            margin-top: 80px !important;
+        }
+
+        .bg-dark {
+            background-color: #23b7e5 !important;
+        }
+
+        .btn-outline-info {
+            color: white;
+            border-color: white;
+        }
+
+        .green {
+            color: green !important;
+        }
+
+        .holder-icon {
+            left: 0;
+            position: absolute;
+            top: 15px;
+            font-size: 22px;
+        }
+
+        .remove {
+            position: relative;
+            top: 33px;
+            cursor: pointer;
+        }
+
+        .center {
+            text-align: center;
+            display: block;
+        }
+
+        .QuatroCincopx {
+            width: 45px !important;
+        }
+
+        .compare {
+            color: red;
+            font-weight: 700;
+        }
+
+        .priceReal {
+            color: green;
+            font-weight: 700;
+        }
+
+        .desconto {
+            color: blue;
+            font-weight: 700;
+        }
+
+        .btnIncrementDecrement {
+            height: 21px;
+        }
+
+        .spanIncrementDecrement {
+            top: -6px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .cursorP {
+            cursor: pointer !important;
+        }
+
+        .btnKeepBuyingFooter {
+            color: #5d9cec;
+            border-color: #5d9cec;
+        }
+
+        .iconBadge {
+            background-color: #5d9cec;
+            font-size: 15px;
+            color: white;
+        }
+
+        .iconStep {
+            border-radius: 50px;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto;
+            display: block;
+            color: white;
+            background-color: #5d9cec;
+            text-align: center;
+            font-size: 34px;
+            margin-top: 5px;
+            line-height: normal;
+        }
+
+        .dadosPessoais {
+            font-size: 20px;
+            font-weight: 900;
+            top: 1px;
+            position: relative;
+            color: #5d9cec;
+            margin-left: 10px;
+        }
+
+        .resumoCompra {
+            font-size: 16px;
+            font-weight: 900;
+            top: 1px;
+            position: relative;
+            color: #5d9cec;
+            margin-left: 10px;
+        }
+
+        .comandoCollapse {
+            margin-left: 5px;
+            top: 2px;
+            position: relative;
+            color: dodgerblue;
+            font-size: 17px;
+        }
+
+        .labelForm {
+            margin: 0 0 0px;
+
+            color: #4d4d4d;
+            font-weight: 700;
+        }
+
+        .formGroup {
+            margin-bottom: 0rem;
+        }
+
+        .card-default {
+            border-color: #5d9cec;
+        }
+
+        .cardSide {
+            padding: 0 5px;
+            box-sizing: border-box;
+            border-radius: 50px;
+            display: inline !important;
+        }
+
+        .textInformation {
+            line-height: 14px;
+            color: #999 !important;
+            padding: 0;
+            padding-left: 30px;
+            float: left;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .minusmargintop {
+            margin-top: -30px !important;
+        }
+
+        .box-title {
+            position: relative;
+            padding: 0 30px 0 35px;
+            box-sizing: border-box;
+        }
+
+        .card-default {
+            border-radius: 7px;
+        }
+
+        .btnContinue {
+            height: 50px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        .rounded {
+            border-radius: 7px !important;
+        }
+
+        .disabledBox {
+            cursor: default;
+            pointer-events: none;
+            -moz-opacity: 0.6;
+            -khtml-opacity: 0.6;
+            -webkit-opacity: 0.6;
+            opacity: 0.6;
+        }
+
+        .paddingZero {
+            padding: 0;
+        }
+
+        .localidade {
+            top: 5px !important;
+            font-size: 12px;
+        }
+
+        .dadosPessoaisNomeCompletoVModel {
+            color: #4d4d4d !important;
+            font-weight: 700 !important;
+            font-size: 15px;
+        }
+
+        .paddingTopBottomZERO {
+            padding-bottom: 0px !important;
+            padding-top: 0px !important;
+        }
+
+        .enderecoEntregaHeader {
+            font-size: 15px;
+            font-weight: 700;
+            color: grey;
+        }
+
+        .opcaoSelecionada {
+            background-color: #dcdcdc;
+            color: black;
+            font-weight: bold;
+            border-color: #dcdcdc;
+            border: 2px solid #ccc;
+        }
+
+        .opcaoDeselecionada {
+            font-weight: bold;
+            color: gray;
+            border-color: 2px solid #23b7e5;
+        }
+
+        .btnFrete {
+            padding: 15px;
+            margin: 10px;
+            cursor: pointer !important;
+            border-radius: 10px;
+        }
+
+        .btnFormaPagamentoSelecionada {
+            padding: 5px;
+            margin: 5px;
+            cursor: pointer !important;
+            border-radius: 10px;
+            margin: 0 auto !important;
+            margin-bottom: 10px !important;
+        }
+
+        .smallInforFormaPagamentoBoleto {
+            margin: 0 auto !important;
+            padding: 5px;
+            margin: 5px;
+            cursor: pointer !important;
+            border-radius: 10px;
+            color: black;
+            background-color: #dcdcdc;
+            border: 2px solid #ccc;
+        }
+
+        .selecionadoInfo {
+            margin-top: 10px;
+            color: blueviolet;
+            text-align: right !important;
+            float: right !important;
+        }
+
+        .ValorTotalResumo {
+            background-color: #f5f5f5;
+            border-radius: 9px;
+            height: 40px;
+            color: white !important;
+        }
+
+        .textValorTotal {
+            color: black;
+            font-weight: 700;
+            font-size: 1.2em;
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+            top: 5px;
+            float: left !important;
+        }
+
+        .textItems {
+            color: black;
+            margin-bottom: 5px !important;
+        }
+
+        .imgVariant {
+            width: 50px;
+            height: 50px;
+            top: 7px;
+            position: relative;
+        }
+
+        .textInfoFrete {
+            text-align: left;
+            font-size: 11px;
+            white-space: pre-wrap;
+        }
+
+        .imageCard {
+            width: 25px !important;
+            height: 25px !important;
+        }
+
+        .valorTotalCollapse {
+            font-weight: 700;
+            color: #3fc583 !important;
+            font-size: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media only screen and (max-width: 992px) {
+            #btnTop {
+                display: block !important;
+            }
+
+            .valorTotalCollapse {
+                font-weight: 700;
+                color: #3fc583 !important;
+                font-size: 11px !important;
+                top: 3px !important;
+                position: relative;
+            }
+
+            .resumoCompra {
+                font-size: 13px !important;
+            }
+
+            .comandoCollapse {
+                margin-left: 5px;
+                top: 0px !important;
+                position: relative;
+                color: dodgerblue;
+                font-size: 15px !important;
+            }
+        }
+
+        @media only screen and (max-width: 767px) {
+            .QuatroCincopx {
+                margin-left: 0px !important;
+            }
+
+            .remove {
+                float: left;
+                left: 60px;
+                position: relative;
+                top: -54px;
+                cursor: pointer;
+                font-size: 25px;
+            }
+
+            .valorTotalCollapse {
+                font-weight: 700;
+                color: #3fc583;
+                font-size: 11px !important;
+                top: 3px !important;
+                position: relative;
+            }
+
+            .resumoCompra {
+                font-size: 13px !important;
+            }
+
+            .comandoCollapse {
+                margin-left: 5px;
+                top: 0px !important;
+                position: relative;
+                color: dodgerblue;
+                font-size: 15px !important;
+            }
+
+            .textItems {
+                position: relative;
+                top: 0px !important;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="col-md-12 mt-5">
+
+
+        <div class="row mt-2">
+
+            <div class="col-md-3 mr-0 pr-0 pl-0"></div>
+            <div class="col-xl-6 ml-0 mr-0 pr-0 pl-0">
+                <form>
+                    <!-- START card-->
+                    <form name="form" id="form">
+                        <div class="block-center">
+                            <div class="container-fluid">
+                                <div class="card shopping-cart mb-0">
+                                    <div class="card-header bg-dark text-light">
+                                        <span class="col-md-12"><strong id="pnome_loja">Thuor.com</strong></span>
+
+                                        <!-- <div class="clearfix"></div> -->
+                                        <div class="item-security pull-right float-right black-70 ml30 row"
+                                            aria-hidden="true">
+                                            <div class="holder-icon col-md-2" style="display:none;">
+                                                <div class="fa fa-lock"></div>
+                                                <!-- /.icon -->
+                                            </div>
+                                            <!-- /.holder-icon -->
+                                            <div class="text mr-2">
+                                                <div class="fa fa-lock"></div>
+                                                <strong class="ml-1">Pagamento</strong>
+                                                <br />
+                                                <strong class="green">100% seguro</strong>
+                                            </div>
+                                            <!-- /.text -->
+                                        </div>
+                                    </div>
+                                    <span class></span>
+                                    <div class="badge badge-blue iconStep" style="display:none;">1</div>
+                                </div>
+                                <div class="row col-lg-12 col-lg-offset-2" style=" margin: 0 auto; display:block">
+                                    <!-- <up-sell-card @recalcula="getTotal()" :noCheckout="1"></up-sell-card> -->
+                                    <!-- START STEP 4-->
+                                    <div class="col-md-4 mt-0 mb-0 cardSide">
+                                        <!-- START card-->
+                                        <div class="card card-default mb-3">
+                                            <div class="card-header rounded ">
+                                                <div class="row">
+                                                    <span class="col-md-12 mt-3 ml-2 mr-0"><strong>Escolha qual
+                                                            opção vai levar</strong></span>
+                                                    <div class="product-info row col-md-12 text-center marginCenter"
+                                                        id="productOptions"></div>
+                                                    <button onclick="adicionarProdutoUpSell()" type="button"
+                                                        class="mt-2 btn btn-primary btn-lg btn-block float-left pull-left btnContinue ">Adicionar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card card-default mb-0">
+
+                                            <div class="card-header rounded">
+                                                <a style="cursor:pointer!important;" data-toggle="collapse"
+                                                    aria-expanded="false" aria-controls="collapseResumo"
+                                                    onclick="collapse('#collapseResumo','#comandoCollapse')">
+                                                    <span id="collapseParent" style="margin-top: 1px!important;"
+                                                        class="resumoCompra pull-left float-left ml-0"
+                                                        role="button">Resumo</span>
+                                                    <small style="cursor:pointer!important;"
+                                                        class="ml-2 text-left textItems " id="totalQuantity">
+                                                        1 Item </small>
+                                                    <small class="valorTotalCollapse pull-right float-right">
+                                                        <span class="valorTotalCollapse" id="granTotal">R$ 0,00</span>
+                                                        <span
+                                                            class="fa fa-arrow-down comandoCollapse pull-right float-right"
+                                                            id="comandoCollapse" role="button"></span>
+                                                    </small>
+                                                </a>
+
+                                                <div class="col-lg-12 collapse" id="collapseResumo"
+                                                    data-parent="#collapseParent">
+                                                    <div class="col-md-12 ValorTotalResumo mt-3">
+                                                        <span class="textValorTotal col-md-12" id="granTotal2">Valor: R$
+                                                            0,00</span>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="items" id="items">
+
+                                                            </div>
+                                                        </div>
+                                                        <!-- CUPOM CARD -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body minusmargintop"></div>
+                                        </div>
+                                        <!-- END card-->
+                                    </div>
+                                    <!-- END STEP 4-->
+                                    <!-- START STEP 1-->
+                                    <form class="form-horizontal" id="formCheckout">
+                                        <div class="col-md-4 col-xl-4 mt-0 mb-0 cardSide">
+                                            <!-- START card-->
+                                            <div class="card card-default mb-0">
+                                                <div class="card-header rounded">
+                                                    <span class="badge badge-blue iconBadge">1</span>
+                                                    <span class="dadosPessoais">Dados Pessoais</span>
+                                                    <span class="fa fa-edit pull-right float-right cursorP hidden"
+                                                        id="editaDadosPessoais()"
+                                                        onclick="editarDadosPessoais()"></span>
+                                                    <p>
+                                                        <small class="textInformation col-md-10">Solicitamos somente as
+                                                            informações essenciais para você fazer sua compra.</small>
+                                                    </p>
+                                                </div>
+                                                <div class="card-body minusmargintop"
+                                                    v-show="this.getStepDadosPessoaisFinalizados()">
+                                                    <div class="form-group row formGroup">
+                                                        <label id="pnome_completo"
+                                                            class="col-xl-12 col-form-label labelForm dadosPessoaisNomeCompletoVModel paddingTopBottomZERO"
+                                                            v-show="nome_completo"></label>
+                                                        <label id="pemail"
+                                                            class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"
+                                                            v-show="email"></label>
+                                                        <label id="pcpf"
+                                                            class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"
+                                                            v-show="cpf"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body minusmargintop"
+                                                    v-show="!this.getStepDadosPessoaisFinalizados()">
+                                                    <div class="form-group row formGroup">
+                                                        <label class="col-md-10 col-form-label labelForm">E-mail</label>
+                                                        <div class="col-xl-12">
+                                                            <input autocomplete="email" class="form-control"
+                                                                type="email" v-model.lazy="email" id="email_user"
+                                                                placeholder="Digite seu E-mail" required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row formGroup">
+                                                        <label class="col-xl-12 col-form-label labelForm">Nome
+                                                            Completo</label>
+                                                        <div class="col-xl-12">
+                                                            <input class="form-control required" autocomplete="name"
+                                                                onblur="populaDadosComprador()" type="text"
+                                                                minlength="5" v-model.lazy="nome_completo"
+                                                                id="nome_completo" placeholder="Digite seu nome aqui"
+                                                                required />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row formGroup">
+                                                        <label class="col-xl-12 col-form-label labelForm">CPF</label>
+                                                        <div class="col-md-7">
+                                                            <input onchange="maskCPF()" onblur="saveLead()"
+                                                                minlength="14" maxlength="14"
+                                                                class="form-control required" autocomplete="cpf"
+                                                                type="text" v-model="cpf" placeholder="Digite seu CPF"
+                                                                required />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row formGroup">
+                                                        <label class="col-xl-12 col-form-label labelForm"
+                                                            for="inlineFormInputGroup">Celular / WhatsApp</label>
+                                                        <div class="col-xl-7 col-md-9">
+                                                            <div class="input-group mb-0">
+                                                                <div class="input-group-prepend">
+                                                                    <div class="input-group-text">+55</div>
+                                                                </div>
+                                                                <input class="form-control" id="inlineFormInputGroup"
+                                                                    type="text" minlength="15" maxlength="15"
+                                                                    onchange="maskTelefone()" v-model="telefone"
+                                                                    placeholder="71 9 9130-6561" required />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row mt-3">
+                                                        <div class="col-xl-12">
+                                                            <button
+                                                                class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"
+                                                                onclick="validarStep(currentStep)" type="button">
+                                                                Continuar
+                                                                <span class="fa fa-arrow-right ml-2"
+                                                                    style="position:relative; top:1px"></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- END card-->
+                                        </div>
+                                        <!-- END STEP 1-->
+                                        <!-- START STEP 2-->
+                                        <div class="col-md-4 mt-0 mb-0 cardSide">
+                                            <!-- START card-->
+                                            <div class="card card-default mb-0">
+                                                <div class="card-header rounded">
+                                                    <span class="badge badge-blue iconBadge">2</span>
+                                                    <span class="dadosPessoais">Entrega</span>
+                                                    <span class="fa fa-edit pull-right float-right cursorP"
+                                                        v-show="getStepDadosEnderecoFinalizado() == 1"
+                                                        onclick="editarEndereco()"></span>
+                                                    <p>
+                                                        <small class="textInformation col-md-10">Cadastre ou selecione
+                                                            um
+                                                            endereço para receber sua encomenda.</small>
+                                                    </p>
+                                                </div>
+                                                <div class="card-default minusmargintop"
+                                                    v-show="getStepDadosEnderecoFinalizado() == 1">
+                                                    <div class="card-body">
+                                                        <div class="form-group row formGroup">
+                                                            <label
+                                                                class="col-xl-12 col-form-label labelForm enderecoEntregaHeader paddingTopBottomZERO"
+                                                                v-show="endereco">
+                                                                <b>Endereço de Entrega:</b>
+                                                            </label>
+                                                            <label
+                                                                class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"
+                                                                v-show="endereco">
+                                                                <b>{{endereco}} - {{bairro}}</b>
+                                                            </label>
+                                                            <label
+                                                                class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"
+                                                                v-show="cidade">{{cidade}}-{{estado}}</label>
+                                                            <label
+                                                                class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"
+                                                                v-show="CEP">CEP: {{CEP}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body minusmargintop"
+                                                    v-show="getStepDadosEnderecoFinalizado() == 0">
+                                                    <div class="form-group row formGroup">
+                                                        <label class="col-xl-12 col-form-label labelForm">CEP</label>
+                                                        <div class="col-md-7">
+                                                            <input onchange="consultaCEP()"
+                                                                class="form-control required" autocomplete="zipcode"
+                                                                type="text" id="cep" v-model="CEP"
+                                                                placeholder="Digite seu CEP" />
+                                                        </div>
+                                                        <span class="localidade col-md-6 pull-left float-left text-left"
+                                                            v-show="getCidade()">{{getCidade()}} -
+                                                            {{getEstado()}}</span>
+                                                    </div>
+                                                    <div class="form-group row formGroup" v-show="endereco">
+                                                        <label
+                                                            class="col-md-12 col-form-label labelForm">Endereço</label>
+                                                        <div class="col-xl-12">
+                                                            <input autocomplete="address" class="form-control"
+                                                                type="address" id="endereco" v-model="endereco"
+                                                                placeholder="Digite seu E-mail" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row formGroup" v-show="endereco">
+                                                        <div class="col-md-6 mt-1">
+                                                            <label
+                                                                class="col-xl-12 col-form-label labelForm paddingZero mb-1">Número</label>
+                                                            <input class="form-control required" autocomplete="address"
+                                                                type="text" v-model="numero_porta" />
+                                                        </div>
+
+                                                        <div class="col-md-6 mt-1" v-show="bairro">
+                                                            <label
+                                                                class="col-xl-6 col-form-label labelForm paddingZero mb-1">Bairro</label>
+                                                            <input class="form-control required"
+                                                                autocomplete="neighborhood" type="text"
+                                                                v-model="bairro" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row formGroup" v-show="endereco">
+                                                        <label
+                                                            class="col-xl-12 col-form-label labelForm">Complemento</label>
+                                                        <div class="col-md-12">
+                                                            <input class="form-control" autocomplete="complement"
+                                                                v-model="complemento" type="text" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row formGroup" v-show="endereco">
+                                                        <label
+                                                            class="col-xl-12 col-form-label labelForm">Destinatário</label>
+                                                        <div class="col-md-12">
+                                                            <input class="form-control" autocomplete="receiver"
+                                                                v-model="destinatario" type="text" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group row mt-3">
+                                                        <div class="col-xl-12">
+                                                            <button
+                                                                class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"
+                                                                onclick="validarStep(currentStep)" type="button">
+                                                                Continuar
+                                                                <span class="fa fa-arrow-right ml-2"
+                                                                    style="position:relative; top:1px"></span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- stepDadosEnderecoFinalizados == 1 &&  -->
+                                                <div class="card-default minusmargintop"
+                                                    v-show="getStepDadosEnderecoFinalizado() == 1 && ifGetFretes()"
+                                                    v-for="{id, status, nome, prazo, preco } in getFretes()" :key="id">
+                                                    <div class="card-body">
+                                                        <div class="form-group row formGroup">
+                                                            <button type="button" onclick="freteSelected(id)"
+                                                                class="btn btn-secondary col-md-11 pull-left float-left btnFrete"
+                                                                :class="freteSelecionado == id ? 'opcaoSelecionada':'opcaoDeselecionada'">
+                                                                <p>
+                                                                    <span
+                                                                        class="text-left pull-left float-left col-md-10 textInfoFrete">{{nome}}</span>
+                                                                </p>
+                                                                <p>
+                                                                    <span
+                                                                        class="text-left pull-left float-left ml-0 col-md-10 textInfoFrete">Preço:
+                                                                        R$ {{preco}}</span>
+                                                                </p>
+                                                                <p>
+                                                                    <span
+                                                                        class="text-left pull-left float-left ml-0 col-md-10">
+                                                                        <small>Entrega garantida</small>
+                                                                    </span>
+                                                                </p>
+                                                                <p v-if="freteSelecionado == id">
+                                                                    <span
+                                                                        class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo">
+                                                                        <small>Selecionado</small>
+                                                                    </span>
+                                                                </p>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- END card-->
+                                        </div>
+                                        <!-- END STEP 2-->
+                                        <!-- START STEP 3-->
+                                        <div class="col-md-4 mt-0 mb-0 cardSide">
+                                            <!-- START card-->
+                                            <div class="card card-default mb-0">
+                                                <div class="card-header rounded">
+                                                    <span class="badge badge-blue iconBadge">3</span>
+                                                    <span class="dadosPessoais">Pagamento</span>
+                                                    <p>
+                                                        <small class="textInformation col-md-10">Escolha abaixo uma
+                                                            forma de
+                                                            pagamento.</small>
+                                                    </p>
+                                                    <p class="mt-5 col-md-12">
+                                                        <small class>
+                                                            Processado por:
+                                                            <img v-bind:src="getImageProcessor()" height="20px"
+                                                                class="imageCompanyProcessor" />
+                                                        </small>
+                                                    </p>
+
+                                                    <!-- MOSTRA AS OPÇÕES DE PAGAMENTO -->
+                                                    <div class="form-group row formGroup">
+                                                        <button type="button"
+                                                            onclick="formaPagamentoSelecionada('creditCard')"
+                                                            class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada mb-2"
+                                                            :class="getClassSelected('creditCard')">
+                                                            <p>
+                                                                <span
+                                                                    class="text-left pull-left float-left col-md-10">Cartão
+                                                                    de Crédito</span>
+                                                                <span class="text-left pull-left float-left col-md-10">
+                                                                    <img src="img/payment_form.png"
+                                                                        style="width: 130px!important; height: auto" />
+                                                                </span>
+                                                            </p>
+                                                            <p>
+                                                                <span
+                                                                    class="text-left pull-left float-left ml-0 col-md-10">
+                                                                    <small>Pagamento 100% seguro</small>
+                                                                </span>
+                                                            </p>
+                                                            <p v-if="getFormaPagamento() == 'creditCard'">
+                                                                <span
+                                                                    class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo">
+                                                                    <small>Selecionado</small>
+                                                                </span>
+                                                            </p>
+                                                        </button>
+                                                        <div class="card-body minusmargintop"
+                                                            v-show="getFormaPagamento() =='creditCard'">
+                                                            <div class="form-group row formGroup mt-3">
+                                                                <label class="col-xl-12 col-form-label labelForm">
+                                                                    Número do Cartão
+                                                                    <img class="imageCard" v-show="getPaymentID()"
+                                                                        :src="getImageCard()" />
+                                                                </label>
+                                                                <div class="col-md-7">
+                                                                    <input onchange="verificaDigitosCartao()"
+                                                                        class="form-control required"
+                                                                        autocomplete="cc-number" type="text"
+                                                                        id="card_number" v-model="card_number" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row formGroup">
+                                                                <label
+                                                                    class="col-xl-12 col-form-label labelForm">Validade</label>
+                                                                <div class="col-md-5">
+                                                                    <input onchange="maskValidade()"
+                                                                        autocomplete="cc-exp" class="form-control"
+                                                                        type="text" id="validade" v-model="validade"
+                                                                        placeholder="MM/AA" minlength="5"
+                                                                        maxlength="5" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row formGroup">
+                                                                <label class="col-xl-12 col-form-label labelForm">Nome
+                                                                    do
+                                                                    Titular do Cartão</label>
+                                                                <div class="col-md-7">
+                                                                    <input class="form-control required"
+                                                                        v-model="nome_titular" autocomplete="name"
+                                                                        type="text" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row formGroup">
+                                                                <label class="col-xl-12 col-form-label labelForm">Cód.
+                                                                    de
+                                                                    Segurança</label>
+                                                                <div class="col-md-5">
+                                                                    <input class="form-control required"
+                                                                        v-model="codigo_seguranca"
+                                                                        autocomplete="security" type="text" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row formGroup">
+                                                                <label class="col-xl-12 col-form-label labelForm">CPF do
+                                                                    Titular</label>
+                                                                <div class="col-md-7">
+                                                                    <input onchange="maskCPFTitular()" minlength="14"
+                                                                        maxlength="14" class="form-control required"
+                                                                        autocomplete="cpf_titular" type="text"
+                                                                        v-model="cpf_titular"
+                                                                        placeholder="Digite seu CPF" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row formGroup">
+                                                                <label class="col-xl-2 col-form-label labelForm"
+                                                                    for="inlineFormInputGroup">Parcelas</label>
+                                                                <div class="col-lg-12">
+                                                                    <small>Digite o cartão para selecionar as
+                                                                        parcelas</small>
+                                                                    <select id="dropParcelas" v-model="parcelas"
+                                                                        class="form-control" name="installments"
+                                                                        selectedIndex="0">
+                                                                        <option v-bind:value="parcelas"
+                                                                            selected="selected">
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group row mt-3">
+                                                                <div class="col-xl-12">
+                                                                    <button
+                                                                        class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"
+                                                                        onclick="validarStep(currentStep)"
+                                                                        type="button">
+                                                                        <span class="fa fa-lock mr-2"
+                                                                            style="position:relative; top:1px"></span>Comprar
+                                                                        Agora
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button type="button"
+                                                            onclick="formaPagamentoSelecionada('bolbradesco')"
+                                                            class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada"
+                                                            :class="getClassSelected('bolbradesco')">
+                                                            <p>
+                                                                <span
+                                                                    class="text-left pull-left float-left col-md-10 fa fa-ticket">Boleto</span>
+                                                                <span class="text-left pull-left float-left col-md-10">
+                                                                    <img src="img/barcode.png"
+                                                                        style="width: 35px!important; height: auto" />
+                                                                </span>
+                                                            </p>
+                                                            <p>
+                                                                <span
+                                                                    class="text-left pull-left float-left ml-0 col-md-10">
+                                                                    <small>Processamento em 3 dias.</small>
+                                                                </span>
+                                                            </p>
+                                                            <p v-if="formaPagamento == 'bolbradesco'">
+                                                                <span
+                                                                    class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo">
+                                                                    <small>Selecionado</small>
+                                                                </span>
+                                                            </p>
+                                                        </button>
+                                                        <div class="card-body minusmargintop"
+                                                            v-show="formaPagamento =='bolbradesco'">
+                                                            <div class="form-group row mt-2">
+                                                                <small
+                                                                    class="text-justify col-md-11 smallInforFormaPagamentoBoleto">Somente
+                                                                    quando recebermos a confirmação, em até 72h após o
+                                                                    pagamento, seguiremos com o envio das suas compras.
+                                                                    O
+                                                                    prazo de entrega passa a ser contado somente após a
+                                                                    confirmação do pagamento.</small>
+                                                            </div>
+                                                            <div class="form-group row mt-2">
+                                                                <span class="valorNoBoleto col-md-12 ml-1">
+                                                                    Valor no Boleto
+                                                                    <strong>R$ {{formatPrice(granTotal)}}</strong>
+                                                                </span>
+                                                            </div>
+                                                            <div class="form-group row mt-3">
+                                                                <div class="col-xl-12">
+                                                                    <button
+                                                                        class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"
+                                                                        onclick="validarStep(currentStep)"
+                                                                        type="button">
+                                                                        <span class="fa fa-lock mr-2"
+                                                                            style="position:relative; top:1px"></span>Comprar
+                                                                        Agora
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- END card-->
+                                        </div>
+                                    </form>
+                                    <!-- END STEP 3-->
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- END card-->
+                </form>
+            </div>
+
+            <div class="col-md-3 mr-0 pr-0 pl-0"></div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://use.fontawesome.com/aa8f958ac7.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
+
+
+
+    <script type="text/javascript">
+        const TEMPLATE_ITENS_CART = '<div class="product" > <div class="row col-md-12"> <div class="mt-2 w-100"> <img class="rounded img-fluid float-left imgVariant" src="{img}"/> <div class="product-name"> <div class="product-name"> <a class="ml-2 w-100" href="#">{title}</a> <div class="product-info"> <div> <span class="value ml-2">{variant_title}</span> </div></div><div class="product-info"> <div> <span class="value ml-2"> <small>{quantity} Unidade(s) - <b>R$ {variant_price}</b> </small> </span> </div></div></div></div></div></div><hr/> </div>';
+        const URL_END_POINT_GET_PRODUTO_BY_ID = "http://localhost:3000/produtos/GetProdutoByIDThuor";
+        const URL_END_POINT_SAVE_REVIEW = "http://localhost:3000/reviews/SaveReview";
+        const URL_END_POINT_GET_PRODUCT = "http://localhost:3000/produtos/GetProdutoIDThuor";
+        const URL_END_POINT_GET_PRODUCT_IMPORTED = "http://localhost:3000/produtos/GetProdutoByIDImportedCheckoutIndependente";
+        var isShowingLoading = false;
+        var formValidate = [];
+        var errors = [];
+        var base64Image = '';
+        var plataforma = '';
+        var url_loja = window.location.host;
+        var id_produto_geral = '';
+        var rating = '';
+        var price = 123.45;
+        var decimal = ",";
+        var thousands = ".";
+        var prefix = " ";
+        var suffix = "";
+        var precision = 2;
+        var masked = false /* doesn't work with directive */
+        var DadosCheckout = {};
+        var produtosCart = [];
+        var fretes = [];
+        var freteSelecionado = -1;
+        var dadosLoja = {};
+        var nomeLoja = "";
+        var currentStep = 1;
+        var nome_completo = "";
+        var telefone = "";
+        var cpf = "";
+        var email = "";
+        var CEP = "";
+        var endereco = "";
+        var numero_porta = "";
+        var bairro = "";
+        var complemento = "";
+        var destinatario = "";
+        var cidade = "";
+        var estado = "";
+        var parcelas = "";
+        var codigo_seguranca = "";
+        var cpf_titular = "";
+        var nome_titular = "";
+        var validade = "";
+        var cardToken = "";
+        var card_number = "";
+        var payment_id = "";
+        var stepDadosPessoaisFinalizados = 0;
+        var stepDadosEnderecoFinalizados = 0;
+        var valorTotalCompra = 0;
+        var valorFrete = 0;
+        var formaPagamento = "any";
+        var ImageProcessor = "";
+        var vueSelectValue = "";
+        var totalQuantity = 0;
+        var granTotal = 0;
+        var granDesconto = 0;
+        var granQuantity = 0;
+        var granSubTotal = 0;
+        var descontoCupom = 0;
+        var produtoToSell = {};
+        var produtoVariantes = [];
+        var images = [];
+        var VarianteIDProdutoJSONUpSellSelected = 0;
+        var quantity = 1;
+        var VarianteIDUpSellSelected;
+        var VarianteImageUpSellSelected;
+        var VarianteSKUUpSellSelected;
+        var VariantePriceUpSellSelected;
+        var VarianteTitleUPSellSelected;
+
+        $(document).ready(function () {
+
+            const plugin = document.createElement("script");
+            plugin.onload = function () {
+                console.log("Carregado Script MP");
+            };
+            plugin.setAttribute(
+                "src",
+                "https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"
+            );
+            plugin.async = true;
+            document.head.appendChild(plugin);
+
+
+            ShowLoading();
+            formValidate.push({ nome: 'nome', type: 'text', required: true, value: '' });
+            formValidate.push({ nome: 'email', type: 'text', required: true, value: '' });
+            formValidate.push({ nome: 'titulo', type: 'text', required: true, value: '' });
+            formValidate.push({ nome: 'avaliacao', type: 'text', required: true, value: '' });
+            formValidate.push({ nome: 'imagem', type: 'text', required: false, value: '' });
+
+            var url = new URL(window.location.href);
+            var parametroID = url.searchParams.get("id");
+            
+            var LBody = {
+                id_produto: parametroID
+            }
+            postAxios(URL_END_POINT_GET_PRODUCT, LBody, (response) => {
+                VarianteIDProdutoJSONUpSellSelected = parametroID;
+                produtoToSell = response.data;
+                const variantes = produtoToSell.json_dados_produto.variants;
+                images = produtoToSell.json_dados_produto.images;
+                variantes.forEach((obj, i) => {
+                    const img = images.find(x => x.id == obj.image_id).src;
+                    const LP = { id: obj.id, title: obj.title, image: img, price: obj.price, sku: obj.sku };
+                    produtoVariantes.push(LP);
+
+
+
+
+                    if (produtoVariantes && produtoVariantes.length > 0) {
+                        var select = document.createElement("select");
+                        select.name = "Opcao";
+                        select.id = "Opcao";
+                        select.setAttribute(
+                            "class",
+                            "form-control col-md-12 mt-2"
+                        );
+                        var self = this;
+                        select.onchange = function () {
+                            toggleSelect(select);
+                        };
+                        document.getElementById("productOptions").innerHTML =
+                            "";
+                        document
+                            .getElementById("productOptions")
+                            .append(select);
+                        var option = document.createElement("option");
+                        option.value = 0;
+                        option.text = "Selecione";
+                        select.appendChild(option);
+                        produtoVariantes.forEach((obj, i) => {
+                            var option = document.createElement("option");
+                            option.value = obj.id;
+                            option.text = obj.title;
+                            select.appendChild(option);
+                        });
+                    }
+                })
+                
+                HideLoading();
+            });
+
+            // Swal.fire({
+            // 	type: 'success',
+            // 	title: 'Your work has been done',
+            // 	showConfirmButton: false,
+            // 	timer: 1500
+            // })
+
+        });
+
+        function ShowLoading() {
+            this.isShowingLoading = true;
+            Swal.fire({
+                customClass: 'swal-wide',
+                title: '<span class="text-aguard">Aguarde...</span>',
+                html: " <div class='card-body align-items-center justify-content-center'>             <div class='loader loader-bars widthLoadingDiv'>    </div>        </div>",
+                showConfirmButton: false,
+                showCancelButton: false,
+                allowEnterKey: false,
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                timerProgressBar: true,
+                onBeforeOpen: () => {
+                    // Swal.showLoading();          
+                },
+                onClose: () => {
+
+                }
+            })
+        }
+        function HideLoading() {
+            if (this.isShowingLoading) {
+                Swal.close();
+                this.isShowingLoading = false;
+            }
+        }
+        async function SaveReview() {
+            try {
+                ShowLoading();
+                let LBody = {
+                    url_loja: url_loja,
+                    id_produto: id_produto_geral,
+                    nome: await getFieldValue('nome'),
+                    email: await getFieldValue('email'),
+                    titulo: await getFieldValue('titulo'),
+                    avaliacao: await getFieldValue('avaliacao'),
+                    imagem: base64Image,
+                    rating: rating,
+                    plataforma: plataforma
+
+                }
+                postAxios(URL_END_POINT_SAVE_REVIEW, LBody, () => {
+                    getReviews(id_produto_geral, url_loja);
+                    showNotification('Avaliação Enviada!', 'success');
+                })
+                // postAjax(URL_END_POINT_SAVE_REVIEW, LBody, () => {
+
+                // })
+            }
+            catch (error) {
+                showNotificationW('Oops!', 'Ocorreu um erro. Tente novamente', 'error');
+            }
+        }
+        function getFieldValue(campo) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const LFV = document.getElementById(campo);
+                    if (LFV && LFV.value) { console.log(LFV.value); resolve(LFV.value); }
+                    resolve(null);
+                }
+                catch (error) {
+                    console.log("Erro ao pegar o valor do campo: ", campo, error);
+                    reject(error);
+                }
+            })
+
+        }
+
+        function checkField(campo) {
+            const LV = document.getElementById(campo);
+            return LV && !LV.value;
+        }
+        function getFieldName(nome) {
+            if (nome == 'avaliacao') return 'Avaliação';
+            return toCamelCase(nome);
+        }
+        function toCamelCase(str) {
+            var LSTR2 = "";
+            if (str.indexOf(" ") > -1) {
+                var LSpace = str.split(" ");
+                LSpace.forEach((objS, i) => {
+                    var LStr = objS.split("");
+                    LStr.forEach((obj, i) => {
+                        if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+                        if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+                    });
+                    LSTR2 = LSTR2 + " ";
+                });
+            } else {
+                var LStr = str.split("");
+                LStr.forEach((obj, i) => {
+                    if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+                    if (i > 0) LSTR2 = LSTR2 + obj.toString().toLowerCase();
+                });
+            }
+            return LSTR2;
+        }
+        async function getFileData(files) {
+            ShowLoading();
+            var file = files[0];
+            document.getElementById("labelFileSelecionado").innerHTML = file.name;
+            this.base64Image = await toBase64(file);
+            HideLoading();
+        }
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+        function validateMyForm() {
+            errors = [];
+            formValidate.forEach((obj, i) => {
+                if (obj.required == true && checkField(obj.nome)) {
+                    errors.push({ field: obj.nome, mensagem: 'Campo ' + getFieldName(obj.nome) + ' é Obrigatório.' });
+                }
+            });
+            const alertErros = document.getElementById("alertErros");
+            const alert = document.getElementById("alertReturn");
+            if (errors.length > 0) {
+                alertErros.classList.remove('success');
+                alertErros.classList.add('danger');
+                alertErros.innerHTML = errors[0].mensagem;
+                return false;
+            }
+            else {
+                alertErros.classList.remove('danger');
+                alertErros.classList.add('success');
+                SaveReview();
+                return true;
+            }
+
+        }
+
+        function getAjax(url, success) {
+            var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            xhr.open('GET', url);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState > 3 && xhr.status == 200) success(xhr.responseText);
+            };
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send();
+            return xhr;
+        }
+
+        function postAxios(url, data, success) {
+            axios.post(url, data)
+                .then(function (response) {
+                    success(response);
+                })
+                .catch(function (error) {
+                    console.log('Erro ao executar Axios', error);
+                });
+        }
+
+        function getAxios(url, success) {
+            axios.get(url)
+                .then(function (response) {
+                    // handle success
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                })
+                .finally(function () {
+                    // always executed
+                });
+        }
+
+        function ShowLoadingT(text) {
+            this.isShowingLoading = true;
+            Swal.fire({
+                customClass: 'swal-wide',
+                title: '<span class="text-aguard">' + text + '</span>',
+                html: " <div class='card-body align-items-center justify-content-center'>             <div class='ball-scale-ripple-multiple widthLoadingDiv'>                <div class='loadingSwall'></div>               <div class='loadingSwall'></div>                <div class='loadingSwall'></div>            </div>        </div>",
+                showConfirmButton: false,
+                showCancelButton: false,
+                allowEnterKey: false,
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                timerProgressBar: true,
+                onBeforeOpen: () => {
+                    // Swal.showLoading();          
+                },
+                onClose: () => {
+
+                }
+            })
+        }
+
+        function showNotification(message, type) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true,
+                onOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: type,
+                title: message
+            })
+        }
+
+        function showNotificationW(title, message, type) {
+            Swal.fire(
+                title,
+                message,
+                type
+            );
+        }
+
+        function getErrorField(field) {
+            const errorF = errors.find(x => x.field == field);
+            if (errorF != undefined) return errorF.mensagem;
+        }
+
+        function toAsterisk(str) {
+            var LSTR2 = "";
+            if (str.indexOf(" ") > -1) {
+                var LSpace = str.split(" ");
+                LSpace.forEach((objS, i) => {
+                    var LStr = objS.split("");
+                    LStr.forEach((obj, i) => {
+                        if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+                        if (i > 0) LSTR2 = LSTR2 + '*';
+                    });
+                    LSTR2 = LSTR2 + " ";
+                });
+            } else {
+                var LStr = str.split("");
+                LStr.forEach((obj, i) => {
+                    if (i == 0) LSTR2 = LSTR2 + obj.toString().toUpperCase();
+                    if (i > 0) LSTR2 = LSTR2 + '*';
+                });
+            }
+            return LSTR2;
+        }
+        function setStarValue(value) {
+            rating = value;
+            console.log(value);
+        }
+
+        function CREATE_FORM_MP(pdescription, pamount, pcardNumber, pcardholderName, pcardExpirationMonth, pcardExpirationYear, psecurityCode, parcela, pdocNumber, pemail, ppayment_method_id) {
+            return new Promise(async (resolve, reject) => {
+                if (document.contains(document.getElementById("pay"))) { document.getElementById("pay").remove(); }
+                var f = document.createElement("form");
+                f.setAttribute('method', "post");
+                f.setAttribute('action', "/processar_pagamento");
+                f.setAttribute('id', 'pay');
+                f.setAttribute('name', 'pay');
+                var fieldSet = document.createElement("FIELDSET");
+
+                var description = document.createElement("input");
+                description.setAttribute('type', "text");
+                description.setAttribute('name', "description");
+                description.setAttribute('id', "description");
+                description.setAttribute('data-checkout', "description");
+                description.setAttribute('value', pdescription);
+                fieldSet.appendChild(description);
+
+                var transaction_amount = document.createElement("input");
+                transaction_amount.setAttribute('type', "text");
+                transaction_amount.setAttribute('name', "transaction_amount");
+                transaction_amount.setAttribute('id', "transaction_amount");
+                transaction_amount.setAttribute('data-checkout', "transaction_amount");
+                transaction_amount.setAttribute('value', pamount);
+                fieldSet.appendChild(transaction_amount);
+
+                var cardNumber = document.createElement("input");
+                cardNumber.setAttribute('type', "text");
+                cardNumber.setAttribute('name', "cardNumber");
+                cardNumber.setAttribute('id', "cardNumber");
+                cardNumber.setAttribute('data-checkout', "cardNumber");
+                cardNumber.setAttribute('value', pcardNumber);
+                fieldSet.appendChild(cardNumber);
+
+                var cardholderName = document.createElement("input");
+                cardholderName.setAttribute('type', "text");
+                cardholderName.setAttribute('name', "cardholderName");
+                cardholderName.setAttribute('id', "cardholderName");
+                cardholderName.setAttribute('data-checkout', "cardholderName");
+                cardholderName.setAttribute('value', pcardholderName);
+                fieldSet.appendChild(cardholderName);
+
+                var cardExpirationMonth = document.createElement("input");
+                cardExpirationMonth.setAttribute('type', "text");
+                cardExpirationMonth.setAttribute('name', "cardExpirationMonth");
+                cardExpirationMonth.setAttribute('id', "cardExpirationMonth");
+                cardExpirationMonth.setAttribute('data-checkout', "cardExpirationMonth");
+                cardExpirationMonth.setAttribute('value', pcardExpirationMonth);
+                fieldSet.appendChild(cardExpirationMonth);
+
+                var cardExpirationYear = document.createElement("input");
+                cardExpirationYear.setAttribute('type', "text");
+                cardExpirationYear.setAttribute('name', "cardExpirationYear");
+                cardExpirationYear.setAttribute('id', "cardExpirationYear");
+                cardExpirationYear.setAttribute('data-checkout', "cardExpirationYear");
+                cardExpirationYear.setAttribute('value', pcardExpirationYear);
+                fieldSet.appendChild(cardExpirationYear);
+
+                var securityCode = document.createElement("input");
+                securityCode.setAttribute('type', "text");
+                securityCode.setAttribute('name', "securityCode");
+                securityCode.setAttribute('id', "securityCode");
+                securityCode.setAttribute('data-checkout', "securityCode");
+                securityCode.setAttribute('value', psecurityCode);
+                fieldSet.appendChild(securityCode);
+
+                var installments = document.createElement("select");
+                installments.name = "installments";
+                installments.id = "installments";
+                var option = document.createElement("option");
+                option.setAttribute('value', parcela);
+                option.setAttribute('selected', 'selected');
+                installments.appendChild(option);
+                fieldSet.appendChild(installments);
+
+                var docType = document.createElement("select");
+                docType.name = "docType";
+                docType.id = "docType";
+                docType.setAttribute('data-checkout', 'docType');
+                var optionD = document.createElement("option");
+                optionD.setAttribute('value', "CPF");
+                optionD.setAttribute('selected', 'selected');
+                docType.appendChild(optionD);
+                fieldSet.appendChild(docType);
+
+                var docNumber = document.createElement("input");
+                docNumber.setAttribute('type', "text");
+                docNumber.setAttribute('name', "docNumber");
+                docNumber.setAttribute('id', "docNumber");
+                docNumber.setAttribute('data-checkout', "docNumber");
+                docNumber.setAttribute('value', pdocNumber);
+                fieldSet.appendChild(docNumber);
+
+                var email = document.createElement("input");
+                email.setAttribute('type', "text");
+                email.setAttribute('name', "email");
+                email.setAttribute('id', "email");
+                email.setAttribute('data-checkout', 'email');
+                email.setAttribute('value', pemail);
+                fieldSet.appendChild(email);
+
+                var payment_method_id = document.createElement("input");
+                payment_method_id.setAttribute('type', "hidden");
+                payment_method_id.setAttribute('name', "email");
+                payment_method_id.setAttribute('id', "email");
+                payment_method_id.setAttribute('data-checkout', 'payment_method_id');
+                payment_method_id.setAttribute('value', ppayment_method_id);
+                fieldSet.appendChild(payment_method_id);
+                f.appendChild(fieldSet);
+                resolve(f);
+            });
+        }
+
+        function collapse(id, idComando) {
+            const element = document.querySelector(id);
+            const elementComando = document.querySelector(idComando);
+            if (element.classList.contains("show")) {
+                element.classList.remove("show");
+                elementComando.classList.remove("fa-arrow-up");
+                elementComando.classList.add("fa-arrow-down");
+            } else {
+                element.classList.add("show");
+                elementComando.classList.remove("fa-arrow-down");
+                elementComando.classList.add("fa-arrow-up");
+            }
+        }
+
+        function toggleSelect(componente) {
+            const ID = componente.id;
+            var Selected = componente.options[componente.selectedIndex].value;
+            if (Selected == 0) {
+                VarianteIDUpSellSelected = 0;
+                return;
+            }
+            const LImageID = produtoVariantes.find(x => x.id == Selected).image;
+            variant_img = LImageID; //images.find(x => x.id == LImageID).src;
+            produtoVariantes.find(x => x.id == Selected).selected = Selected;
+            const LSKU = produtoVariantes.find(x => x.id == Selected).sku;
+            produtoVariantes.find(x => x.id == Selected).SkuSelected = LSKU;
+            variant_title = produtoVariantes.find(x => x.id == Selected).title;
+            const LPrice = produtoVariantes.find(x => x.id == Selected).price;
+            //const LVarianteIDSelected = this.LVariantes.find(x = x.id ==)
+            VarianteIDUpSellSelected = Selected;
+            VarianteImageUpSellSelected = variant_img;
+            VarianteSKUUpSellSelected = LSKU;
+            VariantePriceUpSellSelected = parseFloat(LPrice);
+            VarianteTitleUPSellSelected = variant_title;
+        }
+        async function adicionarProdutoUpSell() {
+            if(VarianteTitleUPSellSelected  == "" && VarianteIDUpSellSelected == "")return;
+            var lpro = await pushProducts(
+                VarianteIDProdutoJSONUpSellSelected,
+                quantity,
+                VarianteIDUpSellSelected
+            );
+            /*ADICIONADO O TRECHO ABAIXO PARA GERENCIAR A QUANTIDADE NO CART, AO INVÉS DE FICAR AIDICONANDO VÁRIOS ITEMS */
+            /* SE FICAR DANDO PROBLEMA COMENTE E O CÓDIGO ATÉ ONDE TEM 'ATÉ AQUI PARA GERENCIAR'  E DESCOMENTE A LINHA BAIXO*/
+            //this.produtosCart.push(lpro);
+            var LExists = produtosCart.find(
+                x => x.variant_id == this.VarianteIDUpSellSelected
+            );
+            if (LExists == undefined) {
+                produtosCart.push(lpro);
+            } else {
+                var LQuantidade = produtosCart.find(
+                    x => x.variant_id == VarianteIDUpSellSelected
+                ).quantity;
+                LQuantidade = LQuantidade + lpro.quantity;
+                produtosCart.find(
+                    x => x.variant_id == VarianteIDUpSellSelected
+                ).quantity = LQuantidade;
+            }
+            /*'ATÉ AQUI PARA GERENCIAR' */
+            var LTotal = 0;
+            sessionStorage.setItem("cart", JSON.stringify(produtosCart));
+            const LDivItens = document.getElementById("items");
+            LDivItens.innerHTML = "";
+            const LDivQuantidade = document.getElementById("totalQuantity");
+            const Qtd = produtosCart.length;
+            var LIt = " Item"
+            if(Qtd > 1){
+                LIt = " Itens";
+            }
+            LDivQuantidade.innerHTML =Qtd + LIt;
+            produtosCart.forEach((obj, i) => {
+                LTotal += (parseFloat(obj.variant_price) * parseFloat(obj.quantity));
+                const LTemplate = TEMPLATE_ITENS_CART.replace("{img}", obj.variant_img).replace("{title}", obj.title).replace("{variant_title}", obj.variant_title).replace("{quantity}", obj.quantity).replace("{variant_price}", formatPrice(obj.variant_price));
+                LDivItens.insertAdjacentHTML('beforeend', LTemplate);
+            });
+            const granTot = document.getElementById("granTotal");
+            const granTot2 = document.getElementById("granTotal2");
+            const val = "R$ ";
+            const valr = "Valor R$ ";
+            granTot.innerHTML = val.concat(formatPrice(LTotal));
+            granTot2.innerHTML = valr.concat(formatPrice(LTotal));
+            //this.UpSellNoCheckout = 0;
+        }
+
+        async function pushProducts(product, quantity, variante_id) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    postAxios(URL_END_POINT_GET_PRODUCT_IMPORTED, {
+                        id_produto: product,
+                        quantity: quantity,
+                        variant: variante_id
+                    }, (response) => {
+                        //getDadosLoja(retorno.data.id_usuario);
+                        resolve(response.data);
+                    })
+                } catch (error) {
+                    console.log("Erro ao pegar os dados do produto na API", error);
+                }
+            });
+        }
+        function formatPrice(value) {
+            let val = (value / 1).toFixed(2).replace(".", ",");
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+    </script>
+</body>
+
+</html>
