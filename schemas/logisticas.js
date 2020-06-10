@@ -16,6 +16,8 @@ module.exports.GetFretes = (req, res, next) => {
     }
 }
 
+
+
 module.exports.TrackingCode = (req, res, next) => {
     try {
         const { code } = req.body;
