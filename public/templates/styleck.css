@@ -1,0 +1,687 @@
+
+    .marginCenter {
+        margin: 0 auto !important;
+    }
+
+    .loader {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        vertical-align: middle;
+    }
+
+    .loader-bars span,
+    .loader-bars:after,
+    .loader-bars:before {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 10px;
+        height: 30px;
+        background-color: #23b7e5;
+        -webkit-animation: grow 1.5s linear infinite;
+        animation: grow 1.5s linear infinite
+    }
+
+    .loader-bars:after {
+        left: 15px;
+        -webkit-animation: grow 1.5s linear -.5s infinite;
+        animation: grow 1.5s linear -.5s infinite
+    }
+
+    .loader-bars span {
+        left: 30px;
+        -webkit-animation: grow 1.5s linear -1s infinite;
+        animation: grow 1.5s linear -1s infinite
+    }
+
+    @-webkit-keyframes grow {
+        0% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            opacity: 0
+        }
+
+        50% {
+            -webkit-transform: scaleY(1);
+            transform: scaleY(1);
+            opacity: 1
+        }
+
+        100% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            opacity: 0
+        }
+    }
+
+    @keyframes grow {
+        0% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            opacity: 0
+        }
+
+        50% {
+            -webkit-transform: scaleY(1);
+            transform: scaleY(1);
+            opacity: 1
+        }
+
+        100% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            opacity: 0
+        }
+    }
+
+    @-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0);
+            tranform: rotate(0)
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+            tranform: rotate(360deg)
+        }
+    }
+
+    @keyframes spin {
+        0% {
+            -webkit-transform: rotate(0);
+            transform: rotate(0)
+        }
+
+        100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg)
+        }
+    }
+
+    @-webkit-keyframes spinreverse {
+        0% {
+            -webkit-transform: rotate(0);
+            tranform: rotate(0)
+        }
+
+        100% {
+            -webkit-transform: rotate(-360deg);
+            tranform: rotate(-360deg)
+        }
+    }
+
+    @keyframes spinreverse {
+        0% {
+            -webkit-transform: rotate(0);
+            transform: rotate(0)
+        }
+
+        100% {
+            -webkit-transform: rotate(-360deg);
+            transform: rotate(-360deg)
+        }
+    }
+
+    .swal-wide {
+        width: 280px !important;
+        height: 150px;
+    }
+
+    .loadingSwall {
+        border-color: #23b7e5 !important;
+        width: 80px !important;
+        height: 80px !important;
+        margin-bottom: 20px;
+    }
+
+    .widthLoadingDiv {
+        display: block;
+        width: 15% !important;
+        margin: 0 auto !important;
+    }
+
+    .text-aguard {
+        font-size: 35px;
+        top: 0px !important;
+        position: relative;
+        margin: 0 auto;
+        padding: 0;
+        color: #23b7e5 !important;
+    }
+
+    .card-flat {
+        margin-top: 80px !important;
+    }
+
+    .bg-dark {
+        background-color: #23b7e5 !important;
+    }
+
+    .footerText {
+        font-size: 12px !important;
+    }
+
+    .custom-file-label::after {
+        content: "Procurar" !important;
+        height: 100% !important;
+    }
+
+    .cursorP {
+        cursor: pointer !important;
+    }
+
+    .starFulFill {
+        color: gold;
+        margin-left: 5px !important;
+    }
+
+    .starNotFulFill {
+        color: white;
+    }
+
+    .alertErros {
+        margin-top: 0px !important;
+        padding: 5px !important;
+    }
+
+    .success {
+        color: green;
+        font-size: 15px !important;
+    }
+
+    .danger {
+        color: red;
+        font-size: 15px !important;
+    }
+
+    input[file-upload-button] {
+
+        background-color: #3498db;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+        margin: 10px;
+        padding: 6px 20px
+    }
+
+    /* Aparência que terá o seletor de arquivo */
+    .hidden {
+        display: none !important;
+    }
+
+    .checkedBuy {
+        color: green;
+        font-size: 20px !important;
+    }
+
+    .noopen {
+        text-decoration: none !important;
+    }
+
+    .fontName {
+        font-size: 21px !important;
+        margin-left: 0px !important;
+        left: 0 !important;
+    }
+
+    .imageThumb {
+        margin: 0 auto !important;
+        display: block !important;
+    }
+
+    fieldset,
+    label {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        margin: 20px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+        margin: 10px;
+    }
+
+    /****** Style Star Rating Widget *****/
+
+    .rating {
+        border: none;
+        float: left;
+    }
+
+    .rating>input {
+        display: none;
+    }
+
+    .rating>label:before {
+        margin: 5px;
+        font-size: 1.25em;
+        font-family: FontAwesome;
+        display: inline-block;
+        content: "\f005";
+    }
+
+    .rating>.half:before {
+        content: "\f089";
+        position: absolute;
+    }
+
+    .rating>label {
+        color: #ddd;
+        float: right;
+    }
+
+    /***** CSS Magic to Highlight Stars on Hover *****/
+
+    .rating>input:checked~label,
+    /* show gold star when clicked */
+    .rating:not(:checked)>label:hover,
+    /* hover current star */
+    .rating:not(:checked)>label:hover~label {
+        color: gold;
+    }
+
+    /* hover previous stars in list */
+
+    .rating>input:checked+label:hover,
+    /* hover current star when changing rating */
+    .rating>input:checked~label:hover,
+    .rating>label:hover~input:checked~label,
+    /* lighten current selection */
+    .rating>input:checked~label:hover~label {
+        color: gold;
+    }
+
+    .fontf {
+        color: gold;
+    }
+
+    .imageDisplayOff {
+        display: none !important;
+    }
+
+    .imageDisplayOn {
+        display: block !important;
+    }
+
+    .card-flat {
+        margin-top: 80px !important;
+    }
+
+    .bg-dark {
+        background-color: #23b7e5 !important;
+    }
+
+    .btn-outline-info {
+        color: white;
+        border-color: white;
+    }
+
+    .green {
+        color: green !important;
+    }
+
+    .holder-icon {
+        left: 0;
+        position: absolute;
+        top: 15px;
+        font-size: 22px;
+    }
+
+    .remove {
+        position: relative;
+        top: 33px;
+        cursor: pointer;
+    }
+
+    .center {
+        text-align: center;
+        display: block;
+    }
+
+    .QuatroCincopx {
+        width: 45px !important;
+    }
+
+    .compare {
+        color: red;
+        font-weight: 700;
+    }
+
+    .priceReal {
+        color: green;
+        font-weight: 700;
+    }
+
+    .desconto {
+        color: blue;
+        font-weight: 700;
+    }
+
+    .btnIncrementDecrement {
+        height: 21px;
+    }
+
+    .spanIncrementDecrement {
+        top: -6px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .cursorP {
+        cursor: pointer !important;
+    }
+
+    .btnKeepBuyingFooter {
+        color: #5d9cec;
+        border-color: #5d9cec;
+    }
+
+    .iconBadge {
+        background-color: #5d9cec;
+        font-size: 15px;
+        color: white;
+    }
+
+    .iconStep {
+        border-radius: 50px;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        display: block;
+        color: white;
+        background-color: #5d9cec;
+        text-align: center;
+        font-size: 34px;
+        margin-top: 5px;
+        line-height: normal;
+    }
+
+    .dadosPessoais {
+        font-size: 20px;
+        font-weight: 900;
+        top: 1px;
+        position: relative;
+        color: #5d9cec;
+        margin-left: 10px;
+    }
+
+    .resumoCompra {
+        font-size: 16px;
+        font-weight: 900;
+        top: 1px;
+        position: relative;
+        color: #5d9cec;
+        margin-left: 10px;
+    }
+
+    .comandoCollapse {
+        margin-left: 5px;
+        top: 2px;
+        position: relative;
+        color: dodgerblue;
+        font-size: 17px;
+    }
+
+    .labelForm {
+        margin: 0 0 0px;
+
+        color: #4d4d4d;
+        font-weight: 700;
+    }
+
+    .formGroup {
+        margin-bottom: 0rem;
+    }
+
+    .card-default {
+        border-color: #5d9cec;
+    }
+
+    .cardSide {
+        padding: 0 5px;
+        box-sizing: border-box;
+        border-radius: 50px;
+        display: inline !important;
+    }
+
+    .textInformation {
+        line-height: 14px;
+        color: #999 !important;
+        padding: 0;
+        padding-left: 30px;
+        float: left;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .minusmargintop {
+        margin-top: -30px !important;
+    }
+
+    .box-title {
+        position: relative;
+        padding: 0 30px 0 35px;
+        box-sizing: border-box;
+    }
+
+    .card-default {
+        border-radius: 7px;
+    }
+
+    .btnContinue {
+        height: 50px;
+        font-size: 20px;
+        border-radius: 10px;
+    }
+
+    .rounded {
+        border-radius: 7px !important;
+    }
+
+    .disabledBox {
+        cursor: default;
+        pointer-events: none;
+        -moz-opacity: 0.6;
+        -khtml-opacity: 0.6;
+        -webkit-opacity: 0.6;
+        opacity: 0.6;
+    }
+
+    .paddingZero {
+        padding: 0;
+    }
+
+    .localidade {
+        top: 5px !important;
+        font-size: 12px;
+    }
+
+    .dadosPessoaisNomeCompletoVModel {
+        color: #4d4d4d !important;
+        font-weight: 700 !important;
+        font-size: 15px;
+    }
+
+    .paddingTopBottomZERO {
+        padding-bottom: 0px !important;
+        padding-top: 0px !important;
+    }
+
+    .enderecoEntregaHeader {
+        font-size: 15px;
+        font-weight: 700;
+        color: grey;
+    }
+
+    .opcaoSelecionada {
+        background-color: #dcdcdc !important;
+        color: black !important;
+        font-weight: bold !important;
+        border-color: #dcdcdc !important;
+        border: 2px solid #ccc !important;
+    }
+
+    .opcaoDeselecionada {
+        font-weight: bold !important;
+        color: gray !important;
+        border-color: 2px solid #23b7e5 !important;
+        background-color: white !important;
+    }
+
+    .btnFrete {
+        padding: 15px;
+        margin: 10px;
+        cursor: pointer !important;
+        border-radius: 10px;
+    }
+
+    .btnFormaPagamentoSelecionada {
+        padding: 5px;
+        margin: 5px;
+        cursor: pointer !important;
+        border-radius: 10px;
+        margin: 0 auto !important;
+        margin-bottom: 10px !important;
+    }
+
+    .smallInforFormaPagamentoBoleto {
+        margin: 0 auto !important;
+        padding: 5px;
+        margin: 5px;
+        cursor: pointer !important;
+        border-radius: 10px;
+        color: black;
+        background-color: #dcdcdc;
+        border: 2px solid #ccc;
+    }
+
+    .selecionadoInfo {
+        margin-top: 10px;
+        color: blueviolet;
+        text-align: right !important;
+        float: right !important;
+    }
+
+    .ValorTotalResumo {
+        background-color: #f5f5f5;
+        border-radius: 9px;
+        height: 40px;
+        color: white !important;
+    }
+
+    .textValorTotal {
+        color: black;
+        font-weight: 700;
+        font-size: 1.2em;
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+        top: 5px;
+        float: left !important;
+    }
+
+    .textItems {
+        color: black;
+        margin-bottom: 5px !important;
+    }
+
+    .imgVariant {
+        width: 50px;
+        height: 50px;
+        top: 7px;
+        position: relative;
+    }
+
+    .textInfoFrete {
+        text-align: left;
+        font-size: 11px;
+        white-space: pre-wrap;
+    }
+
+    .imageCard {
+        width: 25px !important;
+        height: 25px !important;
+    }
+
+    .valorTotalCollapse {
+        font-weight: 700;
+        color: #3fc583 !important;
+        font-size: 15px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    @media only screen and (max-width: 992px) {
+        #btnTop {
+            display: block !important;
+        }
+
+        .valorTotalCollapse {
+            font-weight: 700;
+            color: #3fc583 !important;
+            font-size: 11px !important;
+            top: 3px !important;
+            position: relative;
+        }
+
+        .resumoCompra {
+            font-size: 13px !important;
+        }
+
+        .comandoCollapse {
+            margin-left: 5px;
+            top: 0px !important;
+            position: relative;
+            color: dodgerblue;
+            font-size: 15px !important;
+        }
+    }
+
+    @media only screen and (max-width: 767px) {
+        .QuatroCincopx {
+            margin-left: 0px !important;
+        }
+
+        .remove {
+            float: left;
+            left: 60px;
+            position: relative;
+            top: -54px;
+            cursor: pointer;
+            font-size: 25px;
+        }
+
+        .valorTotalCollapse {
+            font-weight: 700;
+            color: #3fc583;
+            font-size: 11px !important;
+            top: 3px !important;
+            position: relative;
+        }
+
+        .resumoCompra {
+            font-size: 13px !important;
+        }
+
+        .comandoCollapse {
+            margin-left: 5px;
+            top: 0px !important;
+            position: relative;
+            color: dodgerblue;
+            font-size: 15px !important;
+        }
+
+        .textItems {
+            position: relative;
+            top: 0px !important;
+        }
+    }
