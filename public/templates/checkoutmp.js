@@ -1,8 +1,9 @@
 
 
 const TEMPLATE_ITENS_CART = '<div class="product" > <div class="row col-md-12"> <div class="mt-2 w-100"> <img class="rounded img-fluid float-left imgVariant" src="{img}"/> <div class="product-name"> <div class="product-name"> <a class="ml-2 w-100" href="#">{title}</a> <div class="product-info"> <div> <span class="value ml-2">{variant_title}</span> </div></div><div class="product-info"> <div> <span class="value ml-2"> <small>{quantity} Unidade(s) - <b>R$ {variant_price}</b> </small> </span> </div></div></div></div></div></div><hr/> </div>';
-const TEMPLATE_ITENS_FRETE = '<div class="card-default minusmargintop col-md-12 " > <div class="card-body"> <div class="form-group row formGroup"> <button type="button" onclick="freteSelected({id_frete})" class="btn btn-secondary col-md-11 pull-left float-left btnFrete classSelected" id="{id_frete}" > <p> <span class="text-left pull-left float-left col-md-10 textInfoFrete">{nome_frete}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10 textInfoFrete">Preço: R${{preco_frete}}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Entrega garantida</small> </span> </p></button> </div></div></div>';
-const ULR_BASE = "http://localhost:3000/";
+const TEMPLATE_ITENS_FRETE = '<div class="card-default minusmargintop col-md-12 " > <div class="card-body"> <div class="form-group row formGroup"> <button type="button" class="btn btn-secondary col-md-11 pull-left float-left btnFrete classSelected" id="{id_frete}" > <p> <span class="text-left pull-left float-left col-md-10 textInfoFrete">{nome_frete}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10 textInfoFrete">Preço: R${{preco_frete}}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Entrega garantida</small> </span> </p></button> </div></div></div>';
+//const ULR_BASE = "http://localhost:3000/";
+const ULR_BASE = "https://hmlapi.thuor.com:9443/";
 const ULR_BASE_WEB = "http://localhost:8081/";
 const URL_END_POINT_GET_PRODUTO_BY_ID = ULR_BASE + "produtos/GetProdutoByIDThuor";
 const URL_END_POINT_SAVE_REVIEW = ULR_BASE + "reviews/SaveReview";
@@ -15,6 +16,7 @@ const URL_END_POINT_GET_FRETE = ULR_BASE + 'logisticas/GetFretes';
 const URL_END_POINT_GET_PIXELS = ULR_BASE + 'pixels/GetPixels';
 const URL_END_POINT_PAY_TICKET = ULR_BASE + 'checkouts/DoPayTicket';
 const URL_END_POINT_PAY_CARD = ULR_BASE + 'checkouts/DoPay';
+const URL_END_POINT_SAVE_LEAD = ULR_BASE + 'clientes/SaveLead';
 
 var isShowingLoading = false;
 var formValidateDadosPessoais = [];
@@ -92,7 +94,7 @@ var LTotal = 0;
 
 
 const template = document.createElement('template');
-template.innerHTML = `<div class="col-md-12 mt-5"> <div class="row mt-2"> <div class="col-md-3 mr-0 pr-0 pl-0"></div><div class="col-xl-6 ml-0 mr-0 pr-0 pl-0"> <form> <form name="form" id="form"> <div class="block-center"> <div class="container-fluid"> <div class="card shopping-cart mb-0"> <div class="card-header bg-dark text-light"> <span class="col-md-12"><strong id="pnome_loja">Thuor.com</strong></span> <div class="item-security pull-right float-right black-70 ml30 row" aria-hidden="true"> <div class="holder-icon col-md-2" style="display:none;"> <div class="fa fa-lock"></div></div><div class="text mr-2"> <div class="fa fa-lock"></div><strong class="ml-1">Pagamento</strong> <br/> <strong class="green">100% seguro</strong> </div></div></div><span class></span> <div class="badge badge-blue iconStep" style="display:none;">1</div></div><div class="row col-lg-12 col-lg-offset-2" style=" margin: 0 auto; display:block"> <div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-3"> <div class="card-header rounded "> <div class="row"> <span class="col-md-12 mt-3 ml-2 mr-0"><strong>Escolha quais opções irá levar</strong></span> <div class="product-info row col-md-12 text-center marginCenter" id="productOptions"></div><button id="buttonAdd" type="button" class="mt-2 btn btn-primary btn-lg btn-block float-left pull-left btnContinue ">Adicionar</button> </div></div></div><div id="formResumo" class="card card-default mb-0"> <div class="card-header rounded"> <a style="cursor:pointer!important;" data-toggle="collapse" aria-expanded="false" aria-controls="collapseResumo" id="collapseR"> <span id="collapseParent" style="margin-top: 1px!important;" class="resumoCompra pull-left float-left ml-0" role="button">Resumo</span> <small style="cursor:pointer!important; margin-top: 2px!important;" class="ml-2 text-left textItems " id="totalQuantity"> Nenhum Item </small> <small class="valorTotalCollapse pull-right float-right"> <span class="valorTotalCollapse" id="granTotal">R$ 0,00</span> <span class="fa fa-arrow-down comandoCollapse pull-right float-right" id="comandoCollapse" role="button"></span> </small> </a> <div class="col-lg-12 collapse" id="collapseResumo" data-parent="#collapseParent"> <div class="col-md-12 ValorTotalResumo mt-3"> <span class="textValorTotal col-md-12" id="granTotal2">Valor: R$ 0,00</span> </div><div class="row"> <div class="col-md-12"> <div class="items" id="items"> <span class="col-md-12 alert alert-info p-2 text-center marginCenter d-block">Seu carrinho ainda está vazio. Adicione itens para vê-los aqui.</span> </div></div></div></div></div><div class="card-body minusmargintop"></div></div></div><form class="form-horizontal " id="formCheckout"> <div class="col-md-4 col-xl-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosPessoais"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">1</span> <span class="dadosPessoais">Dados Pessoais</span> <span class="fa fa-edit pull-right float-right cursorP hidden" id="editaDadosPessoaisButton" onclick="editarDadosPessoais()"></span> <p> <small class="textInformation col-md-10">Solicitamos somente as informações essenciais para você fazer sua compra.</small> </p></div><div class="card-body minusmargintop " id="editaDadosPessoaisLabel"> <div class="form-group row formGroup mt-3"> <label id="pnome_completo" class="col-xl-12 col-form-label labelForm dadosPessoaisNomeCompletoVModel paddingTopBottomZERO" v-show="nome_completo"></label> <label id="pemail" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" v-show="email"></label> <label id="pcpf" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" v-show="cpf"></label> <label id="ptelefone" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"></label> </div></div><div class="card-body minusmargintop" id="editaDadosPessoaisForm"> <div class="form-group row formGroup"> <label class="col-md-10 col-form-label labelForm">E-mail</label> <div class="col-xl-12"> <input autocomplete="off" class="form-control" type="email" v-model.lazy="email" id="email" placeholder="Digite seu E-mail"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Nome Completo</label> <div class="col-xl-12"> <input class="form-control required" autocomplete="off" type="text" minlength="5" v-model.lazy="nome_completo" id="nome_completo" placeholder="Digite seu nome aqui"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CPF</label> <div class="col-md-7"> <input onchange="maskCPF()" onblur="saveLead()" minlength="14" maxlength="14" class="form-control required" autocomplete="off" id="cpf" type="text" v-model="cpf" placeholder="Digite seu CPF"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm" for="telefone">Celular / WhatsApp</label> <div class="col-xl-7 col-md-9"> <div class="input-group mb-0"> <div class="input-group-prepend"> <div class="input-group-text">+55</div></div><input class="form-control" id="telefone" type="text" minlength="15" maxlength="15" onchange="maskTelefone()" placeholder="71 9 9130-6561"/> </div></div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" type="button"> Continuar <span class="fa fa-arrow-right ml-2" style="position:relative; top:1px"></span> </button> </div></div></div></div></div><div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosEndereco"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">2</span> <span class="dadosPessoais">Entrega</span> <span class="fa fa-edit pull-right float-right cursorP hidden" id="editaDadosEnderecoButton" onclick="editarDadosEndereco()"></span> <p> <small class="textInformation col-md-10">Cadastre ou selecione um endereço para receber sua encomenda.</small> </p></div><div class="card-default minusmargintop hidden" id="editaDadosEnderecoLabel"> <div class="card-body"> <div class="form-group row formGroup mt-3"> <label class="col-xl-12 col-form-label labelForm enderecoEntregaHeader paddingTopBottomZERO"> <b>Endereço de Entrega:</b> </label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"> <b id="penderecobairro"></b> </label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" id="pcidadeestado"></label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" id="pcep"></label> </div></div></div><div class="card-body minusmargintop" id="editaDadosEnderecoForm"> <div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CEP</label> <div class="col-md-7"> <input onchange="consultaCEP()" class="form-control required" autocomplete="off" type="text" id="cep" maxlength="9" placeholder="Digite seu CEP"/> </div><span class="localidade col-md-6 pull-left float-left text-left" v-show="getCidade()" id="cidadeestado"></span> </div><div class="form-group row formGroup" v-show="endereco"> <label class="col-md-12 col-form-label labelForm">Endereço</label> <div class="col-xl-12"> <input autocomplete="off" class="form-control" type="address" id="endereco" v-model="endereco" placeholder="Digite seu E-mail"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <div class="col-md-6 mt-1"> <label class="col-xl-12 col-form-label labelForm paddingZero mb-1">Número</label> <input class="form-control required" autocomplete="off" type="text" id="numero_porta"/> </div><div class="col-md-6 mt-1" v-show="bairro"> <label class="col-xl-6 col-form-label labelForm paddingZero mb-1">Bairro</label> <input class="form-control required" id="bairro" autocomplete="off" type="text" v-model="bairro"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <label class="col-xl-12 col-form-label labelForm">Complemento</label> <div class="col-md-12"> <input class="form-control" autocomplete="complement" id="complemento" v-model="complemento" type="text"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <label class="col-xl-12 col-form-label labelForm">Destinatário</label> <div class="col-md-12"> <input class="form-control" autocomplete="receiver" id="destinatario" v-model="destinatario" type="text"/> </div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" type="button"> Continuar <span class="fa fa-arrow-right ml-2" style="position:relative; top:1px"></span> </button> </div></div></div><div class="col-md-12" id="cardFretes"></div></div></div><div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosPagamento"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">3</span> <span class="dadosPessoais">Pagamento</span> <p> <small class="textInformation col-md-10">Escolha abaixo uma forma de pagamento.</small> </p><p class="mt-5 col-md-12"> <small class> Processado por: <strong>Mercado Pago</strong> </small> </p><div class="form-group row formGroup"> <button type="button" id="creditCard"  class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada mb-2 opcaoDeselecionada"> <p> <span class="text-left pull-left float-left col-md-10">Cartão de Crédito</span> <span class="text-left pull-left float-left col-md-10"> <img src="http://github.bubbstore.com/formas-de-pagamento/visa.svg" style="width: 65px!important; height: auto"/> </span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Pagamento 100% seguro</small> </span> </p><p id="creditCardSel" class="hidden"> <span class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo"> <small>Selecionado</small> </span> </p></button> <div class="card-body minusmargintop hidden" id="creditCardForm"> <div class="form-group row formGroup mt-3"> <label class="col-xl-12 col-form-label labelForm"> Número do Cartão </label> <div class="col-md-7"> <input onchange="verificaDigitosCartao()" class="form-control required" autocomplete="cc-number" type="text" id="card_number" v-model="card_number"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Validade</label> <div class="col-md-5"> <input onchange="maskValidade()" autocomplete="cc-exp" class="form-control" type="text" id="validade" v-model="validade" placeholder="MM/AA" minlength="5" maxlength="5"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Nome do Titular do Cartão</label> <div class="col-md-7"> <input class="form-control required" id="nome_titular" autocomplete="name" type="text"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Cód. de Segurança</label> <div class="col-md-5"> <input class="form-control required" id="codigo_seguranca" autocomplete="security" type="text"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CPF do Titular</label> <div class="col-md-7"> <input onchange="maskCPFTitular()" minlength="14" maxlength="14" class="form-control required" autocomplete="off" type="text" id="cpf_titular" placeholder="Digite seu CPF"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-2 col-form-label labelForm" for="inlineFormInputGroup">Parcelas</label> <div class="col-lg-12"> <small>Informe o cartão de crédito para selecionar as parcelas</small> <select id="dropParcelas" v-model="parcelas" class="form-control" name="installments" selectedIndex="0"> <option v-bind:value="parcelas" selected="selected"> </option> </select> </div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"  type="button"> <span class="fa fa-lock mr-2" style="position:relative; top:1px"></span>Comprar Agora </button> </div></div></div><button type="button" id="bolbradesco" onclick="formaPagamentoSelecionada(\'bolbradesco\')" class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada opcaoDeselecionada"> <p> <span class="text-left pull-left float-left col-md-10">Boleto</span> <span class="text-left pull-left float-left col-md-10"> <img src="http://github.bubbstore.com/formas-de-pagamento/boleto-barcode.svg" style="width: 65px!important; height: auto"/> </span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Processamento em 3 dias.</small> </span> </p><p id="bolbradescoSel" class="hidden"> <span class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo"> <small>Selecionado</small> </span> </p></button> <div class="card-body minusmargintop hidden" id="bolbradescoForm"> <div class="form-group row mt-2"> <small class="text-justify col-md-11 smallInforFormaPagamentoBoleto">Somente quando recebermos a confirmação, em até 72h após o pagamento, seguiremos com o envio das suas compras. O prazo de entrega passa a ser contado somente após a confirmação do pagamento.</small> </div><div class="form-group row mt-2"> <span class="valorNoBoleto col-md-12 ml-1"> Valor no Boleto <strong>R$ <span id="valorTotalBoleto"></span></strong> </span> </div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue"  type="button"> <span class="fa fa-lock mr-2" style="position:relative; top:1px"></span>Comprar Agora </button> </div></div></div></div></div></div></div></form> </div></div></div></form> </form> </div><div class="col-md-3 mr-0 pr-0 pl-0"></div></div></div> `;
+template.innerHTML = `<div class="col-md-12 mt-5"> <div class="row mt-2"> <div class="col-md-3 mr-0 pr-0 pl-0"></div><div class="col-xl-6 ml-0 mr-0 pr-0 pl-0"> <form> <form name="form" id="form"> <div class="block-center"> <div class="container-fluid"> <div class="card shopping-cart mb-0"> <div class="card-header bg-dark text-light"> <span class="col-md-12"><strong id="pnome_loja">Thuor.com</strong></span> <div class="item-security pull-right float-right black-70 ml30 row" aria-hidden="true"> <div class="holder-icon col-md-2" style="display:none;"> <div class="fa fa-lock"></div></div><div class="text mr-2"> <div class="fa fa-lock"></div><strong class="ml-1">Pagamento</strong> <br/> <strong class="green">100% seguro</strong> </div></div></div><span class></span> <div class="badge badge-blue iconStep" style="display:none;">1</div></div><div class="row col-lg-12 col-lg-offset-2" style=" margin: 0 auto; display:block"> <div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-3"> <div class="card-header rounded "> <div class="row"> <span class="col-md-12 mt-3 ml-2 mr-0"><strong>Escolha quais opções irá levar</strong></span> <div class="product-info row col-md-12 text-center marginCenter" id="productOptions"></div><button id="buttonAdd" type="button" class="mt-2 btn btn-primary btn-lg btn-block float-left pull-left btnContinue ">Adicionar</button> </div></div></div><div id="formResumo" class="card card-default mb-0"> <div class="card-header rounded"> <a style="cursor:pointer!important;" data-toggle="collapse" aria-expanded="false" aria-controls="collapseResumo" id="collapseR"> <span id="collapseParent" style="margin-top: 1px!important;" class="resumoCompra pull-left float-left ml-0" role="button">Resumo</span> <small style="cursor:pointer!important; margin-top: 2px!important;" class="ml-2 text-left textItems " id="totalQuantity"> Nenhum Item </small> <small class="valorTotalCollapse pull-right float-right"> <span class="valorTotalCollapse" id="granTotal">R$ 0,00</span> <span class="fa fa-arrow-down comandoCollapse pull-right float-right" id="comandoCollapse" role="button"></span> </small> </a> <div class="col-lg-12 collapse" id="collapseResumo" data-parent="#collapseParent"> <div class="col-md-12 ValorTotalResumo mt-3"> <span class="textValorTotal col-md-12" id="granTotal2">Valor: R$ 0,00</span> </div><div class="row"> <div class="col-md-12"> <div class="items" id="items"> <span class="col-md-12 alert alert-info p-2 text-center marginCenter d-block">Seu carrinho ainda está vazio. Adicione itens para vê-los aqui.</span> </div></div></div></div></div><div class="card-body minusmargintop"></div></div></div><form class="form-horizontal " id="formCheckout"> <div class="col-md-4 col-xl-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosPessoais"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">1</span> <span class="dadosPessoais">Dados Pessoais</span> <span class="fa fa-edit pull-right float-right cursorP hidden" id="editaDadosPessoaisButton" ></span> <p> <small class="textInformation col-md-10">Solicitamos somente as informações essenciais para você fazer sua compra.</small> </p></div><div class="card-body minusmargintop " id="editaDadosPessoaisLabel"> <div class="form-group row formGroup mt-3"> <label id="pnome_completo" class="col-xl-12 col-form-label labelForm dadosPessoaisNomeCompletoVModel paddingTopBottomZERO" v-show="nome_completo"></label> <label id="pemail" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" v-show="email"></label> <label id="pcpf" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" v-show="cpf"></label> <label id="ptelefone" class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"></label> </div></div><div class="card-body minusmargintop" id="editaDadosPessoaisForm"> <div class="form-group row formGroup"> <label class="col-md-10 col-form-label labelForm">E-mail</label> <div class="col-xl-12"> <input autocomplete="off" class="form-control" type="email" v-model.lazy="email" id="email" placeholder="Digite seu E-mail"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Nome Completo</label> <div class="col-xl-12"> <input class="form-control required" autocomplete="off" type="text" minlength="5" v-model.lazy="nome_completo" id="nome_completo" placeholder="Digite seu nome aqui"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CPF</label> <div class="col-md-7"> <input minlength="14" maxlength="14" class="form-control required" autocomplete="off" id="cpf" type="text" v-model="cpf" placeholder="Digite seu CPF"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm" for="telefone">Celular / WhatsApp</label> <div class="col-xl-7 col-md-9"> <div class="input-group mb-0"> <div class="input-group-prepend"> <div class="input-group-text">+55</div></div><input class="form-control" id="telefone" type="text" minlength="15" maxlength="15" placeholder="71 9 9130-6561"/> </div></div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" type="button" id="btnDadosPe"> Continuar <span class="fa fa-arrow-right ml-2" style="position:relative; top:1px"></span> </button> </div></div></div></div></div><div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosEndereco"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">2</span> <span class="dadosPessoais">Entrega</span> <span class="fa fa-edit pull-right float-right cursorP hidden" id="editaDadosEnderecoButton" ></span> <p> <small class="textInformation col-md-10">Cadastre ou selecione um endereço para receber sua encomenda.</small> </p></div><div class="card-default minusmargintop hidden" id="editaDadosEnderecoLabel"> <div class="card-body"> <div class="form-group row formGroup mt-3"> <label class="col-xl-12 col-form-label labelForm enderecoEntregaHeader paddingTopBottomZERO"> <b>Endereço de Entrega:</b> </label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO"> <b id="penderecobairro"></b> </label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" id="pcidadeestado"></label> <label class="col-xl-12 col-form-label labelForm paddingTopBottomZERO" id="pcep"></label> </div></div></div><div class="card-body minusmargintop" id="editaDadosEnderecoForm"> <div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CEP</label> <div class="col-md-7"> <input class="form-control required" autocomplete="off" type="text" id="cep" maxlength="9" placeholder="Digite seu CEP"/> </div><span class="localidade col-md-6 pull-left float-left text-left" v-show="getCidade()" id="cidadeestado"></span> </div><div class="form-group row formGroup" v-show="endereco"> <label class="col-md-12 col-form-label labelForm">Endereço</label> <div class="col-xl-12"> <input autocomplete="off" class="form-control" type="address" id="endereco" v-model="endereco" placeholder="Digite seu E-mail"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <div class="col-md-6 mt-1"> <label class="col-xl-12 col-form-label labelForm paddingZero mb-1">Número</label> <input class="form-control required" autocomplete="off" type="text" id="numero_porta"/> </div><div class="col-md-6 mt-1" v-show="bairro"> <label class="col-xl-6 col-form-label labelForm paddingZero mb-1">Bairro</label> <input class="form-control required" id="bairro" autocomplete="off" type="text" v-model="bairro"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <label class="col-xl-12 col-form-label labelForm">Complemento</label> <div class="col-md-12"> <input class="form-control" autocomplete="complement" id="complemento" v-model="complemento" type="text"/> </div></div><div class="form-group row formGroup" v-show="endereco"> <label class="col-xl-12 col-form-label labelForm">Destinatário</label> <div class="col-md-12"> <input class="form-control" autocomplete="receiver" id="destinatario" v-model="destinatario" type="text"/> </div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" id="btnDadosEnd" type="button"> Continuar <span class="fa fa-arrow-right ml-2" style="position:relative; top:1px"></span> </button> </div></div></div><div class="col-md-12" id="cardFretes"></div></div></div><div class="col-md-4 mt-0 mb-0 cardSide"> <div class="card card-default mb-0 hidden" id="formDadosPagamento"> <div class="card-header rounded"> <span class="badge badge-blue iconBadge">3</span> <span class="dadosPessoais">Pagamento</span> <p> <small class="textInformation col-md-10">Escolha abaixo uma forma de pagamento.</small> </p><p class="mt-5 col-md-12"> <small class> Processado por: <strong>Mercado Pago</strong> </small> </p><div class="form-group row formGroup"> <button type="button" id="creditCard"  class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada mb-2 opcaoDeselecionada"> <p> <span class="text-left pull-left float-left col-md-10">Cartão de Crédito</span> <span class="text-left pull-left float-left col-md-10"> <img src="http://github.bubbstore.com/formas-de-pagamento/visa.svg" style="width: 65px!important; height: auto"/> </span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Pagamento 100% seguro</small> </span> </p><p id="creditCardSel" class="hidden"> <span class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo"> <small>Selecionado</small> </span> </p></button> <div class="card-body minusmargintop hidden" id="creditCardForm"> <div class="form-group row formGroup mt-3"> <label class="col-xl-12 col-form-label labelForm"> Número do Cartão </label> <div class="col-md-7"> <input class="form-control required" autocomplete="cc-number" type="text" id="card_number" v-model="card_number"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Validade</label> <div class="col-md-5"> <input autocomplete="cc-exp" class="form-control" type="text" id="validade" v-model="validade" placeholder="MM/AA" minlength="5" maxlength="5"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Nome do Titular do Cartão</label> <div class="col-md-7"> <input class="form-control required" id="nome_titular" autocomplete="name" type="text"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">Cód. de Segurança</label> <div class="col-md-5"> <input class="form-control required" id="codigo_seguranca" autocomplete="security" type="text"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-12 col-form-label labelForm">CPF do Titular</label> <div class="col-md-7"> <input minlength="14" maxlength="14" class="form-control required" autocomplete="off" type="text" id="cpf_titular" placeholder="Digite seu CPF"/> </div></div><div class="form-group row formGroup"> <label class="col-xl-2 col-form-label labelForm" for="inlineFormInputGroup">Parcelas</label> <div class="col-lg-12"> <small>Informe o cartão de crédito para selecionar as parcelas</small> <select id="dropParcelas" v-model="parcelas" class="form-control" name="installments" selectedIndex="0"> <option v-bind:value="parcelas" selected="selected"> </option> </select> </div></div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" id="btnBuyCard"  type="button"> <span class="fa fa-lock mr-2" style="position:relative; top:1px"></span>Comprar Agora </button> </div></div></div><button type="button" id="bolbradesco" class="btn btn-secondary col-md-11 pull-left float-left btnFormaPagamentoSelecionada opcaoDeselecionada"> <p> <span class="text-left pull-left float-left col-md-10">Boleto</span> <span class="text-left pull-left float-left col-md-10"> <img src="http://github.bubbstore.com/formas-de-pagamento/boleto-barcode.svg" style="width: 65px!important; height: auto"/> </span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Processamento em 3 dias.</small> </span> </p><p id="bolbradescoSel" class="hidden"> <span class="text-left pull-left float-left ml-0 col-md-10 selecionadoInfo"> <small>Selecionado</small> </span> </p></button> <div class="card-body minusmargintop hidden" id="bolbradescoForm"> <div class="form-group row mt-2"> <small class="text-justify col-md-11 smallInforFormaPagamentoBoleto">Somente quando recebermos a confirmação, em até 72h após o pagamento, seguiremos com o envio das suas compras. O prazo de entrega passa a ser contado somente após a confirmação do pagamento.</small> </div><div class="form-group row mt-2"> <span class="valorNoBoleto col-md-12 ml-1"> Valor no Boleto <strong>R$ <span id="valorTotalBoleto"></span></strong> </span> </div><div class="form-group row mt-3"> <div class="col-xl-12"> <button class="btn btn-sm btn-primary btn-lg btn-block float-right mb-0 btnContinue" id="btnBuyBoleto"  type="button"> <span class="fa fa-lock mr-2" style="position:relative; top:1px"></span>Comprar Agora </button> </div></div></div></div></div></div></div></form> </div></div></div></form> </form> </div><div class="col-md-3 mr-0 pr-0 pl-0"></div></div></div> `;
 class CheckoutMP extends HTMLElement {
 
     constructor() {
@@ -116,16 +118,17 @@ class CheckoutMP extends HTMLElement {
                 "src",
                 obj.script
             );
-            
+
             if (obj.trigger == 1) {
                 script.onload = function () {
                     obj.call;
                 }
             }
             this._shadowRoot.appendChild(script);
-        });       
+        });
         var self = this;
-        window.onload = function () {            
+        window.onload = function () {
+            self.ShowLoading();
             const plugin = document.createElement("script");
             plugin.onload = function () {
                 console.log("Carregado Script MP");
@@ -153,7 +156,7 @@ class CheckoutMP extends HTMLElement {
             { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
             { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' },
             { script: './styleck.css' },
-            { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css'}
+            { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css' }
         ];
     }
     get arrayScripts() {
@@ -283,7 +286,7 @@ class CheckoutMP extends HTMLElement {
             })
             nome = auxx;
         }
-        return toCamelCase(nome);
+        return this.toCamelCase(nome);
     }
     toCamelCase(str) {
         var LSTR2 = "";
@@ -342,7 +345,7 @@ class CheckoutMP extends HTMLElement {
         editaDadosEnderecoLabel.classList.remove("hidden");
         editaDadosEnderecoForm.classList.add("hidden");
         editaDadosEnderecoButton.classList.remove("hidden");
-        GetFretes();
+        this.GetFretes();
     }
     editarDadosEndereco() {
         currentStep = 2;
@@ -359,25 +362,30 @@ class CheckoutMP extends HTMLElement {
         errors = [];
         if (currentStep == 1) {
             formValidateDadosPessoais.forEach((obj, i) => {
-                if (obj.required == true && checkField(obj.nome)) {
-                    errors.push({ field: obj.nome, mensagem: 'Campo ' + getFieldName(obj.nome) + ' é Obrigatório.' });
+                if (obj.required == true && this.checkField(obj.nome)) {
+                    errors.push({ field: obj.nome, mensagem: 'Campo ' + this.getFieldName(obj.nome) + ' é Obrigatório.' });
                 }
             });
+            this.saveLead();
         }
         if (currentStep == 2) {
             formValidateDadosEndereco.forEach((obj, i) => {
-                if (obj.required == true && checkField(obj.nome)) {
-                    errors.push({ field: obj.nome, mensagem: 'Campo ' + getFieldName(obj.nome) + ' é Obrigatório.' });
+                if (obj.required == true && this.checkField(obj.nome)) {
+                    errors.push({ field: obj.nome, mensagem: 'Campo ' + this.getFieldName(obj.nome) + ' é Obrigatório.' });
                 }
             });
+            this.saveLead();
         }
-
-        if (currentStep == 3) {
+        if (currentStep == 3 && formaPagamento == "bolbradesco") {
+            this.saveLead();
+        }
+        if (currentStep == 3 && formaPagamento == "creditCard") {
             formValidateDadosCartao.forEach((obj, i) => {
-                if (obj.required == true && checkField(obj.nome)) {
-                    errors.push({ field: obj.nome, mensagem: 'Campo ' + getFieldName(obj.nome) + ' é Obrigatório.' });
+                if (obj.required == true && this.checkField(obj.nome)) {
+                    errors.push({ field: obj.nome, mensagem: 'Campo ' + this.getFieldName(obj.nome) + ' é Obrigatório.' });
                 }
             });
+            this.saveLead();
         }
 
         const alertErros = this._shadowRoot.getElementById("alertErros");
@@ -493,7 +501,18 @@ class CheckoutMP extends HTMLElement {
             type
         );
     }
-    saveLead() {
+    async saveLead() {
+        var LLead = await this.getDadosPagamentoTransacao();
+        let LBody = {
+            id_usuario: dadosLoja.id_usuario,
+            email: this._shadowRoot.getElementById("email").value,
+            nome: this._shadowRoot.getElementById("nome_completo").value,
+            telefone: this._shadowRoot.getElementById("telefone").value,
+            lead: LLead
+        }
+        this.postAxios(URL_END_POINT_SAVE_LEAD, LBody, (retornoLead) => {
+            console.log("L S");
+        })
 
     }
 
@@ -714,6 +733,7 @@ class CheckoutMP extends HTMLElement {
     }
     async adicionarProdutoUpSell() {
         if (VarianteTitleUPSellSelected == "" && VarianteIDUpSellSelected == "") return;
+        this.ShowLoading();
         var lpro = await this.pushProducts(
             VarianteIDProdutoJSONUpSellSelected,
             quantity,
@@ -772,6 +792,7 @@ class CheckoutMP extends HTMLElement {
             formDataPa.classList.remove("hidden");
 
         }
+        this.HideLoading();
         //this.UpSellNoCheckout = 0;
     }
 
@@ -845,10 +866,16 @@ class CheckoutMP extends HTMLElement {
             fretes = responseFrete;
             if (responseFrete.length > 0) {
                 responseFrete.forEach((obj, i) => {
-                    const LTempFrete = TEMPLATE_ITENS_FRETE.replace(/{id_frete}/g, obj.id).replace(/{nome_frete}/g, obj.nome).replace("{{preco_frete}}", obj.preco);
+                    const LTempFrete = TEMPLATE_ITENS_FRETE.replace(/{id_frete}/g, "btn" + obj.id).replace(/{nome_frete}/g, obj.nome).replace("{{preco_frete}}", obj.preco);
                     LDivFretes.insertAdjacentHTML("beforeend", LTempFrete);
+                    const LBtn = this._shadowRoot.getElementById("btn" + obj.id);
+                    if (LBtn) {
+                        LBtn.addEventListener("click", () => {
+                            this.freteSelected(obj.id)
+                        })
+                    }
                     setTimeout(() => {
-                        selecionaPadrao(obj.id, obj.preco, obj.nome);
+                        this.selecionaPadrao(obj.id, obj.preco, obj.nome);
                     }, 500);
 
 
@@ -1019,14 +1046,14 @@ class CheckoutMP extends HTMLElement {
         );
         console.log(valorFrete);
         fretes.forEach((obj, i) => {
-            const LD = this._shadowRoot.getElementById(obj.id);
+            const LD = this._shadowRoot.getElementById("btn" + obj.id);
             if (LD) {
                 LD.classList.remove('classSelected');
                 LD.classList.remove('opcaoSelecionada');
                 LD.classList.add('opcaoDeselecionada');
             }
         });
-        const LSelected = this._shadowRoot.getElementById(id);
+        const LSelected = this._shadowRoot.getElementById("btn" + id);
         if (LSelected) {
             LSelected.classList.remove('opcaoDeselecionada');
             LSelected.classList.add('opcaoSelecionada');
@@ -1149,54 +1176,62 @@ class CheckoutMP extends HTMLElement {
         return r;
     }
 
-    async getDadosPagamentoTransacao() {
-        var transacao = {
-            dadosComprador: {
-                nome_completo: removeAcento(this._shadowRoot.getElementById("nome_completo").value),
-                email: this._shadowRoot.getElementById("email").value,
-                cpf: this._shadowRoot.getElementById("cpf").value,
-                telefone: this._shadowRoot.getElementById("telefone").value,
-                cep: this._shadowRoot.getElementById("cep").value,
-                endereco: removeAcento(this._shadowRoot.getElementById("endereco").value),
-                numero_porta: this._shadowRoot.getElementById("numero_porta").value,
-                bairro: this._shadowRoot.getElementById("bairro").value,
-                cidade: cidadeEnd,
-                estado: estadoEnd,
-                complemento: removeAcento(this._shadowRoot.getElementById("complemento").value),
-                destinatario: removeAcento(this._shadowRoot.getElementById("destinatario").value),
-                numero_cartao: this._shadowRoot.getElementById("card_number").value,
-                validade: this._shadowRoot.getElementById("validade").value,
-                nome_titular: this._shadowRoot.getElementById("nome_titular").value,
-                codigo_seguranca: this._shadowRoot.getElementById("codigo_seguranca").value,
-                cpf_titular: this._shadowRoot.getElementById("cpf_titular").value,
-                frete: getFreteSelecionadoNome(),
-                valor: formatPrice(granTotal),
-                forma: formaPagamento,
-                barcode: "",
-                urlBoleto: "",
-                parcela: parcelas,
-                valorParcela: "",
-                bandeira: payment_id
-            },
-            produtos: produtosCart,
-            dadosLoja: dadosLoja,
-            dadosCheckout: DadosCheckout,
-            paymentData: {
-                transaction_amount: formatPrice(granTotal),
-                token: cardToken,
-                description: dadosLoja.nome_loja,
-                installments: parcelas,
-                payment_method_id: payment_id,
-                payer: {
-                    email: this.getRandomStringEmail() + this._shadowRoot.getElementById("email").value
-                }
-            }
-        };
-        const JSONString = JSON.stringify(transacao);
-        //console.log(JSONString);
-        const LCripto = btoa(JSONString);
+    getDadosPagamentoTransacao() {
+        return new Promise((resolve, reject) => {
+            try {
+                var transacao = {
+                    dadosComprador: {
+                        nome_completo: this.removeAcento(this._shadowRoot.getElementById("nome_completo").value),
+                        email: this._shadowRoot.getElementById("email").value,
+                        cpf: this._shadowRoot.getElementById("cpf").value,
+                        telefone: this._shadowRoot.getElementById("telefone").value,
+                        cep: this._shadowRoot.getElementById("cep").value,
+                        endereco: this.removeAcento(this._shadowRoot.getElementById("endereco").value),
+                        numero_porta: this._shadowRoot.getElementById("numero_porta").value,
+                        bairro: this._shadowRoot.getElementById("bairro").value,
+                        cidade: cidadeEnd,
+                        estado: estadoEnd,
+                        complemento: this.removeAcento(this._shadowRoot.getElementById("complemento").value),
+                        destinatario: this.removeAcento(this._shadowRoot.getElementById("destinatario").value),
+                        numero_cartao: this._shadowRoot.getElementById("card_number").value,
+                        validade: this._shadowRoot.getElementById("validade").value,
+                        nome_titular: this._shadowRoot.getElementById("nome_titular").value,
+                        codigo_seguranca: this._shadowRoot.getElementById("codigo_seguranca").value,
+                        cpf_titular: this._shadowRoot.getElementById("cpf_titular").value,
+                        frete: this.getFreteSelecionadoNome(),
+                        valor: this.formatPrice(granTotal),
+                        forma: formaPagamento,
+                        barcode: "",
+                        urlBoleto: "",
+                        parcela: parcelas,
+                        valorParcela: "",
+                        bandeira: payment_id
+                    },
+                    produtos: produtosCart,
+                    dadosLoja: dadosLoja,
+                    dadosCheckout: DadosCheckout,
+                    paymentData: {
+                        transaction_amount: this.formatPrice(granTotal),
+                        token: cardToken,
+                        description: dadosLoja.nome_loja,
+                        installments: parcelas,
+                        payment_method_id: payment_id,
+                        payer: {
+                            email: this.getRandomStringEmail() + this._shadowRoot.getElementById("email").value
+                        }
+                    }
+                };
+                const JSONString = JSON.stringify(transacao);
+                //console.log(JSONString);
+                const LCripto = btoa(JSONString);
 
-        return LCripto;
+                resolve(LCripto);
+            }
+            catch (error) {
+                reject(error);
+            }
+        })
+
     }
 
     async iniciaPagamentoBackEndBoleto() {
@@ -1231,7 +1266,7 @@ class CheckoutMP extends HTMLElement {
         this.ShowLoading();
         var eParcel = this._shadowRoot.getElementById("dropParcelas");
         var eParcelSelected = eParcel.options[eParcel.selectedIndex].value;
-        const LForm = await CREATE_FORM_MP(
+        const LForm = await this.CREATE_FORM_MP(
             dadosLoja.nome_loja,
             parseFloat(granTotal),
             this._shadowRoot.getElementById("card_number").value.replace(/ /g, ''),
@@ -1243,7 +1278,49 @@ class CheckoutMP extends HTMLElement {
             this._shadowRoot.getElementById("cpf_titular").value,
             this._shadowRoot.getElementById("email").value,
             payment_id)
-        window.Mercadopago.createToken(LForm, iniciaPagamentoBackEnd);
+        var self = this;
+        window.Mercadopago.createToken(LForm, async (status, response) => {
+
+            if (status != 200 && status != 201) {
+                //console.log("Não foi possível gerar o token", response.message);
+                window.Mercadopago.clearSession();
+                self.showNotificationW(
+                    "Oops!",
+                    "Não foi possível completar a ação. Tente novamente!",
+                    "warning"
+                );
+            } else {
+                self.ShowLoading();
+                cardToken = response.id;
+                const LCripto = await self.getDadosPagamentoTransacao();
+
+                self.postAxios(URL_END_POINT_PAY_CARD, { pay: LCripto }, async (retornoPay) => {
+                    if (
+                        retornoPay.data.status != undefined &&
+                        (retornoPay.data.status.toUpperCase() == "REJECTED" ||
+                            retornoPay.data.status.toUpperCase() == "CANCELED" ||
+                            retornoPay.data.status.toUpperCase() == "VACATED")
+                    ) {
+                        const LMensagem = await self.getErrorMPDetail(retornoPay.data.status_detail);
+                        self.showNotificationW(
+                            "Oops!",
+                            "Pagamento Rejeitado. " + LMensagem,
+                            "error"
+                        );
+                        return;
+                    }
+                    var DadosCliente = {
+                        nome: self._shadowRoot.getElementById("nome_completo").value,
+                        dadosCompra: retornoPay.data
+                    };
+
+                    window.Mercadopago.clearSession();
+                    self.showNotificationW("Pagamento Realizado!", "Em instantes você irá receber um e-mail com os detalhes da sua compra.", "success");
+                })
+
+                //break;
+            }
+        });
     }
     getParcelas() {
         var self = this;
@@ -1254,16 +1331,16 @@ class CheckoutMP extends HTMLElement {
             },
             function (status, response) {
                 if (status == 200) {
-                    this._shadowRoot.getElementById("dropParcelas").options.length = 0;
+                    self._shadowRoot.getElementById("dropParcelas").options.length = 0;
                     response[0].payer_costs.forEach(installment => {
                         let opt = document.createElement("option");
                         opt.text = installment.recommended_message;
                         opt.value = installment.installments;
                         opt.id = "parcel_" + installment.installments;
-                        this._shadowRoot.getElementById("dropParcelas").appendChild(opt);
+                        self._shadowRoot.getElementById("dropParcelas").appendChild(opt);
                         setTimeout(() => {
-                            this._shadowRoot.getElementById("dropParcelas").selectedIndex = 0;
-                            this._shadowRoot.getElementById("dropParcelas").value = 1;
+                            self._shadowRoot.getElementById("dropParcelas").selectedIndex = 0;
+                            self._shadowRoot.getElementById("dropParcelas").value = 1;
                             self.parcelas = 1;
                         }, 1000);
                     });
@@ -1309,29 +1386,30 @@ class CheckoutMP extends HTMLElement {
 
         this.maskCardNumber();
     }
-
     async iniciaPagamentoBackEnd(status, response) {
+        var self = this;
         if (status != 200 && status != 201) {
             //console.log("Não foi possível gerar o token", response.message);
             window.Mercadopago.clearSession();
-            this.showNotificationW(
+            self.showNotificationW(
                 "Oops!",
                 "Não foi possível completar a ação. Tente novamente!",
                 "warning"
             );
         } else {
+            self.ShowLoading();
             cardToken = response.id;
-            const LCripto = await this.getDadosPagamentoTransacao();
-            this.ShowLoading();
-            this.postAxios(URL_END_POINT_PAY_CARD, { pay: LCripto }, async (retornoPay) => {
+            const LCripto = await self.getDadosPagamentoTransacao();
+
+            self.postAxios(URL_END_POINT_PAY_CARD, { pay: LCripto }, async (retornoPay) => {
                 if (
                     retornoPay.data.status != undefined &&
                     (retornoPay.data.status.toUpperCase() == "REJECTED" ||
                         retornoPay.data.status.toUpperCase() == "CANCELED" ||
                         retornoPay.data.status.toUpperCase() == "VACATED")
                 ) {
-                    const LMensagem = await getErrorMPDetail(retornoPay.data.status_detail);
-                    showNotificationW(
+                    const LMensagem = await self.getErrorMPDetail(retornoPay.data.status_detail);
+                    self.showNotificationW(
                         "Oops!",
                         "Pagamento Rejeitado. " + LMensagem,
                         "error"
@@ -1339,12 +1417,12 @@ class CheckoutMP extends HTMLElement {
                     return;
                 }
                 var DadosCliente = {
-                    nome: this._shadowRoot.getElementById("nome_completo").value,
+                    nome: self._shadowRoot.getElementById("nome_completo").value,
                     dadosCompra: retornoPay.data
                 };
 
                 window.Mercadopago.clearSession();
-                this.showNotificationW("Pagamento Realizado!", "Em instantes você irá receber um e-mail com os detalhes da sua compra.", "success");
+                self.showNotificationW("Pagamento Realizado!", "Em instantes você irá receber um e-mail com os detalhes da sua compra.", "success");
             })
 
             //break;
@@ -1402,13 +1480,51 @@ class CheckoutMP extends HTMLElement {
         editaDadosEnd.addEventListener("click", () => {
             this.editarDadosEndereco();
         });
-        const validFor = document.querySelectorAll(".btnContinue");
-        validFor.forEach((obj, i) => {
-            obj.addEventListener("click", () => {
-                this.validateMyForm();
-            })
-        })
+        const btnDadosP = this._shadowRoot.getElementById("btnDadosPe");
+        btnDadosP.addEventListener("click", () => {
+            this.validateMyForm();
+        });
 
+        const btnDadosEn = this._shadowRoot.getElementById("btnDadosEnd");
+        btnDadosEn.addEventListener("click", () => {
+            this.validateMyForm();
+        });
+        const btnBuyCar = this._shadowRoot.getElementById("btnBuyCard");
+        btnBuyCar.addEventListener("click", () => {
+            this.validateMyForm();
+        });
+        const btnBuyBolet = this._shadowRoot.getElementById("btnBuyBoleto");
+        btnBuyBolet.addEventListener("click", () => {
+            this.validateMyForm();
+        });
+
+        const ecpf = this._shadowRoot.getElementById("cpf");
+        ecpf.addEventListener('change', () => {
+            this.maskCPF();
+        });
+        ecpf.addEventListener('blur', () => {
+            this.saveLead();
+        });
+        const ecep = this._shadowRoot.getElementById("cep");
+        ecep.addEventListener("change", () => {
+            this.consultaCEP();
+        });
+        const ecard_number = this._shadowRoot.getElementById("card_number");
+        ecard_number.addEventListener("change", () => {
+            this.verificaDigitosCartao();
+        });
+        const evalidade = this._shadowRoot.getElementById("validade");
+        evalidade.addEventListener("change", () => {
+            this.maskValidade();
+        });
+        const ecpfTitular = this._shadowRoot.getElementById("cpf_titular");
+        ecpfTitular.addEventListener("change", () => {
+            this.maskCPFTitular();
+        });
+        const eTelefone = this._shadowRoot.getElementById("telefone");
+        eTelefone.addEventListener("change", () => {
+            this.maskTelefone();
+        });
 
         //this.ShowLoading();
         /* DADOS PESSOAIS */
@@ -1452,10 +1568,11 @@ class CheckoutMP extends HTMLElement {
                 if (produtoVariantes && produtoVariantes.length > 0) {
                     var select = document.createElement("select");
                     select.name = "Opcao";
+                    select.classList.add("selectpicker");
                     select.id = "Opcao";
                     select.setAttribute(
                         "class",
-                        "form-control col-md-12 mt-2"
+                        "selectpicker form-control col-md-12 mt-2 "
                     );
                     var self = this;
                     select.onchange = function () {
