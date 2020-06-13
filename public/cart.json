@@ -1,5 +1,5 @@
 {
-    "url": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart",
+    "url": "http://localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart",
     "urlCheckout": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart&redirectTo=checkout",
     "active": "1",
     "skip_cart": "0"

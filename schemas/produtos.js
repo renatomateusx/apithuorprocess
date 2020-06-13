@@ -67,7 +67,7 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
             if (resultsProd.rows) {
 
                 resultsProd.rows.forEach(async (prod, ii) => {
-                    const ProdutoJSON = JSON.parse(prod.json_dados_produto);
+                    const ProdutoJSON = prod.json_dados_produto;
                     const plataforma = prod.plataforma;
                     const imgSRC = await GetImageVariantID(variant, ProdutoJSON.images);                    
                     ProdutoJSON.variants.forEach((variante, i) => {
