@@ -127,12 +127,8 @@ function getDadosLoja(shop) {
             if (error) {
                 throw error
             }
-            if (results.rows) {
-
-                results.rows.forEach(async (obj, i) => {
-                    resolve(obj);
-                })
-
+            if (results.rowCount> 0) {
+                resolve(results.rows[0]);
             }
         });
     });
@@ -143,12 +139,8 @@ module.exports.GetDadosLojaInternal = (shop) => {
             if (error) {
                 throw error
             }
-            if (results.rows) {
-
-                results.rows.forEach(async (obj, i) => {
-                    resolve(obj);
-                })
-
+            if (results.rowCount > 0) {
+                resolve(results.rows[0]);
             }
         });
     });
@@ -162,13 +154,11 @@ module.exports.GetDadosLoja = (req, res, next) => {
             if (error) {
                 throw error
             }
-            if (results.rows) {
+            if (results.rowCount > 0) {
+                //console.log("Shop", loja);
+                res.json(results.rows[0]);
+                res.end();
 
-                results.rows.forEach((loja, i) => {
-                    //console.log("Shop", loja);
-                    res.json(loja);
-                    res.end();
-                })
             }
         });
     }
@@ -189,13 +179,11 @@ module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
             if (error) {
                 throw error
             }
-            if (results.rows) {
+            if (results.rowCount > 0) {
+                //console.log("Shop", loja);
+                res.json(results.rows[0]);
+                res.end();
 
-                results.rows.forEach((loja, i) => {
-                    //console.log("Shop", loja);
-                    res.json(loja);
-                    res.end();
-                })
             }
         });
     }
@@ -211,19 +199,17 @@ module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
 
 module.exports.GetLojaByUsuario = (id_usuario) => {
     return new Promise((resolve, reject) => {
-        try {           
+        try {
 
             pool.query('SELECT * FROM integracoes_plataformas WHERE id_usuario=$1', [id_usuario], (error, results) => {
                 if (error) {
                     throw error
                 }
-                if (results.rows) {
+                if (results.rowCount > 0) {
+                    //console.log("Shop", loja);
+                    resolve(results.rows[0]);
 
-                    results.rows.forEach((loja, i) => {
-                        //console.log("Shop", loja);
-                        resolve(loja);
-                    })
-                }else{
+                } else {
                     resolve(0);
                 }
             });

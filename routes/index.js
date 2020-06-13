@@ -13,6 +13,12 @@ router.get('/', function (req, res, next) {
   res.send('/index');
 });
 
+router.get('/status',function (req, res, next) {
+  
+  
+  res.send('Status OK!');
+});
+
 router.get('/newNotification', function (req, res, next) {
   let socket = req.app.get('socketio');
   socket.emit('newNotification', req.body);
