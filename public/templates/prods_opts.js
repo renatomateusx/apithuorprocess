@@ -819,7 +819,6 @@ class CheckoutMP extends HTMLElement {
         })
         UrlFinal = LInitUrl + UrlFinal + LEndCart;
         console.log(UrlFinal);
-        return;
         this.ShowLoading();
         window.location.href = UrlFinal;
     }
