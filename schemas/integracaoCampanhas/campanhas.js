@@ -22,9 +22,8 @@ module.exports.GetCampanhas = (req, res, next) => {
 module.exports.SaveCampanhaCartAbandon = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {            
-            const {id_usuario, campanha} = req.body;
-            
-            pool.query('INSERT INTO campanhas (id_usuario, campanha, sequencia) VALUES($1, $2, $3) ON CONFLICT (id_usuario, campanha) DO UPDATE SET id_usuario = $1, campanha=$2, sequencia = $3',[id_usuario, campanha, req.body], (error, results) => {
+            const {id_usuario, campanha, status} = req.body;
+            pool.query('INSERT INTO campanhas (id_usuario, campanha, sequencia, status) VALUES($1, $2, $3, $4) ON CONFLICT (id_usuario, campanha) DO UPDATE SET id_usuario = $1, campanha=$2, sequencia = $3, status=$4',[id_usuario, campanha, req.body, +status], (error, results) => {
                 if (error) {
                     throw error
                 }

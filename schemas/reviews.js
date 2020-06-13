@@ -45,6 +45,22 @@ module.exports.SaveReview = async (req, res, next) => {
 }
 module.exports.GetReviewByID = (req, res, next) => {
     try {
+        const { id_produto } = req.body;
+        pool.query('SELECT * FROM reviews WHERE id_produto = $1', [id_produto], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetReviewByIDOld = (req, res, next) => {
+    try {
         const { id_produto, url_loja } = req.body;
         pool.query('SELECT * FROM reviews WHERE id_produto = $1 and url_loja = $2', [id_produto, url_loja], (error, results) => {
             if (error) {

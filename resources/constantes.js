@@ -21,7 +21,8 @@ module.exports = Object.freeze({
     WEBSITE_CART: 'https://thuor.com/cart/items?',
     WEBSITEAPI: 'https://api.thuor.com/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com/webhooks/webhookpayu',
-    WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
+    // WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
+    WEBSITECHECKOUT: 'https://thuor.com/cart/items?',
     VERSAO_API: '2020-04',
     RESOURCE_PRODUCTS: 'products',
     RESOURCE_WEBHOOKS: 'webhooks',
@@ -36,9 +37,11 @@ module.exports = Object.freeze({
     RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT: "<br/><!-- Não remova. Checkout Thuor. -->     {% capture thuor_snippet_content %}{% include 'ThuorSnippet' %}{% endcapture %} {% unless thuor_snippet_content contains 'Liquid error' %} {% include 'ThuorSnippet' %} {% endunless %}     <!-- Não remova. Checkout Thuor. --> <br/> </body>",
     RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT: "{% endif %} <!-- Não remova. App Thuor Review. -->     {% capture thuor_review_snippet_content %}{% include 'ThuorReviewSnippet' %}{% endcapture %} {% unless thuor_review_snippet_content contains 'Liquid error' %} {% include 'ThuorReviewSnippet' %} {% endunless %}     <!-- Não remova. App Thuor Review. -->",
 
-    URL_TRACK_CODE: 'http://localhost:8081/track/@',
+    //URL_TRACK_CODE: 'http://localhost:8081/track/@',
+    URL_TRACK_CODE: 'https://thuor.com/track/@',
 
-    URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
+    // URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
+    URL_PUBLIC_RESOURCES_EMAIL: 'https://hmlapi.thuor.com/images/templates',
     FROM_MAIL:'{nome_loja} <{email_loja}>',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
     STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',

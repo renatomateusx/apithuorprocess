@@ -17,6 +17,8 @@ router.post('/GetProdutoIDThuor', produtosSchema.GetProdutoIDThuor);
 
 router.post('/GetProdutoByIDImported', produtosSchema.GetProdutoByIDImported);
 
+router.post('/GetProdutoByIDImportedCheckoutIndependente', produtosSchema.GetProdutoByIDImportedCheckoutIndependente);
+
 router.post('/AddProduto', utilis.verifyJWT, produtosSchema.AddProduto);
 
 router.put('/UpdateProduto', utilis.verifyJWT, produtosSchema.UpdateProduto);

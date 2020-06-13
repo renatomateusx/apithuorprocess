@@ -44,65 +44,67 @@ var j = schedule.scheduleJob('* * */23 * * *', function () {
 
                     //console.log('diff', duration.asHours());
                     var LReturnTracker = await logistica.TrackingCodeInternal(tracking_number);
-                    LReturnTracker = JSON.parse(LReturnTracker);
-                    //console.log(tracking_number);   
-                    // console.log("Retorno", LReturnTracker);
                     if (LReturnTracker) {
-                        LReturnTracker.forEach(async (objTrack, i) => {
-                            objTrack.checkpoints.forEach(async (objCheckPoint, i) => {
-                                self.LDescriptionCheckPoint = objCheckPoint.description + ' - ' || '';
-                                self.LDateCheckPoint = moment(objCheckPoint.date).format("DD/MM/YYYY HH:mm:ss");
-                                self.LStatusCheckPoint = await utilisEmail.getStatusRastreio(self.LStatusCheckPoint, objCheckPoint.status);
-                                self.LDetailCheckPoint = await utilisEmail.getDetail(self.LDateCheckPoint, objCheckPoint.details);
-                                if (objCheckPoint.status == "DELIVERED") {
-                                    LSIT = " foi ENTREGUE!";
-                                } else {
-                                    LSIT = " está chegando";
-                                }
-                            });
-                            var LSTATUS = constantes.STRING_STATUS_EMAIL;
-                            LSTATUS = LSTATUS.replace("{STATUS}", self.LStatusCheckPoint || '');
-                            LSTATUS = LSTATUS.replace("{LOCAL}", self.LDescriptionCheckPoint || '');
-                            LSTATUS = LSTATUS.replace("{LOCAL_CIDADE}", self.LDetailCheckPoint || '');
-                            LSTATUS = LSTATUS.replace("{DATA}", self.LDateCheckPoint);
-                            //console.log("STATUS", LSTATUS);
-
-                            const LUpdateTracker = moment(objTrack.lastUpdateTime).format("DD/MM/YYYY hh:mm:ss");
-                            //console.log("Upate", LUpdateTracker);
-                            if (LUpdateTracker > moment(last_updated).format("DD/MM/YYYY hh:mm:ss")) {
-                                console.log(LUpdateTracker, last_updated);
-                                const statusTracker = objTrack.status;
-                                var template = path.resolve('public/templates/email-encomenda.html');
-                                fs.readFile(template, 'utf8', async function (err, html) {
-                                    if (err) {
-                                        throw err;
-                                    }
-                                    var LHTML = html;
-                                    var URLTrack = constantes.URL_TRACK_CODE.replace('@', 'LB121347495SG');
-                                    //console.log(URLTrack);
-                                    LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
-                                    LHTML = LHTML.replace("@SATUS_ENCOMENDA", LSTATUS);
-                                    LHTML = LHTML.replace("@NOME_LOJA", DadosLoja.nome_loja);
-                                    LHTML = LHTML.replace("@SIT", LSIT);
-                                    //console.log(LHTML);
-                                    var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
-                                    arrayAttachments.forEach((obj, i) => {
-                                        obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
-                                    });
-
-                                    const LReturnEmail = await utilisEmail.SendMail(email, constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO, LHTML, arrayAttachments);
-                                    if (LReturnEmail) {
-                                        const updateFulFillment = await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusTracker, moment().format());
-                                        if (updateFulFillment) {
-                                        }
-                                        else {
-                                            console.log("Error", updateFulFillment);
-                                        }
+                        LReturnTracker = JSON.parse(LReturnTracker);
+                        //console.log(tracking_number);   
+                        // console.log("Retorno", LReturnTracker);
+                        if (LReturnTracker) {
+                            LReturnTracker.forEach(async (objTrack, i) => {
+                                objTrack.checkpoints.forEach(async (objCheckPoint, i) => {
+                                    self.LDescriptionCheckPoint = objCheckPoint.description + ' - ' || '';
+                                    self.LDateCheckPoint = moment(objCheckPoint.date).format("DD/MM/YYYY HH:mm:ss");
+                                    self.LStatusCheckPoint = await utilisEmail.getStatusRastreio(self.LStatusCheckPoint, objCheckPoint.status);
+                                    self.LDetailCheckPoint = await utilisEmail.getDetail(self.LDateCheckPoint, objCheckPoint.details);
+                                    if (objCheckPoint.status == "DELIVERED") {
+                                        LSIT = " foi ENTREGUE!";
+                                    } else {
+                                        LSIT = " está chegando";
                                     }
                                 });
+                                var LSTATUS = constantes.STRING_STATUS_EMAIL;
+                                LSTATUS = LSTATUS.replace("{STATUS}", self.LStatusCheckPoint || '');
+                                LSTATUS = LSTATUS.replace("{LOCAL}", self.LDescriptionCheckPoint || '');
+                                LSTATUS = LSTATUS.replace("{LOCAL_CIDADE}", self.LDetailCheckPoint || '');
+                                LSTATUS = LSTATUS.replace("{DATA}", self.LDateCheckPoint);
+                                //console.log("STATUS", LSTATUS);
 
-                            }
-                        })
+                                const LUpdateTracker = moment(objTrack.lastUpdateTime).format("DD/MM/YYYY hh:mm:ss");
+                                //console.log("Upate", LUpdateTracker);
+                                if (LUpdateTracker > moment(last_updated).format("DD/MM/YYYY hh:mm:ss")) {
+                                    console.log(LUpdateTracker, last_updated);
+                                    const statusTracker = objTrack.status;
+                                    var template = path.resolve('public/templates/email-encomenda.html');
+                                    fs.readFile(template, 'utf8', async function (err, html) {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        var LHTML = html;
+                                        var URLTrack = constantes.URL_TRACK_CODE.replace('@', 'LB121347495SG');
+                                        //console.log(URLTrack);
+                                        LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
+                                        LHTML = LHTML.replace("@SATUS_ENCOMENDA", LSTATUS);
+                                        LHTML = LHTML.replace("@NOME_LOJA", DadosLoja.nome_loja);
+                                        LHTML = LHTML.replace("@SIT", LSIT);
+                                        //console.log(LHTML);
+                                        var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
+                                        arrayAttachments.forEach((obj, i) => {
+                                            obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
+                                        });
+
+                                        const LReturnEmail = await utilisEmail.SendMail(email, constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO, LHTML, arrayAttachments);
+                                        if (LReturnEmail) {
+                                            const updateFulFillment = await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusTracker, moment().format());
+                                            if (updateFulFillment) {
+                                            }
+                                            else {
+                                                console.log("Error", updateFulFillment);
+                                            }
+                                        }
+                                    });
+
+                                }
+                            })
+                        }
                     }
                 }
             });
