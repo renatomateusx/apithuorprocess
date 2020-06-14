@@ -120,14 +120,21 @@ module.exports = Object.freeze({
 
     CC_REJECTED_BAD_FILLED_CARD_NUMBER: 'Revise o número do cartão.',
 
-    HOST_SMTP: 'gmail.com',
-    HOST_SERVICE: 'gmail',
+    HML_HOST_SMTP: 'gmail.com',
+    HML_HOST_SERVICE: 'gmail',
+    HML_PORT_SMTP: '587',
+    HML_USER_SMTP: 'tohrmoura@gmail.com',
+    HML_PASS_SMTP: '02997841500',
+    HML_EMAIL_FROM: "no-replay@thuor.com",
+    HML_EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
+
+    HOST_SMTP: 'in-v3.mailjet.com',
+    HOST_SERVICE: 'mailjet',
     PORT_SMTP: '587',
-    USER_SMTP: 'tohrmoura@gmail.com',
-    PASS_SMTP: '02997841500',
+    USER_SMTP: '787c32052a41264ddda0d60bdaf0e41c',
+    PASS_SMTP: 'a2379cd8e89dd40a9695d09a79c1dde9',
     EMAIL_FROM: "no-replay@thuor.com",
     EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
-
 
     CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,
 

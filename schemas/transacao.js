@@ -39,6 +39,44 @@ module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetReportQtdPerDaySales = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        console.log(id_usuario);
+        pool.query('select COUNT(data) as qtd, data from transacoes  where id_usuario =$1 group by data order by data asc', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetSalesMonth = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        const data = moment().format("MM");
+        console.log(data);
+        pool.query("select * from transacoes where date_part('month', data) = $1 and id_usuario = $2 order by data asc", [data, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+
+
 module.exports.SetPaymentComissionDone = (req, res, next) => {
     try {
         const { json_cobranca_comissao, json_response_comissao, id_usuario, data_processar } = req.body;
