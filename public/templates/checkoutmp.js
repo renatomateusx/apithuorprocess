@@ -89,6 +89,7 @@ var cidadeEnd = "";
 var estadoEnd = "";
 var pixels = {};
 var LTotal = 0;
+var ttrack = 0;
 
 
 
@@ -1268,7 +1269,9 @@ class CheckoutMP extends HTMLElement {
                         urlBoleto: "",
                         parcela: parcelas,
                         valorParcela: "",
-                        bandeira: payment_id
+                        bandeira: payment_id,
+                        ttrack: ttrack
+                        
                     },
                     produtos: produtosCart,
                     dadosLoja: dadosLoja,
