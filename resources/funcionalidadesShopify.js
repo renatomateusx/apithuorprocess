@@ -23,7 +23,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                 utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LShopifyOrder, headerAditional, valueHeaderAditional, 'POST')
                     .then(async retornoShopify => {
                         const RetornoShopifyJSON = retornoShopify.body;
-                        transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP)
+                        transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP, LJSON.dadosComprador.ttrack)
                             .then(async (retornoInsereTransacao) => {
                                 const LDataProcess = moment().format();
                                 const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);

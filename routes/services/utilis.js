@@ -4,34 +4,116 @@ const path = require("path");
 const fs = require('fs');
 const moment = require("moment");
 const UTILIS = require('../../resources/util');
+
+
+module.exports.SendMailTest = async (req, res, next) => {
+    const { to, subject, html, arrayAttachments, from } = req.body;
+    this.SendMail(to, subject, html, arrayAttachments, from)
+        .then((resEmail) => {
+            res.status(200).send('OK');
+        })
+        .catch((error) => {
+            console.log("Erro ao ", error);
+        })
+
+
+}
+
+
+module.exports.SendMailNonUsed = (to, subject, html, arrayAttachments, from) => {
+    return new Promise((resolve, reject) => {
+        try {
+            console.log(to, subject, html, from);
+            if (arrayAttachments == null) { arrayAttachments = []; }
+            sgMail.setApiKey('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');
+            const msg = {
+                to: to,
+                from: from,
+                subject: subject,
+                html: html,
+                attachments: arrayAttachments
+            };
+            sgMail.send(msg)
+                .then((res) => {
+                    resolve(1)
+                })
+                .catch(err => {
+                    console.log(err);
+                    reject(err);
+                });
+        } catch (error) {
+            console.log("er", error.body);
+            reject("Erro no transporter:", error);
+        }
+    })
+
+}
+
+module.exports.SendMailMailJet = (to, subject, html, arrayAttachments, from) => {
+    return new Promise((resolve, reject) => {
+        try {
+            console.log(to, subject, html, from);
+            const mailjet = require('node-mailjet')
+                .connect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE)
+            if (arrayAttachments == null) { arrayAttachments = []; }
+            sgMail.setApiKey('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');
+            const msg = {
+                to: to,
+                from: from,
+                subject: subject,
+                html: html,
+                attachments: arrayAttachments
+            };
+            sgMail.send(msg)
+                .then((res) => {
+                    resolve(1)
+                })
+                .catch(err => {
+                    console.log(err);
+                    reject(err);
+                });
+        } catch (error) {
+            console.log("er", error.body);
+            reject("Erro no transporter:", error);
+        }
+    })
+
+}
+
 module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
     return new Promise((resolve, reject) => {
-        var transporter = nodemailer.createTransport({
-            host: constantes.HOST_SMTP,
-            service: constantes.HOST_SERVICE,
-            port: constantes.PORT_SMTP,
-            secure: true,
-            auth: {
-                user: constantes.USER_SMTP,
-                pass: constantes.PASS_SMTP
-            }
-        });
-        if (arrayAttachments == null) { arrayAttachments = []; }
-        var mailOptions = {
-            from: from || constantes.EMAIL_FROM_TESTES,
-            to: to,
-            subject: subject,
-            attachments: arrayAttachments,
-            html: html
-        };
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                reject(error);
-            } else {
-                /*console.log("Email Enviado");*/
-                resolve(1);
-            }
-        });
+        try {
+            console.log(to, subject, html);
+            var transporter = nodemailer.createTransport({
+                host: constantes.HOST_SMTP,
+                service: constantes.HOST_SERVICE,
+                port: constantes.PORT_SMTP,
+                secure: false,
+                auth: {
+                    user: constantes.USER_SMTP,
+                    pass: constantes.PASS_SMTP
+                }
+            });
+            if (arrayAttachments == null) { arrayAttachments = []; }
+            var mailOptions = {
+                from: from || constantes.EMAIL_FROM,
+                to: to,
+                subject: subject,
+                attachments: arrayAttachments,
+                html: html
+            };
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                    reject("erro no e-mail", error);
+                } else {
+                    /*console.log("Email Enviado");*/
+                    resolve(1);
+                }
+            });
+        } catch (error) {
+            reject("Erro no transporter", error);
+        }
     })
 
 }
@@ -84,7 +166,7 @@ function SendEmailBoleto(JSON_EMAIL) {
                 var LNome = UTILIS.toCamelCase(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.nome_completo).split(' ')[0];
                 LHTML = LHTML.replace("{first_name}", LNome);
                 const LVencimentoBoleto = moment(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.vencimentoBoleto).format('DD/MM/YYYY');
-                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}",JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
                 var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailBoleto);
                 arrayAttachments.forEach((obj, i) => {
                     obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
@@ -111,4 +193,8 @@ function SendEmailBoleto(JSON_EMAIL) {
 module.exports.SendEmailBoleto = (req, res, next) => {
     const JSON_EMAIL = req.body;
     res.status(200).send(SendEmailBoleto(JSON_EMAIL));
+}
+
+module.exports.sleep = (seconds) => {
+    return new Promise(r => setTimeout(r, seconds));
 }

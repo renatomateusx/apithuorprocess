@@ -17,6 +17,9 @@ router.post('/GetTransacoesInternas', transacaoSchema.GetTransacoesInternas);
 router.post('/GetTransacoesInternasPorLoja', transacaoSchema.GetTransacoesInternasPorLoja);
 router.post('/SetPaymentComissionDone', transacaoSchema.SetPaymentComissionDone);
 router.post('/GetPagamentosEfetuadosPorSeller', transacaoSchema.GetPagamentosEfetuadosPorSeller);
+router.post('/GetReportQtdPerDaySales', transacaoSchema.GetReportQtdPerDaySales);
+router.post('/GetSalesMonth', transacaoSchema.GetSalesMonth);
+
 
 
 

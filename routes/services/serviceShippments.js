@@ -16,7 +16,8 @@ const loja = require('../../schemas/integracaoPlataformas');
 
 
 
-var j = schedule.scheduleJob('* * */23 * * *', function () {
+
+var j = schedule.scheduleJob('* * * */23 * *', function () {
     fulfillments.GetFulFillmentList()
         .then((resFul) => {
             resFul.forEach(async (obj, i) => {
@@ -43,8 +44,11 @@ var j = schedule.scheduleJob('* * */23 * * *', function () {
                 if (duration.asHours() >= 24) {
 
                     //console.log('diff', duration.asHours());
+                    console.log(tracking_number);
+
                     var LReturnTracker = await logistica.TrackingCodeInternal(tracking_number);
-                    if (LReturnTracker) {
+                    console.log(LReturnTracker);
+                    if (LReturnTracker && LReturnTracker.length > 20) {
                         LReturnTracker = JSON.parse(LReturnTracker);
                         //console.log(tracking_number);   
                         // console.log("Retorno", LReturnTracker);
@@ -79,7 +83,7 @@ var j = schedule.scheduleJob('* * */23 * * *', function () {
                                             throw err;
                                         }
                                         var LHTML = html;
-                                        var URLTrack = constantes.URL_TRACK_CODE.replace('@', 'LB121347495SG');
+                                        var URLTrack = constantes.URL_TRACK_CODE.replace('@', tracking_number);
                                         //console.log(URLTrack);
                                         LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
                                         LHTML = LHTML.replace("@SATUS_ENCOMENDA", LSTATUS);
@@ -107,6 +111,10 @@ var j = schedule.scheduleJob('* * */23 * * *', function () {
                         }
                     }
                 }
+                var LDataProximo = moment()
+                    .add({ days: 2 })
+                    .format();
+                const LUpdateProximoPagamento = await fulfillments.UpdateStatusFulFillmentInternalProximaConsulta(id_usuario, id, LDataProximo);
             });
         })
         .catch((error) => {
