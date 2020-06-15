@@ -5,13 +5,14 @@ const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
 const transacoes = require('./transacao');
-
+const moment = require('moment');
 
 
 module.exports.GetFulFillmentList = () => {
     return new Promise((resolve, reject) => {
         try {
-            pool.query('SELECT * FROM fulfillments', (error, results) => {
+            const data = moment().format();
+            pool.query("SELECT * FROM fulfillments WHERE status <> 'DELIVERED and proxima_consulta = $1'",[data], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -92,6 +93,21 @@ module.exports.UpdateStatusFulFillmentInternal = (id_usuario, id, status, update
     return new Promise((resolve, reject) => {
         try {
             pool.query('UPDATE fulfillments SET status =$3, last_updated=$4 where id_usuario = $1 and id = $2', [id_usuario, id, status, updated], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+module.exports.UpdateStatusFulFillmentInternalProximaConsulta = (id_usuario, id, data) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('UPDATE fulfillments SET proxima_consulta =$3 where id_usuario = $1 and id = $2', [id_usuario, id, data], (error, results) => {
                 if (error) {
                     throw error
                 }

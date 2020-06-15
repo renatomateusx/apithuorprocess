@@ -39,6 +39,44 @@ module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetReportQtdPerDaySales = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        console.log(id_usuario);
+        pool.query('select COUNT(data) as qtd, data from transacoes  where id_usuario =$1 group by data order by data asc', [id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+module.exports.GetSalesMonth = (req, res, next) => {
+    try {
+        const { id_usuario } = req.body;
+        const data = moment().format("MM");
+        console.log(data);
+        pool.query("select * from transacoes where date_part('month', data) = $1 and id_usuario = $2 order by data asc", [data, id_usuario], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).send(results.rows);
+            res.end();
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
+
+
 module.exports.SetPaymentComissionDone = (req, res, next) => {
     try {
         const { json_cobranca_comissao, json_response_comissao, id_usuario, data_processar } = req.body;
@@ -150,10 +188,13 @@ module.exports.GetTransacoesByID_IDUsuario = (shop, id_usuario, id) => {
 }
 
 
-module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) => {
+module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway], (error, results) => {
+            if(!track || track == undefined){
+                track = 0;
+            }
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway, ttrack) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track], (error, results) => {
                 if (error) {
                     throw error
                 }
