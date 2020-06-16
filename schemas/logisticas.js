@@ -18,7 +18,7 @@ module.exports.GetFretes = (req, res, next) => {
 }
 
 
-module.exports.TrackingCode = (req, res, next) => {
+module.exports.TrackingCodeTem = (req, res, next) => {
     try {
         const { code } = req.body;
         var LBody = {
@@ -47,7 +47,7 @@ module.exports.TrackingCode = (req, res, next) => {
 }
 
 
-module.exports.TrackingCodeOLD = (req, res, next) => {
+module.exports.TrackingCode = (req, res, next) => {
     try {
         const { code } = req.body;
         var LBody = {
@@ -57,7 +57,7 @@ module.exports.TrackingCodeOLD = (req, res, next) => {
         const Lurl = "https://api-track.ebanx.com/production/track";
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, undefined, undefined, "POST")
             .then((resRet) => {
-                console.log(resRet.body);
+                //console.log(resRet.body);
                 res.status(200).send(resRet.body);
                 res.end();
             })

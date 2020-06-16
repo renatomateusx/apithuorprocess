@@ -17,7 +17,12 @@ const DeferredPromise = require('@bitbar/deferred-promise');
 var LURLCartEmail = "";
 //Vai rodar a cada 1 minuto
 
-var jobCartAbandon = schedule.scheduleJob('* */59 * * * * ', function () {
+
+var rule = new schedule.RecurrenceRule();
+rule.hour = 0;
+rule.minute = 59;
+
+var jobCartAbandon = schedule.scheduleJob(rule, function () {
     //var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
     lead.GetLeadCronJob()
         .then((resLead) => {

@@ -20,7 +20,11 @@ const funcionalidadesShopify = require('../../resources/funcionalidadesShopify')
 const users = require('../../schemas/users');
 const planos = require('../../schemas/planos');
 
-var j = schedule.scheduleJob('* * */24 * * *', async function () {
+var rule = new schedule.RecurrenceRule();
+rule.hour = 23;
+rule.minute = 0;
+
+var j = schedule.scheduleJob(rule, async function () {
 
     const LIntegracoes = await checkouts.GetIntegracaoCheckoutInternal();
     LIntegracoes.forEach((obj, i) => {
