@@ -14,13 +14,16 @@ const loja = require('../../schemas/integracaoPlataformas');
 
 
 
+var rule = new schedule.RecurrenceRule();
+rule.hour = 23;
+rule.minute = 0;
 
 
-
-var j = schedule.scheduleJob('* * * */23 * *', function () {
+var j = schedule.scheduleJob(rule, function () {
     fulfillments.GetFulFillmentList()
         .then((resFul) => {
             resFul.forEach(async (obj, i) => {
+                const awa = await utilisEmail.sleep(1000);
                 const order_id = obj.order_id;
                 const id_usuario = obj.id_usuario;
                 const id = obj.id;

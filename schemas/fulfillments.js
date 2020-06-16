@@ -12,7 +12,7 @@ module.exports.GetFulFillmentList = () => {
     return new Promise((resolve, reject) => {
         try {
             const data = moment().format();
-            pool.query("SELECT * FROM fulfillments WHERE status <> 'DELIVERED and proxima_consulta = $1'",[data], (error, results) => {
+            pool.query("SELECT * FROM fulfillments WHERE status <> 'DELIVERED' and proxima_consulta = $1",[data], (error, results) => {
                 if (error) {
                     throw error
                 }
