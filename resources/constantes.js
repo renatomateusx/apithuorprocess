@@ -32,11 +32,14 @@ module.exports = Object.freeze({
     REFOUND_ORDER: 'refound',
     RESOURCE_THUOR_SPNIPPET_LIQUID: 'snippets/ThuorSnippet.liquid',
     RESOURCE_THUOR_SPNIPPET_REVIEW_LIQUID: 'snippets/ThuorReviewSnippet.liquid',
+    RESOURCE_THUOR_SPNIPPET_PARCEL_LIQUID: 'snippets/ThuorParcelSnippet.liquid',
     RESOURCE_THUOR_THEME_LIQUID: 'layout/theme.liquid',
     RESOURCE_THUOR_PRODUCT_LIQUID: 'templates/product.liquid',
+    RESOURCE_THUOR_APP_PARCEL_PRODUCT_LIQUID: 'sections/product-template-default.liquid',
     RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT: "<br/><!-- Não remova. Checkout Thuor. -->     {% capture thuor_snippet_content %}{% include 'ThuorSnippet' %}{% endcapture %} {% unless thuor_snippet_content contains 'Liquid error' %} {% include 'ThuorSnippet' %} {% endunless %}     <!-- Não remova. Checkout Thuor. --> <br/> </body>",
     RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT: "{% endif %} <!-- Não remova. App Thuor Review. -->     {% capture thuor_review_snippet_content %}{% include 'ThuorReviewSnippet' %}{% endcapture %} {% unless thuor_review_snippet_content contains 'Liquid error' %} {% include 'ThuorReviewSnippet' %} {% endunless %}     <!-- Não remova. App Thuor Review. -->",
-
+    RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT: "{% endschema %} <!-- Não remova. App Thuor Parcel. -->     {% capture thuor_parcel_snippet_content %}{% include 'ThuorParcelSnippet' %}{% endcapture %} {% unless thuor_parcel_snippet_content contains 'Liquid error' %} {% include 'ThuorParcelSnippet' %} {% endunless %}     <!-- Não remova. App Thuor Parcel. -->",
+    
     //URL_TRACK_CODE: 'http://localhost:8081/track/@',
     URL_TRACK_CODE: 'https://thuor.com/track/@',
 

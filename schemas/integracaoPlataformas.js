@@ -111,15 +111,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
     }
 }
 
-module.exports.ReInstalarIntegracao = (req, res, next) => {
-    return new Promise((resolve, reject) => {
-        try {
-            console.log("NÃO TÁ FAZENDO NADA");
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
+
 
 function getDadosLoja(shop) {
     return new Promise((resolve, reject) => {
