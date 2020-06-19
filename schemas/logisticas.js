@@ -92,3 +92,24 @@ module.exports.TrackingCodeInternal = (code) => {
     })
 
 }
+
+module.exports.TrackingCodeInternalNinja = (code) => {
+    return new Promise((resolve, reject) => {
+        try {
+            var LBody = {               
+            }
+            const Lurl = "https://rastreio.ninja/buscar/"+code;
+            utilis.makeAPICallExternalParamsJSON(Lurl, "", LBody, undefined, undefined, "GET")
+                .then((resRet) => {
+                    ///console.log(resRet.body);
+                    resolve(resRet.body);
+                })
+                .catch((error) => {
+                    reject(error);
+                })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}

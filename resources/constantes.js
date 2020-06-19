@@ -44,9 +44,10 @@ module.exports = Object.freeze({
     URL_TRACK_CODE: 'https://thuor.com/track/@',
 
     // URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
-    URL_PUBLIC_RESOURCES_EMAIL: 'https://hmlapi.thuor.com/images/templates',
+    URL_PUBLIC_RESOURCES_EMAIL: 'https://hmlapi.thuor.com/public/images/templates',
     FROM_MAIL:'{nome_loja} <{email_loja}>',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
+    STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO_ENTREGUE: 'Sua encomenda foi entregue!',
     STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',
     STRING_SUBJECT_EMAIL_ESQUECEU_SENHA: 'Esqueceu a senha? Segue link para redefinição.',
     STRING_SUBJECT_EMAIL_BOLETO: 'Seu pedido #{pedido} vence {data_vencimento}.',
