@@ -83,7 +83,7 @@ module.exports.SendMailMailJet = (to, subject, html, arrayAttachments, from) => 
 module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
     return new Promise((resolve, reject) => {
         try {
-            console.log(to, subject, html);
+            //console.log(to, subject, html);
             var transporter = nodemailer.createTransport({
                 host: constantes.HOST_SMTP,
                 service: constantes.HOST_SERVICE,

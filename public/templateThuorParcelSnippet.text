@@ -1,0 +1,266 @@
+{% if template.name == 'product' %}
+<script src="https://www.mercadopago.com/v2/security.js" view="item"></script>
+{% endif %}
+
+{% if template.name == 'index' %}
+<script src="https://www.mercadopago.com/v2/security.js" view="home"></script>
+{% endif %}
+
+{% if template.name == 'search' %}
+<script src="https://www.mercadopago.com/v2/security.js" view="search"></script>
+{% endif %}
+
+<style>
+    .thuor-loader {display: none; position: fixed; width: 100%; height: 100%; background: #fff; left: 0; top: 0; z-index:99999}
+    .thuor-loading{position:fixed;overflow:show;margin:auto;top:0;left:0;bottom:0;right:0;width:50px;height:50px}.thuor-loading:before{content:'';display:block;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(255,255,255,.5)}.thuor-loading:not(:required){font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}.thuor-loading:not(:required):after{content:'';display:block;font-size:10px;width:50px;height:50px;margin-top:-.5em;border:5px solid #999;border-radius:100%;border-bottom-color:transparent;-webkit-animation:spinner 1s linear 0s infinite;animation:spinner 1s linear 0s infinite}@-webkit-keyframes spinner{0 % {- webkit - transform:rotate(0);-moz-transform:rotate(0);-ms-transform:rotate(0);-o-transform:rotate(0);transform:rotate(0)}100%{-webkit - transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}@-moz-keyframes spinner{0 % {- webkit - transform:rotate(0);-moz-transform:rotate(0);-ms-transform:rotate(0);-o-transform:rotate(0);transform:rotate(0)}100%{-webkit - transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}@-o-keyframes spinner{0 % {- webkit - transform:rotate(0);-moz-transform:rotate(0);-ms-transform:rotate(0);-o-transform:rotate(0);transform:rotate(0)}100%{-webkit - transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes  spinner{0 % {- webkit - transform:rotate(0);-moz-transform:rotate(0);-ms-transform:rotate(0);-o-transform:rotate(0);transform:rotate(0)}100%{-webkit - transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}
+
+</style>
+    <div class="thuor-loader">
+        <div class="thuor-loading"></div>
+    </div>
+
+    <script type='text/javascript'>
+//const ULR_BASE = "http://localhost:3000/";
+//const ULR_BASE = "https://hmlapi.thuor.com:9443/";
+const ULR_BASE = "https://api.thuor.com:7443/";
+const IMAGE_BASE = ULR_BASE + 'images/templates/payment_form.png';
+const LTEMPLATE = '<style>.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.product-single__price--compare .compare-price{font-size: 12px !important; color: #d92027 !important; text-decoration: line-through !important;}.qtd_parcela{font-size: 18px !important; color: #bac964;}.preco{font-size: 18px !important; color: #bac964;}.imgPaymentForm{width: 100px !important;}.spanParcl{color: dodgerblue; font-weight: 700; font-size: 14px!important;}@media only screen and (max-width: 992px){#btnTop{display: block !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.imgPaymentForm{width: 70px !important;}.spanTextParcel{font-size: 20px!important;}.qtd_parcela{font-size: 25px!important;}.preco{font-size: 21px!important;}.spanParcl{color: dodgerblue!important; font-size: 14px!important;}}@media only screen and (max-width: 767px){.imgPaymentForm{width: 95px !important;}.QuatroCincopx{margin-left: 0px !important;}.remove{float: left; left: 60px; position: relative; top: -54px; cursor: pointer; font-size: 25px;}.valorTotalCollapse{font-weight: 700; color: #3fc583; font-size: 12px !important; top: 0px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.textItems{position: relative; top: 0px !important;}}</style> <div class="row col-lg-12 mb-3"> <div class="col-lg-12 float-left"> <div class=" b mb-2"> <strong><span style="font-size: 18px!important;" class="fa fa-card"></span><span class="ml-2 spanTextParcel">Ou em at&eacute; <span class="qtd_parcela" id="qtd_parcela">{{qtd_parcela}}</span> de <span class="preco" id="preco"> R${{preco}}</span></span> </strong><br></div><div class="card card-default mb-0"> <div class="card-header rounded"> <a style="cursor:pointer!important;" id="colCo" data-toggle="collapse" aria-expanded="false" aria-controls="collapseResumo"> <span id="collapseParent" class="resumoCompra pull-left float-left ml-0" role="button"><img class="imgPaymentForm" id="imgpaymentform" src="'+ULR_BASE + 'images/templates/payment_form.png"/></span> <small class="valorTotalCollapse pull-right float-right"> Clique para expandir. <span class="fa fa-arrow-down comandoCollapse pull-right float-right" id="comandoCollapse" role="button"></span> </small> </a> <div class="col-lg-12 collapse" id="collapseResumo" data-parent="#collapseParent"> <div class="col-md-12 ValorTotalResumo mt-5"> </div><div class="row"> <div class="col-md-12"> <div id="divParc"> </div></div></div></div></div><div class="card-body minusmargintop"></div></div></div></div>';
+const PRODUCAO_BOX_MP_PUBLICK_KEY = 'APP_USR-c97da455-7446-4595-968b-75677fcc12d1';
+const TESTE_BOX_MP_PUBLIC_KEY = 'TEST-5e8249a3-5691-4ae9-bf45-8705c09b5c0e';
+var payment_id = '';
+var granTotal = '{{product.price}}';
+const id_usuario = '{id_usuario}';
+var granTotal = 142.00;
+var parcelAllowed = 12;
+var parcelJurosOwner = false;
+var parcelaSelecionada = 0;
+var parcelaSelecionadaTexto = "";
+var status = false;
+const END_POINT_GET_APP_PARCEL_BY_USER_ID = ULR_BASE + 'apps/GetIntegracaoApps'
+const END_POINT_GET_DADOS_APP_CHECKOUT = ULR_BASE + 'checkouts/GetCheckoutAtivo'
+
+const arrayCSSs =
+    [
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' },
+        { script: './styleck.css' },
+        { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css' }
+    ];
+
+const arrayScripts =
+    [
+        { script: 'https://unpkg.com/axios/dist/axios.min.js', trigger: 0 },
+        { script: 'https://code.jquery.com/jquery-3.2.1.slim.min.js', trigger: 0 },
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', trigger: 0 },
+        { script: 'https://use.fontawesome.com/aa8f958ac7.js', trigger: 0 },
+        { script: 'https://kit.fontawesome.com/2ecd77a85b.js', trigger: 0 }
+    ];
+
+
+function verificaDigitosCartao() {
+    postAxios(END_POINT_GET_APP_PARCEL_BY_USER_ID, { id_usuario: id_usuario, app: 3 }, (response) => {
+
+        const LAppPropriedades = response.data;
+        if (LAppPropriedades != null && LAppPropriedades != undefined) {
+            parcelAllowed = LAppPropriedades.propriedades.parcelas;
+            parcelJurosOwner = LAppPropriedades.propriedades.assume_juros;
+            status = LAppPropriedades.status;
+        }
+        console.log(LAppPropriedades.propriedades.assume_juros);
+        if (status == true) {
+            if (parcelJurosOwner) {
+                window.Mercadopago.setPublishableKey(PRODUCAO_BOX_MP_PUBLICK_KEY);
+            }
+            else {
+                window.Mercadopago.setPublishableKey(TESTE_BOX_MP_PUBLIC_KEY);
+            }
+            var card_number = '5031755734530604';
+            const binCard = card_number.replace(/ /g, "");
+            if (binCard.length >= 6) {
+                let bin = binCard.substring(0, 6);
+                window.Mercadopago.getPaymentMethod(
+                    {
+                        bin: bin
+                    },
+                    async (status, response) => {
+                        if (status == 200) {
+                            payment_id = response[0].id;
+                            const LProcessTemp = await InsertTemplate();
+                            const LcolCo = document.getElementById("colCo");
+                            LcolCo.addEventListener("click", () => {
+                                collapse('#collapseResumo', '#comandoCollapse');
+                            })
+                            getParcelas();
+                        } else {
+                            API_NOTIFICATION.showNotificationW(
+                                "Oops!",
+                                "Cartão de Crédito Não Reconhecido. Verifique!",
+                                "error"
+                            );
+                        }
+                    }
+                );
+            }
+        }
+    });
+
+}
+
+function getParcelas() {
+    var self = this;
+    window.Mercadopago.getInstallments(
+        {
+            payment_method_id: payment_id,
+            amount: parseFloat(granTotal)
+        },
+        async function (status, response) {
+            if (status == 200) {
+                //document.getElementById("dropParcelas").options.length = 0;               
+
+                response[0].payer_costs.forEach(installment => {
+                    const LD = document.getElementById("divParc");
+                    const LSPAN = "<span class='spanParcl row col-md-12 value ml-2'>" + installment.recommended_message + "</span>";
+                    LD.insertAdjacentHTML("beforeend", LSPAN);
+                    if (parcelAllowed == installment.installments) {
+                        parcelaSelecionada = installment.installments;
+                        parcelaSelecionadaTexto = installment.recommended_message;
+                        processaTemplate(parcelaSelecionada, parcelaSelecionadaTexto);
+                        return;
+                    }
+                    /*let opt = document.createElement("option");
+                    opt.text = installment.recommended_message;
+                    opt.value = installment.installments;
+                    opt.id = "parcel_" + installment.installments;
+                    document.getElementById("dropParcelas").appendChild(opt);
+                    setTimeout(() => {
+                      document.getElementById("dropParcelas").selectedIndex = 0;
+                      document.getElementById("dropParcelas").value = 1;
+                      self.parcelas = 1;
+                    }, 1000);*/
+                });
+            } else {
+                console.log(`installments method info error: ${response}`);
+            }
+        }
+    );
+}
+
+function postAxios(url, data, success) {
+    axios.post(url, data)
+        .then(function (response) {
+            success(response);
+        })
+        .catch(function (error) {
+            console.log('Erro ao executar Axios', error);
+        });
+}
+
+function formatPrice(value) {
+    let val = (value / 1).toFixed(2).replace(".", ",");
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function processaTemplate(parcelaSelecionad, parcelaSelecionadaText) {   
+    const lqtd_parcela = document.getElementById("qtd_parcela");
+    const lpreco = document.getElementById("preco");
+    lqtd_parcela.innerText = parcelaSelecionad + "x";
+    const LPa = parcelaSelecionadaText.split(' ');
+    const len = LPa.length;
+    var ppreco = LPa[4];
+
+    lpreco.innerText = "R$" + ppreco.replace(")", "");
+}
+
+function collapse(id, idComando) {
+    const element = document.querySelector(id);
+    const elementComando = document.querySelector(idComando);
+    if (element.classList.contains("show")) {
+        element.classList.remove("show");
+        elementComando.classList.remove("fa-arrow-up");
+        elementComando.classList.add("fa-arrow-down");
+    } else {
+        element.classList.add("show");
+        elementComando.classList.remove("fa-arrow-down");
+        elementComando.classList.add("fa-arrow-up");
+    }
+}
+
+function InsertTemplate() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const LForm = await GetForm();
+            const LTemp = LTEMPLATE;
+            LForm.insertAdjacentHTML("beforebegin", LTemp);
+            resolve(1);
+        }
+        catch (error) {
+            reject(error);
+        }
+    })
+}
+
+function GetForm() {
+    return new Promise((resolve, reject) => {
+        try {
+            var form = '';
+            const form0 = document.getElementById("divThuorParcel");
+            const form1 = document.getElementById("add-to-cart-form");
+            const form2 = document.getElementById("AddToCartForm-product-template");
+            form = form0 || form1 || form2;
+
+            resolve(form);
+        }
+        catch (error) {
+            reject(error);
+        }
+    })
+}
+
+$(document).ready(function () {
+    var self = this;
+    arrayCSSs.forEach((obj, i) => {
+        var link = document.createElement('link');
+        link.id = i;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = obj.script;
+        link.media = 'all';
+        document.head.appendChild(link);
+    });
+    arrayScripts.forEach((obj, i) => {
+        let script = document.createElement("script");
+        script.type = 'text/javascript';
+
+        script.setAttribute(
+            "src",
+            obj.script
+        );
+
+        if (obj.trigger == 1) {
+            script.onload = function () {
+                obj.call;
+            }
+        }
+        document.head.appendChild(script);
+    });
+
+
+});
+window.onload = function () {
+    const plugin = document.createElement("script");
+    var self = this;
+    plugin.onload = function () {
+        verificaDigitosCartao();
+        console.log("ready!");
+    };
+    plugin.setAttribute(
+        "src",
+        "https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"
+    );
+    plugin.async = true;
+    document.head.appendChild(plugin);
+}
+
+</script>

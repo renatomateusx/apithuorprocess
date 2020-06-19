@@ -89,10 +89,10 @@ module.exports.UpdateStatusFulFillmentByID = (req, res, next) => {
     }
 }
 
-module.exports.UpdateStatusFulFillmentInternal = (id_usuario, id, status, updated) => {
+module.exports.UpdateStatusFulFillmentInternal = (id_usuario, id, status, updated, statusText) => {
     return new Promise((resolve, reject) => {
         try {
-            pool.query('UPDATE fulfillments SET status =$3, last_updated=$4 where id_usuario = $1 and id = $2', [id_usuario, id, status, updated], (error, results) => {
+            pool.query('UPDATE fulfillments SET status =$3, last_updated=$4, status_text = $5 where id_usuario = $1 and id = $2', [id_usuario, id, status, updated, statusText], (error, results) => {
                 if (error) {
                     throw error
                 }
