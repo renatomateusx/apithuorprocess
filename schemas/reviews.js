@@ -24,14 +24,20 @@ module.exports.GetAllReviews = (req, res, next) => {
 
 module.exports.SaveReview = async (req, res, next) => {
     try {
-        const { url_loja, id_produto, nome, email, titulo, avaliacao, imagem, plataforma, rating } = req.body;
+        const { url_loja, id_produto, nome, email, titulo, avaliacao, imagem, plataforma, ratipostng } = req.body;
+        var id_prod = id_produto;
         const LData = moment().format();
-        //const Prod = await produtos.GetProdutoByIDInternalShopify(id_produto);
+        const Prod = await produtos.GetProdutoByVariantIDInternal(id_produto);
+        console.log("Prod", Prod);
         var img = imagem;
+        if(Prod.id_produto_json){
+            id_prod = Prod.id_produto_json;
+        }
+        return;
         //if (img.length == 0) {
             //img = Prod.variant_img;
         //}
-        pool.query('INSERT INTO reviews (url_loja, id_produto,nome,email,titulo,avaliacao,imagem,data, plataforma,rating) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9, $10)', [url_loja, id_produto, nome, email, titulo, avaliacao, img, LData, plataforma, rating], (error, results) => {
+        pool.query('INSERT INTO reviews (url_loja, id_produto,nome,email,titulo,avaliacao,imagem,data, plataforma,rating) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, $9, $10)', [url_loja, id_prod, nome, email, titulo, avaliacao, img, LData, plataforma, rating], (error, results) => {
             if (error) {
                 throw error
             }
@@ -43,10 +49,11 @@ module.exports.SaveReview = async (req, res, next) => {
         res.end();
     }
 }
-module.exports.GetReviewByID = (req, res, next) => {
+module.exports.GetReviewByID = async (req, res, next) => {
     try {
         const { id_produto } = req.body;
-        pool.query('SELECT * FROM reviews WHERE id_produto = $1', [id_produto], (error, results) => {
+        const Prod = await produtos.GetProdutoByVariantIDInternal(id_produto);
+        pool.query('SELECT * FROM reviews WHERE id_produto = $1', [Prod.id_produto_json], (error, results) => {
             if (error) {
                 throw error
             }
