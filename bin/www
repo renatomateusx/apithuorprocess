@@ -35,30 +35,30 @@ app.options('*', cors());
 var server = http.createServer(app);
 
 /* COMENTAR ABAIXO PARA USAR LOCALMENTE */
-var privateKey = fs
-  .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.key'))
-  .toString();
-var certificate = fs
-  .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.pem'))
-  .toString();
-var options = {key: privateKey, cert: certificate};
-var ssl_server = https.createServer(options, function(req, res) {
-    app.handle(req, res);
-  })
-  .listen(9443);
-var io = require('socket.io')(ssl_server);
+// var privateKey = fs
+//   .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.key'))
+//   .toString();
+// var certificate = fs
+//   .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.pem'))
+//   .toString();
+// var options = {key: privateKey, cert: certificate};
+// var ssl_server = https.createServer(options, function(req, res) {
+//     app.handle(req, res);
+//   })
+//   .listen(9443);
+// var io = require('socket.io')(ssl_server);
 // /* COMENTAR ACIMA PARA USAR LOCALMENTE */
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 /* COMENTAR ABAIXO PARA USAR LOCALMENTE */
-io.listen(ssl_server);
+// io.listen(ssl_server);
 
-io.on('connection', res => {
-  console.log('Socket Conectado');
-});
-io.origins('*:*');
-app.set('socketio', io);
+// io.on('connection', res => {
+//   console.log('Socket Conectado');
+// });
+// io.origins('*:*');
+// app.set('socketio', io);
 /* COMENTAR ACIMA PARA USAR LOCALMENTE */
 
 function normalizePort(val) {

@@ -47,9 +47,9 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
             plataforma,
             email_loja } = req.body;
         pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma, email_loja) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11,$12) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, id_usuario=$10, plataforma=$11, email_loja=$12',
-            [status,
-                auto_sincroniza,
-                pula_carrinho,
+            [   +status,
+                +auto_sincroniza,
+                +pula_carrinho,
                 tipo_integracao,
                 url_loja,
                 chave_api_key,
@@ -111,15 +111,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
     }
 }
 
-module.exports.ReInstalarIntegracao = (req, res, next) => {
-    return new Promise((resolve, reject) => {
-        try {
-            console.log("NÃO TÁ FAZENDO NADA");
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
+
 
 function getDadosLoja(shop) {
     return new Promise((resolve, reject) => {

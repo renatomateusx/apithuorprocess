@@ -4,7 +4,6 @@ var jwt = require('jsonwebtoken');
 var utilis = require('../resources/util');
 var integracaoShopify = require('../schemas/integracaoPlataformas');
 
-
 /* User Pagination */
 //utilis.verifyJWT, --- COLOCAR ISSO EM TODOS QUE PRECISAM.
 router.post('/AddIntegracaoCheckout', integracaoShopify.AddIntegracaoShopifyCheckout);
@@ -13,7 +12,6 @@ router.post('/UpdateIntegracaoCheckout', integracaoShopify.UpdateIntegracaoShopi
 
 router.get('/GetIntegracaoCheckout', integracaoShopify.GetIntegracaoShopifyCheckout);
 
-router.post('/ReInstalarIntegracao', integracaoShopify.ReInstalarIntegracao);
 
 router.post('/WebHookShopify', integracaoShopify.WebHookShopify);
 
