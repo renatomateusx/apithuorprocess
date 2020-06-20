@@ -72,6 +72,20 @@ const arrayWebHooks = [
   }
 ]
 
+router.post('/teste', function (req, res, next) {
+  try {
+    const url = "https://8e0a5928b377e6e822a30d5c2e9f0e25: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@ditecclube.myshopify.com/admin/api/2020-04/products.json";
+    utilis.makeAPICallExternalHTTPS(url)
+      .then((retorno) => {
+        console.log(retorno[0])
+        res.json({ mensagem: retorno[0]});
+      });
+  }
+  catch (error) {
+    console.log("Erro", error);
+  }
+})
+
 router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, next) {
   try {
     const { id_usuario } = req.body;
@@ -95,6 +109,7 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
             console.log(url);
             utilis.makeAPICallExternalHTTPS(url)
               .then((retorno) => {
+                console.log(retorno[0]);
                 processaListaProdutos(retorno[0], req, res, next, 1);
                 tratarRepostaPaginacao(url, retorno[1], req, res, next, 1);
               });
@@ -553,7 +568,7 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
     .then(retorno => {
       //console.log("WebHook Criado ", url + path);
       var LTemas = JSON.parse(retorno);
-      const {id_usuario} = req.body;
+      const { id_usuario } = req.body;
       LTemas.themes.forEach((tema, i) => {
         if (tema.role === "main") {
           getTemplateThuorParcelAppTemplate()

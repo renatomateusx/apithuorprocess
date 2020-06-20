@@ -45,8 +45,11 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
             quais_pedidos_enviar,
             id_usuario,
             plataforma,
-            email_loja } = req.body;
-        pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma, email_loja) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11,$12) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, id_usuario=$10, plataforma=$11, email_loja=$12',
+            email_loja,
+            nome_loja,
+            limpa_carrinho,
+            url_person } = req.body;
+        pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma, email_loja, nome_loja, limpa_carrinho, url_person) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11,$12,$13,$14,$15) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, id_usuario=$10, plataforma=$11, email_loja=$12, nome_loja=$13, limpa_carrinho=$14, url_person=$15',
             [   +status,
                 +auto_sincroniza,
                 +pula_carrinho,
@@ -58,7 +61,10 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
                 quais_pedidos_enviar,
                 id_usuario,
                 plataforma,
-                email_loja],
+                email_loja,
+                nome_loja,
+                limpa_carrinho,
+                url_person],
             (error, results) => {
                 if (error) {
                     throw error
@@ -85,8 +91,11 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
             senha,
             segredo_compartilhado,
             quais_pedidos_enviar,
-            email_loja } = req.body;
-        pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, email_loja=$12) WHERE id=$10 and id_usuario = $11',
+            email_loja,
+            nome_loja,
+            limpa_carrinho,
+            url_person  } = req.body;
+        pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, email_loja=$12, nome_loja=$13, limpa_carrinho=$14, url_person=$15) WHERE id=$10 and id_usuario = $11',
             [status,
                 auto_sincroniza,
                 pula_carrinho,
@@ -98,7 +107,10 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
                 quais_pedidos_enviar,
                 id,
                 id_usuario,
-                email_loja],
+                email_loja,
+                nome_loja,
+                limpa_carrinho,
+                url_person ],
             (error, results) => {
                 if (error) {
                     throw error
@@ -115,7 +127,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
 
 function getDadosLoja(shop) {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], async (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1 or url_person=$1', [shop], async (error, results) => {
             if (error) {
                 throw error
             }
@@ -127,7 +139,7 @@ function getDadosLoja(shop) {
 }
 module.exports.GetDadosLojaInternal = (shop) => {
     return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], async (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1 or url_person=$1', [shop], async (error, results) => {
             if (error) {
                 throw error
             }
@@ -142,7 +154,7 @@ module.exports.GetDadosLoja = (req, res, next) => {
     try {
         const { shop } = req.body;
 
-        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1 or url_person=$1', [shop], (error, results) => {
             if (error) {
                 throw error
             }
@@ -352,7 +364,7 @@ module.exports.CartShopifyClone = async (req, res, next) => {
                 new DeferredPromise()
             )
         })
-        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1', [shop], (error, results) => {
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1 or url_person=$1', [shop], (error, results) => {
             if (error) {
                 throw error
             }
