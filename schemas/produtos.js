@@ -103,10 +103,34 @@ module.exports.GetProdutoByIDThuor = async (req, res, next) => {
     }
 }
 
+module.exports.GetProdutoByVariantIDInternal = (id_variant) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const LQuery = "select * FROM produtos WHERE json_dados_produto->'variants' @> \'[{\"id\":" + id_variant + "}]\' ";
+            pool.query(LQuery, (error, resultsProd) => {
+                if (error) {
+                    throw error
+                }
+                if (resultsProd.rows) {
+                    resolve(resultsProd.rows[0]);                    
+                }
+                else {
+                    //res.status(200).json({ mensagem: "Nenhum produto encontrado" });
+                    resolve(0);
+                }
+                //
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
 module.exports.GetProdutoByIDInternalShopify = (id_produto) => {
     return new Promise((resolve, reject) => {
         try {
-            const LQuery = "select json_dados_produto FROM produtos WHERE json_dados_produto->'variants' @> \'[{\"id\":" + id_produto + "}]\' ";
+            const LQuery = "select * FROM produtos WHERE json_dados_produto->'variants' @> \'[{\"id\":" + id_produto + "}]\' ";
             pool.query(LQuery, (error, resultsProd) => {
                 if (error) {
                     throw error
