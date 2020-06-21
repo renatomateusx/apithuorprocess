@@ -254,6 +254,7 @@ function processaTemas(req, res, next, url, path, headerAditional, valueHeaderAd
                             .then(retornoGetThemeLiquid => {
                               var LRet = JSON.parse(retornoGetThemeLiquid);
                               var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT, '</body>');
+                              OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT_YAMPI,"");
                               var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT);
                               var LThemeEdited = {
                                 "asset": {
@@ -344,9 +345,8 @@ function processaTemasReviewApp(req, res, next, url, path, headerAditional, valu
                           var LRet = JSON.parse(retornoGetProductLiquid);
                           //console.log("LRet", LRet.asset.value);
                           var word = "{% endif %}";
-                          var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, word);
-                          var n = OLDValue.lastIndexOf(word);
-                          LHT = OLDValue.slice(0, n) + OLDValue.slice(n).replace(word, constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT);
+                          var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, "");
+                          LHT = OLDValue + constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT;
                           //console.log(LHT);
                           //var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, '{% endif %}');
                           var LNewHTMLValue = LHT;
@@ -592,10 +592,10 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
                   var LProductLiquidBak = {
                     "asset": {
                       "key": 'templates/product_theme_edited_by_thuor_parcel_app.liquid',
-                      "source_key": "sections/product-template-default.liquid"
+                      "source_key": "sections/product.liquid"
                     }
                   }
-                  ///CHAMA API PARA FAZER BACKUP DO PRODUCT-TEMPLATE-DEFAULT.LIQUID             
+                  ///CHAMA API PARA FAZER BACKUP DO PRODUCT.LIQUID             
                   utilis.makeAPICallExternalParamsJSON(url, PathAsset, LProductLiquidBak, headerAditional, valueHeaderAditional, 'PUT')
                     .then(retornoBackup => {
                       // res.json({ mensagem: retornoBackup });
@@ -603,16 +603,15 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
                         .then(retornoGetProductLiquid => {
                           var LRet = JSON.parse(retornoGetProductLiquid);
                           //console.log("LRet", LRet.asset.value);
-                          var word = "{% endschema %}";
-                          var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT, word);
+                          var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT, "");
                           var n = OLDValue.lastIndexOf(word);
-                          LHT = OLDValue.slice(0, n) + OLDValue.slice(n).replace(word, constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT);
+                          LHT = OLDValue + constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT;
                           //console.log(LHT);
                           //var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, '{% endif %}');
                           var LNewHTMLValue = LHT;
                           var LProductThemeEdited = {
                             "asset": {
-                              "key": 'sections/product-template-default.liquid',
+                              "key": 'sections/product.liquid',
                               "value": LNewHTMLValue
                             }
                           }

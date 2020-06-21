@@ -1,3 +1,6 @@
+]
+<script src="https://unpkg.com/axios/dist/axios.min.js" view="item"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" view="item"></script>
 {% if template.name == 'product' %}
 <script src="https://www.mercadopago.com/v2/security.js" view="item"></script>
 {% endif %}
@@ -22,17 +25,14 @@
     <script type='text/javascript'>
 
         var currentPage = '{{ template.name }}';
-        var cartEndpoint = 'https://api.thuor.com/integracaoShopify/CartShopify';
-        var statusEndpoint = 'https://api.thuor.com/integracaoShopify/Status';
+        var cartEndpoint = 'https://hmlapi.thuor.com:9443/integracaoShopify/CartShopify';
+      var statusEndpoint = 'https://hmlapi.thuor.com:9443/integracaoShopify/GetDadosLoja';
         var shop = '{{ shop.secure_url }}';
         
       
-        window.ThuorCheckoutUrl = '';
+        window.ThuorCheckoutUrl = '';     
       
-      
-        /*cartEndpoint = 'https://www.drivehq.com/file/DFPublishFile.aspx/FileID7102297365/Keymv0wrhmestoo/cart.json';
-		console.log("Shop", cartEndpoint);*/
-
+       
     function showThuorLoader() {
         var el = document.querySelector('.thuor-loader');
         el.style.display = 'block';
@@ -43,29 +43,29 @@
         el.style.display = 'none';
     }
 
-if (currentPage == 'cart') {
+    if (currentPage == 'cart') {
+        
             getAjax('/cart.json', function (res) {
                 var cartJSON = JSON.parse(res);
                 var dataBody = {
                     shop: window.location.host,
                     cart: cartJSON
-                }
-                var respCartClone = {
-                    "url": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart",
-                    "urlCheckout": "http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart&redirectTo=checkout",
-                    "active": "1",
-                    "skip_cart": "0"
-                }
-                postAjax(cartEndpoint, JSON.stringify(dataBody), function (resEndPoint) {
-                    var respCart = JSON.parse(resEndPoint);
+                }                
+                postAxios(cartEndpoint, dataBody, function (resEndPoint) {
+                    console.log(resEndPoint);
+                    var respCart = resEndPoint.data;
                     if (!respCart.active) {
                         hideThuorLoader();
                     }
                     else {
                         var otherButtons = document.getElementsByClassName('cartX_check_mainBtn');
-
+                      	var otherButtons2 = document.getElementsByClassName('shopify-payment-button');
+			
                         for (var i = 0; i < otherButtons.length; i++) {
                             otherButtons[i].setAttribute('style', 'display: none !important');
+                        }
+                      	for (var i = 0; i < otherButtons2.length; i++) {
+                            otherButtons2[i].setAttribute('style', 'display: none !important');
                         }
                         window.ThuorCheckoutUrl = respCart.urlCheckout;
 
@@ -99,6 +99,94 @@ if (currentPage == 'cart') {
                 });
             });
     }
+    // Product
+    var thData = '';
+    if (window.$ || window.jQuery) {
+
+        var checkoutButtons = $('.btn-checkout');
+        checkoutButtons.each(function () {
+            var t = $(this);
+
+            if (t.attr('onclick') == "window.location='/checkout'") {
+                t.attr('onclick', "window.location='/cart'");
+            }
+        });
+
+        if (currentPage == 'product' || currentPage == 'index') {
+            var thuorSelectors = $('input[name="add"] , button[name=\'add\'], #add-to-cart, .add-to-cart, #AddToCartText ,#AddToCart, .ProductForm__AddToCart');
+            thuorSelectors.attr('disabled', true);
+            var dataBody = {shop:window.location.host };
+            postAxios(statusEndpoint, dataBody, (responseA)=>{
+              	console.log("Resp", responseA);
+                if (responseA.data && responseA.status == 200) {
+                    thData = responseA.data;
+                    if (thData && thData.status == "1") {
+                        thuorSelectors = $('input[name="add"] , button[name=\'add\'], #add-to-cart, .add-to-cart, #AddToCartText ,#AddToCart, .ProductForm__AddToCart');
+                        thuorSelectors.addClass("th_mainBtn th_elem_0");
+                        thuorSelectors.removeAttr("disabled");
+                        
+                        $('.th_mainBtn').on('click', function(event){
+                            event.preventDefault();
+                            var form = $(this).parents('form[action="/cart/add"]');
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '/cart/add.js', true);
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                            xhr.onreadystatechange = function() {
+                                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                                    window.location.href = '/cart?ref=thuor_bb'
+                                }
+                            }
+                            
+                            xhr.send($(form).serialize());
+                        });
+                    } else {
+                        thuorSelectors.removeAttr('disabled');
+                    }
+                }
+            })            
+        }
+    }
+
+    if (window.$ || window.jQuery) {
+        var oldLinks = $('a[href="/a/checkout"]').not('.th-btn-finalize').addClass('th-btn-finalize-single');
+
+        $('.th-btn-finalize-single').on('click', function (e) {
+            e.preventDefault();
+
+            if (currentPage == 'cart') {
+                window.location.href = window.yampiCheckoutUrl;
+            } else {
+                window.location = '/cart';
+            }
+
+        });
+    }
+
+
+    function postAxios(url, data, success) {
+            axios.post(url, data)
+                .then(function (response) {
+                    success(response);
+                })
+                .catch(function (error) {
+                    console.log('Erro ao executar Axios', error);
+                });
+        }
+
+    function getAxios(url, success) {
+            axios.get(url)
+                .then(function (response) {
+                    // handle success
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                })
+                .finally(function () {
+                    // always executed
+                });
+        }
 
 
 

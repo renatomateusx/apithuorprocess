@@ -50,9 +50,9 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
             limpa_carrinho,
             url_person } = req.body;
         pool.query('INSERT INTO integracoes_plataformas (status, auto_sincroniza, pula_carrinho, tipo_integracao, url_loja, chave_api_key, senha, segredo_compartilhado, quais_pedidos_enviar, id_usuario, plataforma, email_loja, nome_loja, limpa_carrinho, url_person) VALUES ($1, $2, $3,$4,$5,$6, $7, $8, $9, $10, $11,$12,$13,$14,$15) ON CONFLICT (id_usuario, plataforma) DO UPDATE SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, id_usuario=$10, plataforma=$11, email_loja=$12, nome_loja=$13, limpa_carrinho=$14, url_person=$15',
-            [   +status,
-                +auto_sincroniza,
-                +pula_carrinho,
+            [+status,
+            +auto_sincroniza,
+            +pula_carrinho,
                 tipo_integracao,
                 url_loja,
                 chave_api_key,
@@ -94,7 +94,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
             email_loja,
             nome_loja,
             limpa_carrinho,
-            url_person  } = req.body;
+            url_person } = req.body;
         pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, email_loja=$12, nome_loja=$13, limpa_carrinho=$14, url_person=$15) WHERE id=$10 and id_usuario = $11',
             [status,
                 auto_sincroniza,
@@ -110,7 +110,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
                 email_loja,
                 nome_loja,
                 limpa_carrinho,
-                url_person ],
+                url_person],
             (error, results) => {
                 if (error) {
                     throw error
@@ -131,7 +131,7 @@ function getDadosLoja(shop) {
             if (error) {
                 throw error
             }
-            if (results.rowCount> 0) {
+            if (results.rowCount > 0) {
                 resolve(results.rows[0]);
             }
         });
@@ -162,6 +162,34 @@ module.exports.GetDadosLoja = (req, res, next) => {
                 //console.log("Shop", loja);
                 res.json(results.rows[0]);
                 res.end();
+            }
+            else {
+                res.json(null);
+                res.end();
+            }
+        });
+    }
+    catch (error) {
+        console.log("Erro cart shopify", error);
+        res.json(error);
+        res.end();
+        // reject(error);
+    }
+    //});
+}
+module.exports.GetDadosLojaShop = (req, res, next) => {
+    //return new Promise((resolve, reject) => {
+    try {
+        const { shop } = req.body;
+
+        pool.query('SELECT * FROM integracoes_plataformas WHERE url_loja=$1 or url_person=$1', [shop], (error, results) => {
+            if (error) {
+                throw error
+            }
+            if (results.rowCount > 0) {
+                //console.log("Shop", loja);
+                res.json(results.rows[0]);
+                res.end();
 
             }
         });
@@ -174,6 +202,8 @@ module.exports.GetDadosLoja = (req, res, next) => {
     }
     //});
 }
+
+
 module.exports.GetDadosLojaByIDUsuario = (req, res, next) => {
     //return new Promise((resolve, reject) => {
     try {
@@ -235,7 +265,7 @@ function getDadosProduto(id_produto, variante_cart) {
                 }
                 if (resultsProd.rows) {
                     resultsProd.rows.forEach((prod, ii) => {
-                        const ProdutoJSON = JSON.parse(prod.json_dados_produto);
+                        const ProdutoJSON = prod.json_dados_produto;
                         ProdutoJSON.variants.forEach((variante, i) => {
                             if (variante.id == variante_cart) {
                                 var produto = {
@@ -295,54 +325,55 @@ module.exports.CartShopify = async (req, res, next) => {
     var status, url_loja, token, isShopify, clearCart, skipToCheckout;
     var produto_option_id = [], produto_option_quantity = [], produto_option_variante_id = [];
     const { shop, cart } = req.body;
-    token = "shopify-" + cart.token;
-    var promises = [];
-    cart.items.forEach((obj, i) => {
-        promises.push(
-            new DeferredPromise()
-        )
-    })
-    var redirTo = ['cart', 'checkout'];
-    var RetornoShopify = null;
-    var produtoFinal = constantes.WEBSITECHECKOUT;
-    const dadosLoja = await getDadosLoja(shop);
-    status = dadosLoja.status;
-    url_loja = dadosLoja.url_loja;
-    skipToCheckout = dadosLoja.pula_carrinho;
-    clearCart = dadosLoja.limpa_carrinho;
-    isShopify = 1;
-
-    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length, url_loja);
-    cart.items.forEach(async (Item, i) => {
-        const cartItem = Item;
-        var produto_id = Item.product_id;
-        var ProdutoVariante;
-        const produto = await getDadosProduto(produto_id, cartItem.id);
-        ProdutoVariante = produto.variante_id;
-        produtoFinal = produtoFinal + await getURLProduto(produto.id_thuor, cartItem.quantity, ProdutoVariante, i);
-        promises[i].resolve();
-    });
-    Promise.all(promises)
-        .then(() => {
-            var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
-            var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
-            urlCart = urlCart.substr(0, urlCart.length - 1);
-            urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
-            //console.log("Prod", produtoFinal);
-            RetornoShopify = {
-                "url": urlCart,
-                "urlCheckout": urlCheckout,
-                "active": status,
-                "skip_cart": skipToCheckout
-            }
-            //console.log("ProdutoFinal", RetornoShopify);
-            res.json(RetornoShopify);
-            res.end();
+        
+        token = "shopify-" + cart.token;
+        var promises = [];
+        cart.items.forEach((obj, i) => {
+            promises.push(
+                new DeferredPromise()
+            )
         })
-        .catch((error) => {
-            console.log("Error", error);
-        })
+        var redirTo = ['cart', 'checkout'];
+        var RetornoShopify = null;
+        var produtoFinal = constantes.WEBSITECHECKOUT;
+        const dadosLoja = await getDadosLoja(shop);
+        status = dadosLoja.status;
+        url_loja = dadosLoja.url_loja;
+        skipToCheckout = dadosLoja.pula_carrinho;
+        clearCart = dadosLoja.limpa_carrinho;
+        isShopify = 1;
 
+        produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length, url_loja);
+        cart.items.forEach(async (Item, i) => {
+            const cartItem = Item;
+            var produto_id = Item.product_id;
+            var ProdutoVariante;
+            const produto = await getDadosProduto(produto_id, cartItem.id);
+            ProdutoVariante = produto.variante_id;
+            produtoFinal = produtoFinal + await getURLProduto(produto.id_thuor, cartItem.quantity, ProdutoVariante, i);
+            promises[i].resolve();
+        });
+        Promise.all(promises)
+            .then(() => {
+                var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
+                var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
+                urlCart = urlCart.substr(0, urlCart.length - 1);
+                urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
+                //console.log("Prod", produtoFinal);
+                RetornoShopify = {
+                    "url": urlCart,
+                    "urlCheckout": urlCheckout,
+                    "active": status,
+                    "skip_cart": skipToCheckout
+                }
+                //console.log("ProdutoFinal", RetornoShopify);
+                res.json(RetornoShopify);
+                res.end();
+            })
+            .catch((error) => {
+                console.log("Error", error);
+            })
+    
 }
 
 
