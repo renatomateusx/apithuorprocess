@@ -111,7 +111,7 @@ module.exports.DoPay = (req, res, next) => {
         if (LJSON.dadosCheckout.gateway == 1) {
             mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
             var paymentData = {
-                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
+                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',','.')),
                 token: LJSON.paymentData.token,
                 description: LJSON.paymentData.description,
                 installments: parseInt(LJSON.paymentData.installments),
@@ -165,7 +165,7 @@ module.exports.DoPayTicket = (req, res, next) => {
         mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
         var FirstLastName = LJSON.dadosComprador.nome_completo.split(" ");
         var paymentData = {
-            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
+            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',','.')),
             description: LJSON.paymentData.description,
             payment_method_id: LJSON.paymentData.payment_method_id,
             payer: {
@@ -186,7 +186,8 @@ module.exports.DoPayTicket = (req, res, next) => {
                 }
             }
         }
-        //console.log("paymentData", paymentData);
+        console.log("paymentData", paymentData);
+
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;

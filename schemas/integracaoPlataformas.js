@@ -4,7 +4,7 @@ var constantes = require('../resources/constantes');
 const format = require('string-format');
 const DeferredPromise = require('@bitbar/deferred-promise');
 const componenteShopify = require('../routes/componentes/Shopify/integracaoShopify');
-const WebHookShopify = require('../webhooks/webhookshopify');
+
 const produtos = require('../schemas/produtos');
 const transacoes = require('../schemas/transacao');
 const fulfillments = require('../schemas/fulfillments');
@@ -63,7 +63,7 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
                 plataforma,
                 email_loja,
                 nome_loja,
-                limpa_carrinho,
+                +limpa_carrinho,
                 url_person],
             (error, results) => {
                 if (error) {
@@ -97,8 +97,8 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
             url_person } = req.body;
         pool.query('UPDATE integracoes_plataformas SET status=$1, auto_sincroniza=$2, pula_carrinho=$3, tipo_integracao=$4, url_loja=$5, chave_api_key=$6, senha=$7, segredo_compartilhado=$8, quais_pedidos_enviar=$9, email_loja=$12, nome_loja=$13, limpa_carrinho=$14, url_person=$15) WHERE id=$10 and id_usuario = $11',
             [status,
-                auto_sincroniza,
-                pula_carrinho,
+                +auto_sincroniza,
+                +pula_carrinho,
                 tipo_integracao,
                 url_loja,
                 chave_api_key,
@@ -109,7 +109,7 @@ module.exports.UpdateIntegracaoShopifyCheckout = (req, res, next) => {
                 id_usuario,
                 email_loja,
                 nome_loja,
-                limpa_carrinho,
+                +limpa_carrinho,
                 url_person],
             (error, results) => {
                 if (error) {
@@ -676,7 +676,8 @@ module.exports.WebHookShopify = async (req, res, next) => {
         //     res.status(200).send(results.rows[0]);
         //     res.end();
         // })
-
+        // res.status(200).send('Ok!');
+        // res.end();
 
 
     } catch (error) {

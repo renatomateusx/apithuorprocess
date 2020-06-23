@@ -122,9 +122,9 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
 
                 if (Body.status.toUpperCase() == 'PAID') {
                     LJSON.dadosComprador.data = Body.created_at;
-                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid);
+                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid.replace(',','.'));
                     LJSON.dadosComprador.id_transacao = Body.id;
-                    LJSON.dadosComprador.valorParcela = (parseFloat(Body.amount.summary.paid) / Body.payment_method.installments);
+                    LJSON.dadosComprador.valorParcela = (parseFloat(Body.amount.summary.paid.replace(',','.')) / Body.payment_method.installments);
                     var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, Body, LJSON.paymentData, 'paid', constantes.GATEWAY_PS);
                     var plataformasResponse = {
                         shopify: responseShopify,
@@ -200,48 +200,7 @@ module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
                 .then(async (resRet) => {
                     const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2)
                     res.status(200).send(LResponse);
-                    // var LRefoundShopify = {
-                    //     "refund": {
-                    //         "currency": "BRL",
-                    //         "notify": true,
-                    //         "note": "Cancelada pelo Vendedor",
-                    //         "shipping": {
-                    //             "full_refund": true
-                    //         },
-                    //         "refund_line_items": ItemsRefound,
-                    //         "transactions": [
-                    //             {
-                    //                 "amount": ValorRefund,
-                    //                 "kind": "refund",
-                    //                 "gateway": "PS"
-                    //             }
-                    //         ]
-                    //     }
-                    // }
-                    // const ordersShopify = format("/admin/api/{}/{}.json", constantes.VERSAO_API, constantes.REFOUND_ORDER);
-                    // const urlShopify = format("https://{}:{}@{}", LDadosLoja.chave_api_key, LDadosLoja.senha, LDadosLoja.url_loja);
-                    // var headerAditional = "X-Shopify-Access-Token";
-                    // var valueHeaderAditional = LDadosLoja.senha;
-                    // utilis.makeAPICallExternalParamsJSON(urlShopify, ordersShopify, LRefoundShopify, headerAditional, valueHeaderAditional, 'POST')
-                    //     .then(async retornoShopify => {
-                    //         const RetornoShopifyJSON = retornoShopify.body;
-                    //         transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA')
-                    //             .then((retornoInsereTransacao) => {
-                    //                 const response = {
-                    //                     dataGateway: data.response,
-                    //                     dataStore: RetornoShopifyJSON
-                    //                 }
-                    //                 res.status(200).send(response);
-                    //             })
-                    //             .catch((error) => {
-                    //                 console.log("Erro ao inserir transação no banco", error);
-                    //             })
-                    //     })
-                    //     .catch(error => {
-                    //         console.log("Erro ao enviar informação do checkout para a shopify", error);
-                    //     })
 
-                    //const LUpdateTransacao = await this.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'REEMBOLSADA');
 
                 })
                 .catch(error => {

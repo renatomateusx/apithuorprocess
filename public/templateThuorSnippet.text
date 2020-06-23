@@ -25,8 +25,8 @@
     <script type='text/javascript'>
 
         var currentPage = '{{ template.name }}';
-        var cartEndpoint = 'https://hmlapi.thuor.com:9443/integracaoShopify/CartShopify';
-      var statusEndpoint = 'https://hmlapi.thuor.com:9443/integracaoShopify/GetDadosLoja';
+        var cartEndpoint = 'https://api.thuor.com:7443/integracaoShopify/CartShopify';
+      var statusEndpoint = 'https://api.thuor.com:7443/integracaoShopify/GetDadosLoja';
         var shop = '{{ shop.secure_url }}';
         
       
@@ -44,7 +44,8 @@
     }
 
     if (currentPage == 'cart') {
-        
+            document.getElementsByTagName("BODY")[0].style.display = 'none';
+      		showThuorLoader();
             getAjax('/cart.json', function (res) {
                 var cartJSON = JSON.parse(res);
                 var dataBody = {
@@ -54,19 +55,15 @@
                 postAxios(cartEndpoint, dataBody, function (resEndPoint) {
                     console.log(resEndPoint);
                     var respCart = resEndPoint.data;
+                    if(respCart.skip_cart == '0'){
+                        document.getElementsByTagName("BODY")[0].style.display = 'block'; 
+                        hideThuorLoader();
+                    }
                     if (!respCart.active) {
                         hideThuorLoader();
                     }
                     else {
-                        var otherButtons = document.getElementsByClassName('cartX_check_mainBtn');
-                      	var otherButtons2 = document.getElementsByClassName('shopify-payment-button');
-			
-                        for (var i = 0; i < otherButtons.length; i++) {
-                            otherButtons[i].setAttribute('style', 'display: none !important');
-                        }
-                      	for (var i = 0; i < otherButtons2.length; i++) {
-                            otherButtons2[i].setAttribute('style', 'display: none !important');
-                        }
+                        removeButtons();
                         window.ThuorCheckoutUrl = respCart.urlCheckout;
 
 
@@ -113,11 +110,11 @@
         });
 
         if (currentPage == 'product' || currentPage == 'index') {
+            removeButtons();
             var thuorSelectors = $('input[name="add"] , button[name=\'add\'], #add-to-cart, .add-to-cart, #AddToCartText ,#AddToCart, .ProductForm__AddToCart');
             thuorSelectors.attr('disabled', true);
             var dataBody = {shop:window.location.host };
             postAxios(statusEndpoint, dataBody, (responseA)=>{
-              	console.log("Resp", responseA);
                 if (responseA.data && responseA.status == 200) {
                     thData = responseA.data;
                     if (thData && thData.status == "1") {
@@ -154,7 +151,7 @@
             e.preventDefault();
 
             if (currentPage == 'cart') {
-                window.location.href = window.yampiCheckoutUrl;
+                window.location.href = window.ThuorCheckoutUrl;
             } else {
                 window.location = '/cart';
             }
@@ -219,5 +216,17 @@
 
         return xhr;
     }
+
+    function removeButtons(){
+            var otherButtons = document.getElementsByClassName('cartX_check_mainBtn');
+            var otherButtons2 = document.getElementsByClassName('shopify-payment-button');
+
+            for (var i = 0; i < otherButtons.length; i++) {
+                otherButtons[i].setAttribute('style', 'display: none !important');
+            }
+            for (var i = 0; i < otherButtons2.length; i++) {
+                otherButtons2[i].setAttribute('style', 'display: none !important');
+            } 
+      }
 
 </script>

@@ -78,7 +78,7 @@ router.post('/teste', function (req, res, next) {
     utilis.makeAPICallExternalHTTPS(url)
       .then((retorno) => {
         console.log(retorno[0])
-        res.json({ mensagem: retorno[0]});
+        res.json({ mensagem: retorno[0] });
       });
   }
   catch (error) {
@@ -167,13 +167,26 @@ function processaWebHooks(req, res, next, url, path, headerAditional, valueHeade
     }
   })
 
-
 }
 
 function getTemplateThuorSnippet() {
   return new Promise((resolve, reject) => {
     try {
       var pathFile = pathWay.join(__dirname, '../../../public/templateThuorSnippet.text');
+
+      var data = fileSystem.readFileSync(pathFile, 'utf8');
+      resolve(data.toString());
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+function getTemplateThuorCrossSellSnippet() {
+  return new Promise((resolve, reject) => {
+    try {
+      var pathFile = pathWay.join(__dirname, '../../../public/templateThuorCrossSellSnippet.text');
 
       var data = fileSystem.readFileSync(pathFile, 'utf8');
       resolve(data.toString());
@@ -254,7 +267,7 @@ function processaTemas(req, res, next, url, path, headerAditional, valueHeaderAd
                             .then(retornoGetThemeLiquid => {
                               var LRet = JSON.parse(retornoGetThemeLiquid);
                               var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT, '</body>');
-                              OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT_YAMPI,"");
+                              OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT_YAMPI, "");
                               var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT);
                               var LThemeEdited = {
                                 "asset": {
@@ -562,6 +575,52 @@ router.post('/InstalarAppThuorParcel', function (req, res, next) {
   }
 });
 
+router.post('/InstalarAppThuorCrossSell', function (req, res, next) {
+  try {
+    const { id_usuario } = req.body;
+    req.body.id = id_usuario;
+    usuario.GetUserByID(req, res, next)
+      .then(userInfo => {
+        req.body.id_usuario = id_usuario;
+        integracaoShopify.GetIntegracaoShopifyCheckout(req, res, next)
+          .then(async integraShopify => {
+            const url_loja = integraShopify[0].url_loja;
+            const chave_api_key = integraShopify[0].chave_api_key;
+            const senha = integraShopify[0].senha;
+            const segredo_compartilhado = integraShopify[0].segredo_compartilhado;
+            const versao = constantes.VERSAO_API;
+            const resourceWebHooks = constantes.RESOURCE_WEBHOOKS;
+            const resourceTemas = constantes.RESOURCE_TEMAS;
+
+            //url = "https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json";
+            const url = format("https://{}:{}@{}", chave_api_key, senha, url_loja);
+            const path = format("/admin/api/{}/{}.json", versao, resourceWebHooks)
+            var headerAditional = "X-Shopify-Access-Token";
+            var valueHeaderAditional = senha;
+            var PathTemas = format("/admin/api/{}/{}.json", versao, resourceTemas);
+            const LWaitInstallProduct = await processaTemasThuorCrossSellAppProdutPage(req, res, next, url, PathTemas, headerAditional, valueHeaderAditional);
+            const LWaitInstallCart = await processaTemasThuorCrossSellAppCartPage(req, res, next, url, PathTemas, headerAditional, valueHeaderAditional);
+            if (LWaitInstallProduct == "ok" && LWaitInstallCart == "ok") {
+              const LApp = await apps.SaveAppInternal(url_loja, id_usuario, 1, 8);
+              res.json({ mensagem: LWaitInstallProduct });
+              res.end();
+            }
+          })
+          .catch(error => {
+            console.log("Erro ao pegar dados da integração com o checkout da shopify", error);
+          })
+
+      })
+      .catch(error => {
+        console.log("Erro ao capturar o usuário pelo ID", error);
+        reject(error);
+      })
+
+  } catch (error) {
+    res.json(error);
+    res.end();
+  }
+});
 
 function processaTemasParcelApp(req, res, next, url, path, headerAditional, valueHeaderAditional) {
   utilis.makeAPICallExternalHeaders(url, path, headerAditional, valueHeaderAditional)
@@ -573,14 +632,14 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
         if (tema.role === "main") {
           getTemplateThuorParcelAppTemplate()
             .then((retornoTemplate) => {
-
+              var templateValue = retornoTemplate.replace("{id_usuario}", id_usuario).replace("{plataforma}", constantes.PLATAFORMA_SHOPIFY);
               var LThemeID = tema.id;
               var LAssets = "assets.json";
               var PathAsset = path.replace(".json", "") + "/" + LThemeID + "/" + LAssets;
               var body = {
                 "asset": {
                   "key": '' + constantes.RESOURCE_THUOR_SPNIPPET_PARCEL_LIQUID + '',
-                  "value": retornoTemplate.replace("{id_usuario}", id_usuario)
+                  "value": templateValue
                 }
               }
               //CHAMA FUNÇÃO PARA CRIAR O ARQUIVO ThuorParcelSnippet.liquid
@@ -588,11 +647,11 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
                 .then(retornoAssets => {
                   //res.json({ mensagem: retornoAssets });
                   //https://kingofertas.myshopify.com/admin/api/2020-04/themes/95439847483/assets.json?asset[key]=layout/theme.liquid
-                  var LProductLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_APP_PARCEL_PRODUCT_LIQUID;
+                  var LProductLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_PRODUCT_LIQUID;
                   var LProductLiquidBak = {
                     "asset": {
                       "key": 'templates/product_theme_edited_by_thuor_parcel_app.liquid',
-                      "source_key": "sections/product.liquid"
+                      "source_key": "templates/product.liquid"
                     }
                   }
                   ///CHAMA API PARA FAZER BACKUP DO PRODUCT.LIQUID             
@@ -604,14 +663,13 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
                           var LRet = JSON.parse(retornoGetProductLiquid);
                           //console.log("LRet", LRet.asset.value);
                           var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT, "");
-                          var n = OLDValue.lastIndexOf(word);
                           LHT = OLDValue + constantes.RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT;
                           //console.log(LHT);
                           //var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, '{% endif %}');
                           var LNewHTMLValue = LHT;
                           var LProductThemeEdited = {
                             "asset": {
-                              "key": 'sections/product.liquid',
+                              "key": 'templates/product.liquid',
                               "value": LNewHTMLValue
                             }
                           }
@@ -649,6 +707,199 @@ function processaTemasParcelApp(req, res, next, url, path, headerAditional, valu
     .catch(error => {
       console.log("Erro ao processar temas", error);
     })
+
+}
+
+function processaTemasThuorCrossSellAppProdutPage(req, res, next, url, path, headerAditional, valueHeaderAditional) {
+  return new Promise((resolve, reject) => {
+    utilis.makeAPICallExternalHeaders(url, path, headerAditional, valueHeaderAditional)
+      .then(retorno => {
+        //console.log("WebHook Criado ", url + path);
+        var LTemas = JSON.parse(retorno);
+        const { id_usuario } = req.body;
+        LTemas.themes.forEach((tema, i) => {
+          if (tema.role === "main") {
+            getTemplateThuorCrossSellSnippet()
+              .then((retornoTemplate) => {
+
+                var LThemeID = tema.id;
+                var LAssets = "assets.json";
+                var PathAsset = path.replace(".json", "") + "/" + LThemeID + "/" + LAssets;
+                var body = {
+                  "asset": {
+                    "key": '' + constantes.RESOURCE_THUOR_SPNIPPET_CROSS_SELL_LIQUID + '',
+                    "value": retornoTemplate
+                  }
+                }
+                //CHAMA FUNÇÃO PARA CRIAR O ARQUIVO ThuorParcelSnippet.liquid
+                utilis.makeAPICallExternalParamsJSON(url, PathAsset, body, headerAditional, valueHeaderAditional, 'PUT')
+                  .then(retornoAssets => {
+                    //res.json({ mensagem: retornoAssets });
+                    //https://kingofertas.myshopify.com/admin/api/2020-04/themes/95439847483/assets.json?asset[key]=layout/theme.liquid
+                    var LProductLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_PRODUCT_LIQUID;
+                    var LProductLiquidBak = {
+                      "asset": {
+                        "key": 'templates/product_theme_edited_by_thuor_cross_sell_app.liquid',
+                        "source_key": "templates/product.liquid"
+                      }
+                    }
+                    ///CHAMA API PARA FAZER BACKUP DO PRODUCT.LIQUID             
+                    utilis.makeAPICallExternalParamsJSON(url, PathAsset, LProductLiquidBak, headerAditional, valueHeaderAditional, 'PUT')
+                      .then(retornoBackup => {
+                        // res.json({ mensagem: retornoBackup });
+                        utilis.makeAPICallExternalHeaders(url, LProductLiquid, body, headerAditional, valueHeaderAditional)
+                          .then(retornoGetProductLiquid => {
+                            var LRet = JSON.parse(retornoGetProductLiquid);
+                            //console.log("LRet", LRet.asset.value);
+                            var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_CROSS_SELL_APP_PRODUCT_LIQUID_EDIT_CONTENT, "");
+                            var LHT = OLDValue + constantes.RESOURCE_THUOR_CROSS_SELL_APP_PRODUCT_LIQUID_EDIT_CONTENT;
+                            //var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, '{% endif %}');
+                            var LNewHTMLValue = LHT;
+                            var LProductThemeEdited = {
+                              "asset": {
+                                "key": 'templates/product.liquid',
+                                "value": LNewHTMLValue
+                              }
+                            }
+                            //CHAMA API PARA ESCREVER O NOVO VALUR INCLUINDO A CHAMADA DO SNIPPET TO THUOR NO ARQUIVO THEME.LIQUID
+                            utilis.makeAPICallExternalParamsJSON(url, PathAsset, LProductThemeEdited, headerAditional, valueHeaderAditional, 'PUT')
+                              .then(retornoEdicaoArquivo => {
+                                resolve('ok');
+                              })
+                              .catch(error => {
+                                console.log("Erro ao EDITAR O ARQUIVO PRODUCT-TEMPLATE.LIQUID ", error);
+                                reject(error);
+                              })
+
+                          })
+                          .catch(error => {
+                            console.log("Error", error);
+                            reject(error);
+                          })
+                      })
+                      .catch(error => {
+                        console.log("Error", error);
+                        reject(error);
+                      })
+                  })
+                  .catch(error => {
+                    console.log("Error", error);
+                    reject(error);
+                  })
+              })
+              .catch((error) => {
+                console.log("Erro ao pegar o template ThuorSnippet", error);
+                reject(error);
+              })
+
+          }
+
+        });
+        //res.end();
+      })
+      .catch(error => {
+        console.log("Erro ao processar temas", error);
+        reject(error);
+      })
+  })
+
+
+}
+
+function processaTemasThuorCrossSellAppCartPage(req, res, next, url, path, headerAditional, valueHeaderAditional) {
+  return new Promise((resolve, reject) => {
+    utilis.makeAPICallExternalHeaders(url, path, headerAditional, valueHeaderAditional)
+      .then(retorno => {
+        //console.log("WebHook Criado ", url + path);
+        var LTemas = JSON.parse(retorno);
+        const { id_usuario } = req.body;
+        LTemas.themes.forEach((tema, i) => {
+          if (tema.role === "main") {
+            getTemplateThuorCrossSellSnippet()
+              .then((retornoTemplate) => {
+
+                var LThemeID = tema.id;
+                var LAssets = "assets.json";
+                var PathAsset = path.replace(".json", "") + "/" + LThemeID + "/" + LAssets;
+                var body = {
+                  "asset": {
+                    "key": '' + constantes.RESOURCE_THUOR_SPNIPPET_CROSS_SELL_LIQUID + '',
+                    "value": retornoTemplate
+                  }
+                }
+                //CHAMA FUNÇÃO PARA CRIAR O ARQUIVO ThuorParcelSnippet.liquid
+                utilis.makeAPICallExternalParamsJSON(url, PathAsset, body, headerAditional, valueHeaderAditional, 'PUT')
+                  .then(retornoAssets => {
+                    //res.json({ mensagem: retornoAssets });
+                    //https://kingofertas.myshopify.com/admin/api/2020-04/themes/95439847483/assets.json?asset[key]=layout/theme.liquid
+                    var LProductLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_CART_LIQUID;
+                    var LProductLiquidBak = {
+                      "asset": {
+                        "key": 'templates/cart_theme_edited_by_thuor_cross_sell_app.liquid',
+                        "source_key": "templates/cart.liquid"
+                      }
+                    }
+                    ///CHAMA API PARA FAZER BACKUP DO CART.LIQUID             
+                    utilis.makeAPICallExternalParamsJSON(url, PathAsset, LProductLiquidBak, headerAditional, valueHeaderAditional, 'PUT')
+                      .then(retornoBackup => {
+                        // res.json({ mensagem: retornoBackup });
+                        utilis.makeAPICallExternalHeaders(url, LProductLiquid, body, headerAditional, valueHeaderAditional)
+                          .then(retornoGetProductLiquid => {
+                            var LRet = JSON.parse(retornoGetProductLiquid);
+                            //console.log("LRet", LRet.asset.value);
+                            var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_CROSS_SELL_APP_PRODUCT_LIQUID_EDIT_CONTENT, "");
+                            LHT = OLDValue + constantes.RESOURCE_THUOR_CROSS_SELL_APP_PRODUCT_LIQUID_EDIT_CONTENT;
+                            //console.log(LHT);
+                            //var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT, '{% endif %}');
+                            var LNewHTMLValue = LHT;
+                            var LProductThemeEdited = {
+                              "asset": {
+                                "key": 'templates/cart.liquid',
+                                "value": LNewHTMLValue
+                              }
+                            }
+                            //CHAMA API PARA ESCREVER O NOVO VALUR INCLUINDO A CHAMADA DO SNIPPET TO THUOR NO ARQUIVO THEME.LIQUID
+                            utilis.makeAPICallExternalParamsJSON(url, PathAsset, LProductThemeEdited, headerAditional, valueHeaderAditional, 'PUT')
+                              .then(retornoEdicaoArquivo => {
+                                resolve('ok');
+                              })
+                              .catch(error => {
+                                console.log("Erro ao EDITAR O ARQUIVO CART.LIQUID ", error);
+                                reject(error);
+                              })
+
+                          })
+                          .catch(error => {
+                            console.log("Error", error);
+                            reject(error);
+                          })
+                      })
+                      .catch(error => {
+                        console.log("Error", error);
+                        reject(error);
+                      })
+                  })
+                  .catch(error => {
+                    console.log("Error", error);
+                    reject(error);
+                  })
+              })
+              .catch((error) => {
+                console.log("Erro ao pegar o template ThuorSnippet", error);
+                reject(error);
+              })
+
+          }
+
+        });
+        //res.end();
+      })
+      .catch(error => {
+        console.log("Erro ao processar temas", error);
+        reject(error);
+      })
+  })
+
 
 }
 

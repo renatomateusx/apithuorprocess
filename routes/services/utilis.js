@@ -153,9 +153,11 @@ module.exports.getDetail = (actualDetail, detail) => {
         }
     })
 }
-function SendEmailBoleto(JSON_EMAIL) {
+function SendEmailBoleto(JSON_EMAI) {
     return new Promise((resolve, reject) => {
-        //console.log(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador);
+        var JSON_EMAIL = Buffer.from(JSON_EMAI, 'base64').toString();
+        var JSON_EMAIL = JSON.parse(Buffer.from(JSON_EMAIL, 'base64').toString());
+        console.log("Dados Email", JSON_EMAIL);
         try {
             var template = path.resolve('public/templates/template_boleto_email.html');
             fs.readFile(template, 'utf8', async function (err, html) {
@@ -163,21 +165,21 @@ function SendEmailBoleto(JSON_EMAIL) {
                     throw err;
                 }
                 var LHTML = html;
-                var LNome = UTILIS.toCamelCase(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.nome_completo).split(' ')[0];
+                var LNome = UTILIS.toCamelCase(JSON_EMAIL.dadosComprador.nome_completo).split(' ')[0];
                 LHTML = LHTML.replace("{first_name}", LNome);
-                const LVencimentoBoleto = moment(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.vencimentoBoleto).format('DD/MM/YYYY');
-                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
+                const LVencimentoBoleto = moment(JSON_EMAIL.dadosComprador.vencimentoBoleto).format('DD/MM/YYYY');
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}", JSON_EMAIL.dadosComprador.id_transacao);
                 var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailBoleto);
                 arrayAttachments.forEach((obj, i) => {
                     obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                 });
                 LHTML = LHTML.replace("{vencimento", LVencimentoBoleto);
-                LHTML = LHTML.replace("{bar_cod}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.barcode);
-                LHTML = LHTML.replace(/{link_boleto}/g, JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.urlBoleto);
-                LHTML = LHTML.replace("{total}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.valor);
-                LHTML = LHTML.replace("{ordem_id}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
-                var from = constantes.FROM_MAIL.replace("{nome_loja}", JSON_EMAIL.dadosCompra.dadosComprador.dadosLoja.nome_loja).replace("{email_loja}", JSON_EMAIL.dadosCompra.dadosComprador.dadosLoja.email_loja);
-                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.email, LTitulo, LHTML, arrayAttachments, from);
+                LHTML = LHTML.replace("{bar_cod}", JSON_EMAIL.dadosComprador.barcode);
+                LHTML = LHTML.replace(/{link_boleto}/g, JSON_EMAIL.dadosComprador.urlBoleto);
+                LHTML = LHTML.replace("{total}", JSON_EMAIL.dadosComprador.valor);
+                LHTML = LHTML.replace("{ordem_id}", JSON_EMAIL.dadosComprador.id_transacao);
+                var from = constantes.FROM_MAIL.replace("{nome_loja}", JSON_EMAIL.dadosLoja.nome_loja).replace("{email_loja}", JSON_EMAIL.dadosLoja.email_loja);
+                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.dadosComprador.email, LTitulo, LHTML, arrayAttachments, from);
                 if (LRetornoMail == 1) {
                     //res.status(200).send('E-mail de redefinição enviado');
                     resolve(1);
@@ -191,7 +193,8 @@ function SendEmailBoleto(JSON_EMAIL) {
     })
 }
 module.exports.SendEmailBoleto = (req, res, next) => {
-    const JSON_EMAIL = req.body;
+    const {JSON_EMAIL} = req.body;
+    console.log(JSON_EMAIL);
     res.status(200).send(SendEmailBoleto(JSON_EMAIL));
 }
 

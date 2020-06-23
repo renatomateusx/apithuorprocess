@@ -44,7 +44,7 @@ module.exports.DoPay = (req, res, next) => {
         LJSON.paymentData.test = constantes.CONSTANTE_TESTES;
         //console.log(JSON.stringify(LJSON));
         
-        LJSON.paymentData.transaction.creditCard.name = "APPROVED";  
+        /*LJSON.paymentData.transaction.creditCard.name = "APPROVED";  */
         utilis.makeAPICallExternalParamsJSON(Lurl, "", LJSON.paymentData, undefined, undefined, "POST")
             .then(async (resRet) => {
                 var json = parser.xml2json(resRet.body);
@@ -86,7 +86,7 @@ module.exports.DoPay = (req, res, next) => {
                     LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
                     LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
                     LJSON.dadosComprador.id_transacao_payu = json.paymentResponse.transactionResponse.transactionId;
-                    LJSON.dadosComprador.valorParcela = (parseFloat(LJSON.dadosComprador.valor) / parseInt(LJSON.dadosComprador.parcela));
+                    LJSON.dadosComprador.valorParcela = (parseFloat(LJSON.dadosComprador.valor.amount.summary.paid.replace(',','.')) / parseInt(LJSON.dadosComprador.parcela));
                     var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, json.paymentResponse, LJSON.paymentData, 'paid', constantes.GATEWAY_PayU);
                     var plataformasResponse = {
                         shopify: responseShopify,

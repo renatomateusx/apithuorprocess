@@ -20,26 +20,32 @@
     </div>
 
     <script type='text/javascript'>
-//const ULR_BASE = "http://localhost:3000/";
-//const ULR_BASE = "https://hmlapi.thuor.com:9443/";
-const ULR_BASE = "https://api.thuor.com:7443/";
-const IMAGE_BASE = ULR_BASE + 'images/templates/payment_form.png';
-const LTEMPLATE = '<style>.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.product-single__price--compare .compare-price{font-size: 12px !important; color: #d92027 !important; text-decoration: line-through !important;}.qtd_parcela{font-size: 18px !important; color: #bac964;}.preco{font-size: 18px !important; color: #bac964;}.imgPaymentForm{width: 100px !important;}.spanParcl{color: dodgerblue; font-weight: 700; font-size: 14px!important;}@media only screen and (max-width: 992px){#btnTop{display: block !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.imgPaymentForm{width: 70px !important;}.spanTextParcel{font-size: 20px!important;}.qtd_parcela{font-size: 25px!important;}.preco{font-size: 21px!important;}.spanParcl{color: dodgerblue!important; font-size: 14px!important;}}@media only screen and (max-width: 767px){.imgPaymentForm{width: 95px !important;}.QuatroCincopx{margin-left: 0px !important;}.remove{float: left; left: 60px; position: relative; top: -54px; cursor: pointer; font-size: 25px;}.valorTotalCollapse{font-weight: 700; color: #3fc583; font-size: 12px !important; top: 0px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.textItems{position: relative; top: 0px !important;}}</style> <div class="row col-lg-12 mb-3"> <div class="col-lg-12 float-left"> <div class=" b mb-2"> <strong><span style="font-size: 18px!important;" class="fa fa-card"></span><span class="ml-2 spanTextParcel">Ou em at&eacute; <span class="qtd_parcela" id="qtd_parcela">{{qtd_parcela}}</span> de <span class="preco" id="preco"> R${{preco}}</span></span> </strong><br></div><div class="card card-default mb-0"> <div class="card-header rounded"> <a style="cursor:pointer!important;" id="colCo" data-toggle="collapse" aria-expanded="false" aria-controls="collapseResumo"> <span id="collapseParent" class="resumoCompra pull-left float-left ml-0" role="button"><img class="imgPaymentForm" id="imgpaymentform" src="'+ULR_BASE + 'images/templates/payment_form.png"/></span> <small class="valorTotalCollapse pull-right float-right"> Clique para expandir. <span class="fa fa-arrow-down comandoCollapse pull-right float-right" id="comandoCollapse" role="button"></span> </small> </a> <div class="col-lg-12 collapse" id="collapseResumo" data-parent="#collapseParent"> <div class="col-md-12 ValorTotalResumo mt-5"> </div><div class="row"> <div class="col-md-12"> <div id="divParc"> </div></div></div></div></div><div class="card-body minusmargintop"></div></div></div></div>';
-const PRODUCAO_BOX_MP_PUBLICK_KEY = 'APP_USR-c97da455-7446-4595-968b-75677fcc12d1';
-const TESTE_BOX_MP_PUBLIC_KEY = 'TEST-5e8249a3-5691-4ae9-bf45-8705c09b5c0e';
+//const ULR_BASE_PC = "http://localhost:3000/";
+var ULR_BASE_PC = "https://api.thuor.com:7443/";
+var IMAGE_BASE_PC = ULR_BASE_PC + 'images/templates/payment_form.png';
+var LTEMPLATE_PC = '<style>.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.product-single__price--compare .compare-price{font-size: 12px !important; color: #d92027 !important; text-decoration: line-through !important;}.qtd_parcela{font-size: 18px !important; color: #bac964;}.preco{font-size: 18px !important; color: #bac964;}.imgPaymentForm{width: 100px !important;}.spanParcl{color: dodgerblue; font-weight: 700; font-size: 14px!important;}@media only screen and (max-width: 992px){#btnTop{display: block !important;}.valorTotalCollapse{font-weight: 700; color: #3fc583 !important; font-size: 12px !important; top: 3px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.imgPaymentForm{width: 70px !important;}.spanTextParcel{font-size: 20px!important;}.qtd_parcela{font-size: 25px!important;}.preco{font-size: 21px!important;}.spanParcl{color: dodgerblue!important; font-size: 14px!important;}}@media only screen and (max-width: 767px){.imgPaymentForm{width: 95px !important;}.QuatroCincopx{margin-left: 0px !important;}.remove{float: left; left: 60px; position: relative; top: -54px; cursor: pointer; font-size: 25px;}.valorTotalCollapse{font-weight: 700; color: #3fc583; font-size: 12px !important; top: 0px !important; position: relative;}.resumoCompra{font-size: 13px !important;}.comandoCollapse{margin-left: 5px; top: 0px !important; position: relative; color: dodgerblue; font-size: 18px !important;}.textItems{position: relative; top: 0px !important;}}</style> <div class="row col-lg-12 mb-3"> <div class="col-lg-12 float-left"> <div class=" b mb-2"> <strong><span style="font-size: 18px!important;" class="fa fa-card"></span><span class="ml-2 spanTextParcel">Ou em at&eacute; <span class="qtd_parcela" id="qtd_parcela">{{qtd_parcela}}</span> de <span class="preco" id="preco"> R${{preco}}</span></span> </strong><br></div><div class="card card-default mb-0"> <div class="card-header rounded"> <a style="cursor:pointer!important;" id="colCo" data-toggle="collapse" aria-expanded="false" aria-controls="collapseResumo"> <span id="collapseParent" class="resumoCompra pull-left float-left ml-0" role="button"><img class="imgPaymentForm" id="imgpaymentform" src="'+ULR_BASE_PC + 'images/templates/payment_form.png"/></span> <small class="valorTotalCollapse pull-right float-right"> Clique para expandir. <span class="fa fa-arrow-down comandoCollapse pull-right float-right" id="comandoCollapse" role="button"></span> </small> </a> <div class="col-lg-12 collapse" id="collapseResumo" data-parent="#collapseParent"> <div class="col-md-12 ValorTotalResumo mt-5"> </div><div class="row"> <div class="col-md-12"> <div id="divParc"> </div></div></div></div></div><div class="card-body minusmargintop"></div></div></div></div>';
+var PRODUCAO_BOX_MP_PUBLICK_KEY_PC = 'APP_USR-c97da455-7446-4595-968b-75677fcc12d1';
+var TESTE_BOX_MP_PUBLIC_KEY_PC = 'TEST-5e8249a3-5691-4ae9-bf45-8705c09b5c0e';
 var payment_id = '';
-var granTotal = '{{product.price}}';
-const id_usuario = '{id_usuario}';
-var granTotal = 142.00;
+var plataforma = "{plataforma}";
+var granTotal = 0;
+if(plataforma == 1){
+     granTotal = '{{product.price  | money_without_currency | remove: '.00' }}';
+    granTotal = granTotal.replace(",",".");
+}
+else{
+    granTotal = '142,00';
+}
+var id_usuario = '1';
 var parcelAllowed = 12;
 var parcelJurosOwner = false;
 var parcelaSelecionada = 0;
 var parcelaSelecionadaTexto = "";
 var status = false;
-const END_POINT_GET_APP_PARCEL_BY_USER_ID = ULR_BASE + 'apps/GetIntegracaoApps'
-const END_POINT_GET_DADOS_APP_CHECKOUT = ULR_BASE + 'checkouts/GetCheckoutAtivo'
+var END_POINT_GET_APP_PARCEL_BY_USER_ID_PC = ULR_BASE_PC + 'apps/GetIntegracaoApps'
+var END_POINT_GET_DADOS_APP_CHECKOUT_PC = ULR_BASE_PC + 'checkouts/GetCheckoutAtivo'
 
-const arrayCSSs =
+var arrayCSSsPC =
     [
         { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
         { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' },
@@ -47,7 +53,7 @@ const arrayCSSs =
         { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css' }
     ];
 
-const arrayScripts =
+var arrayScriptsPC =
     [
         { script: 'https://unpkg.com/axios/dist/axios.min.js', trigger: 0 },
         { script: 'https://code.jquery.com/jquery-3.2.1.slim.min.js', trigger: 0 },
@@ -59,22 +65,21 @@ const arrayScripts =
     ];
 
 
-function verificaDigitosCartao() {
-    postAxios(END_POINT_GET_APP_PARCEL_BY_USER_ID, { id_usuario: id_usuario, app: 3 }, (response) => {
+function verificaDigitosCartaoPC() {
+    postAxiosPC(END_POINT_GET_APP_PARCEL_BY_USER_ID_PC, { id_usuario: id_usuario, app: 3 }, (response) => {
 
         const LAppPropriedades = response.data;
         if (LAppPropriedades != null && LAppPropriedades != undefined) {
             parcelAllowed = LAppPropriedades.propriedades.parcelas;
             parcelJurosOwner = LAppPropriedades.propriedades.assume_juros;
             status = LAppPropriedades.status;
-        }
-        console.log(LAppPropriedades.propriedades.assume_juros);
+        }    
         if (status == true) {
             if (parcelJurosOwner) {
-                window.Mercadopago.setPublishableKey(PRODUCAO_BOX_MP_PUBLICK_KEY);
+                window.Mercadopago.setPublishableKey(PRODUCAO_BOX_MP_PUBLICK_KEY_PC);
             }
             else {
-                window.Mercadopago.setPublishableKey(TESTE_BOX_MP_PUBLIC_KEY);
+                window.Mercadopago.setPublishableKey(TESTE_BOX_MP_PUBLIC_KEY_PC);
             }
             var card_number = '5031755734530604';
             const binCard = card_number.replace(/ /g, "");
@@ -87,12 +92,12 @@ function verificaDigitosCartao() {
                     async (status, response) => {
                         if (status == 200) {
                             payment_id = response[0].id;
-                            const LProcessTemp = await InsertTemplate();
+                            const LProcessTemp = await InsertTemplatePC();
                             const LcolCo = document.getElementById("colCo");
                             LcolCo.addEventListener("click", () => {
-                                collapse('#collapseResumo', '#comandoCollapse');
+                                collapsePC('#collapseResumo', '#comandoCollapse');
                             })
-                            getParcelas();
+                            getParcelasPC();
                         } else {
                             API_NOTIFICATION.showNotificationW(
                                 "Oops!",
@@ -108,7 +113,7 @@ function verificaDigitosCartao() {
 
 }
 
-function getParcelas() {
+function getParcelasPC() {
     var self = this;
     window.Mercadopago.getInstallments(
         {
@@ -126,7 +131,7 @@ function getParcelas() {
                     if (parcelAllowed == installment.installments) {
                         parcelaSelecionada = installment.installments;
                         parcelaSelecionadaTexto = installment.recommended_message;
-                        processaTemplate(parcelaSelecionada, parcelaSelecionadaTexto);
+                        processaTemplatePC(parcelaSelecionada, parcelaSelecionadaTexto);
                         return;
                     }
                     /*let opt = document.createElement("option");
@@ -147,7 +152,7 @@ function getParcelas() {
     );
 }
 
-function postAxios(url, data, success) {
+function postAxiosPC(url, data, success) {
     axios.post(url, data)
         .then(function (response) {
             success(response);
@@ -157,12 +162,12 @@ function postAxios(url, data, success) {
         });
 }
 
-function formatPrice(value) {
+function formatPricePC(value) {
     let val = (value / 1).toFixed(2).replace(".", ",");
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function processaTemplate(parcelaSelecionad, parcelaSelecionadaText) {   
+function processaTemplatePC(parcelaSelecionad, parcelaSelecionadaText) {   
     const lqtd_parcela = document.getElementById("qtd_parcela");
     const lpreco = document.getElementById("preco");
     lqtd_parcela.innerText = parcelaSelecionad + "x";
@@ -173,7 +178,7 @@ function processaTemplate(parcelaSelecionad, parcelaSelecionadaText) {
     lpreco.innerText = "R$" + ppreco.replace(")", "");
 }
 
-function collapse(id, idComando) {
+function collapsePC(id, idComando) {
     const element = document.querySelector(id);
     const elementComando = document.querySelector(idComando);
     if (element.classList.contains("show")) {
@@ -187,11 +192,11 @@ function collapse(id, idComando) {
     }
 }
 
-function InsertTemplate() {
+function InsertTemplatePC() {
     return new Promise(async (resolve, reject) => {
         try {
-            const LForm = await GetForm();
-            const LTemp = LTEMPLATE;
+            const LForm = await GetFormPC();
+            const LTemp = LTEMPLATE_PC;
             LForm.insertAdjacentHTML("beforebegin", LTemp);
             resolve(1);
         }
@@ -201,7 +206,7 @@ function InsertTemplate() {
     })
 }
 
-function GetForm() {
+function GetFormPC() {
     return new Promise((resolve, reject) => {
         try {
             var form = '';
@@ -220,7 +225,7 @@ function GetForm() {
 
 $(document).ready(function () {
     var self = this;
-    arrayCSSs.forEach((obj, i) => {
+    arrayCSSsPC.forEach((obj, i) => {
         var link = document.createElement('link');
         link.id = i;
         link.rel = 'stylesheet';
@@ -229,7 +234,7 @@ $(document).ready(function () {
         link.media = 'all';
         document.head.appendChild(link);
     });
-    arrayScripts.forEach((obj, i) => {
+    arrayScriptsPC.forEach((obj, i) => {
         let script = document.createElement("script");
         script.type = 'text/javascript';
 
@@ -252,7 +257,7 @@ window.onload = function () {
     const plugin = document.createElement("script");
     var self = this;
     plugin.onload = function () {
-        verificaDigitosCartao();
+        verificaDigitosCartaoPC();
         console.log("ready!");
     };
     plugin.setAttribute(
