@@ -9,9 +9,9 @@ const moment = require('moment');
 
 module.exports.GetTransacoes = (req, res, next) => {
     try {
-        const { shop, id_usuario } = req.body;
-        console.log(shop, id_usuario);
-        pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2', [shop, id_usuario], (error, results) => {
+        const { id_usuario } = req.body;
+        console.log(id_usuario);
+        pool.query('SELECT * FROM transacoes where id_usuario =$1', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }

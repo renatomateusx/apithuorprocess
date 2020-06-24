@@ -3,6 +3,7 @@ var jwt = require('jsonwebtoken');
 const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
+const utilisM = require('../routes/services/utilis');
 const format = require('string-format');
 const transacoes = require('./transacao');
 const clientes = require('../schemas/clientes');
@@ -16,23 +17,23 @@ module.exports.GetCheckoutAtivo = (req, res, next) => {
                 throw error
             }
             results.rows.forEach(async (ck, ii) => {
-                if(ck.gateway == 1 && ck.json_checkout){
-                    ck.json_checkout.forEach((objck, i)=>{
-                        if(objck.status == 1){
+                if (ck.gateway == 1 && ck.json_checkout) {
+                    ck.json_checkout.forEach((objck, i) => {
+                        if (objck.status == 1) {
                             results.rows[0].chave_publica = objck.chave_publica;
                             results.rows[0].token_acesso = objck.token_acesso;
                             res.status(200).send(results.rows[0]);
                             res.end();
                         }
-                        
-                    })                    
+
+                    })
                 }
-                else{
+                else {
                     res.status(200).send(results.rows[0]);
                     res.end();
                 }
             });
-           
+
         })
     } catch (error) {
         res.json(error);
@@ -111,7 +112,7 @@ module.exports.DoPay = (req, res, next) => {
         if (LJSON.dadosCheckout.gateway == 1) {
             mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
             var paymentData = {
-                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',','.')),
+                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',', '.')),
                 token: LJSON.paymentData.token,
                 description: LJSON.paymentData.description,
                 installments: parseInt(LJSON.paymentData.installments),
@@ -161,15 +162,16 @@ module.exports.DoPayTicket = (req, res, next) => {
     try {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
-        //console.log("Pay", LJSON);
+
         mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
         var FirstLastName = LJSON.dadosComprador.nome_completo.split(" ");
+        
         var paymentData = {
-            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',','.')),
+            transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
             description: LJSON.paymentData.description,
             payment_method_id: LJSON.paymentData.payment_method_id,
             payer: {
-                email: LJSON.dadosComprador.email,
+                email: LJSON.paymentData.payer.email,
                 first_name: FirstLastName[0],
                 last_name: FirstLastName[FirstLastName.length - 1],
                 identification: {
@@ -186,8 +188,6 @@ module.exports.DoPayTicket = (req, res, next) => {
                 }
             }
         }
-        console.log("paymentData", paymentData);
-
         mercadopago.payment.create(paymentData)
             .then(async function (data) {
                 const DataResponse = data.response;
@@ -199,6 +199,9 @@ module.exports.DoPayTicket = (req, res, next) => {
                 //console.log(LJSON.dadosComprador);
                 if (data.response.status == 'pending') {
                     var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'pending', constantes.GATEWAY_MP);
+                    const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
+                    const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
+                    const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                     // var plataformasResponse = {
                     //     shopify: responseShopify,
                     //     woo: 'notYet'
@@ -296,7 +299,7 @@ module.exports.InsertCheckoutMP = (req, res, next) => {
 module.exports.UpdateStatusMP = (req, res, next) => {
     try {
         const { id_usuario, gateway, status } = req.body;
-       //console.log(req.body);
+        //console.log(req.body);
         pool.query('UPDATE checkouts SET status=0 where id_usuario = $1', [id_usuario], (error, results) => {
             if (error) {
                 throw error

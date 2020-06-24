@@ -144,6 +144,9 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                         shopify: responseShopify,
                         woo: 'notYet',
                     }
+                    const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
+                    const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
+                    const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                     //console.log(responseShopify);
                     res.status(200).send(responseShopify);
 

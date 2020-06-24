@@ -339,7 +339,7 @@ module.exports.CartShopify = async (req, res, next) => {
         const dadosLoja = await getDadosLoja(shop);
         status = dadosLoja.status;
         url_loja = dadosLoja.url_loja;
-        skipToCheckout = dadosLoja.pula_carrinho;
+        skipToCheckout = dadosLoja.pula_carrinho || 0;
         clearCart = dadosLoja.limpa_carrinho;
         isShopify = 1;
 
@@ -364,7 +364,8 @@ module.exports.CartShopify = async (req, res, next) => {
                     "url": urlCart,
                     "urlCheckout": urlCheckout,
                     "active": status,
-                    "skip_cart": skipToCheckout
+                    "skip_cart": skipToCheckout,
+                    "clean_cart": clearCart
                 }
                 //console.log("ProdutoFinal", RetornoShopify);
                 res.json(RetornoShopify);

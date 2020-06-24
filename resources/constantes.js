@@ -139,8 +139,8 @@ module.exports = Object.freeze({
     HOST_SMTP: 'in-v3.mailjet.com',
     HOST_SERVICE: 'mailjet',
     PORT_SMTP: '587',
-    USER_SMTP: '787c32052a41264ddda0d60bdaf0e41c',
-    PASS_SMTP: 'a2379cd8e89dd40a9695d09a79c1dde9',
+    USER_SMTP: '1028cb1452db730d788e8839e5964d29',
+    PASS_SMTP: '4b6b1c2c2932b278f8a94ce169d348db',
     EMAIL_FROM: "no-replay@thuor.com",
     EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
 

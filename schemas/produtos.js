@@ -34,7 +34,7 @@ module.exports.GetProdutoByID = (req, res, next) => {
 function GetImageVariantID(variant, images) {
     return new Promise((resolve, reject) => {
         try {
-            var imgSRC;
+            var imgSRC = images[0].src;
             for (let img of images) {
                 if (img.variant_ids.length > 0) {
                     //var imgs = img.variant_ids.indexOf(variant);
@@ -46,7 +46,7 @@ function GetImageVariantID(variant, images) {
                         break;
                     }
                 }
-            }
+            }            
             resolve(imgSRC);
         }
         catch (error) {
@@ -334,13 +334,13 @@ module.exports.GetProdutoExists2 = async function (req, res, next) {
 module.exports.AddProduto = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
-            const { id_produto_json, json_dados_produto, titulo_produto, id_usuario } = req.body
+            const { id_produto_json, json_dados_produto, titulo_produto, id_usuario, plataforma } = req.body
             var status = '1';
             var tipo_produto = 'FISICO';
             var custom_frete = '0';
 
 
-            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete) SELECT $1, $2, $3, $4, $5, $6, $7 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE id_produto_json = $1);', [id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete], (error, results) => {
+            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma) SELECT $1, $2, $3, $4, $5, $6, $7, $8 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE id_produto_json = $1);', [id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma], (error, results) => {
                 if (error) {
                     throw error
                 }

@@ -110,7 +110,7 @@ router.post('/ImportarProdutosShopify', utilis.verifyJWT, function (req, res, ne
             utilis.makeAPICallExternalHTTPS(url)
               .then((retorno) => {
                 console.log(retorno[0]);
-                processaListaProdutos(retorno[0], req, res, next, 1);
+                processaListaProdutos(retorno[0], req, res, next, constantes.PLATAFORMA_SHOPIFY);
                 tratarRepostaPaginacao(url, retorno[1], req, res, next, 1);
               });
           })
@@ -407,13 +407,13 @@ function processaTemasReviewApp(req, res, next, url, path, headerAditional, valu
 }
 
 
-function InsereProduto(produto, req, res, next) {
+function InsereProduto(produto, req, res, next, plataforma) {
   return new Promise((resolve, reject) => {
     let _LProd = produto;
     req.body.id_produto_json = _LProd.id;
     req.body.json_dados_produto = _LProd;
     req.body.titulo_produto = _LProd.title;
-
+    req.body.plataforma = plataforma;
     produtosSchema.AddProduto(req, res, next)
       .then(count => {
         resolve(count);
