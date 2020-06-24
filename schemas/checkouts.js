@@ -112,7 +112,7 @@ module.exports.DoPay = (req, res, next) => {
         if (LJSON.dadosCheckout.gateway == 1) {
             mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
             var paymentData = {
-                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount.replace(',', '.')),
+                transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
                 token: LJSON.paymentData.token,
                 description: LJSON.paymentData.description,
                 installments: parseInt(LJSON.paymentData.installments),
