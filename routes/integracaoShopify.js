@@ -19,6 +19,7 @@ router.post('/WebHookShopify', integracaoShopify.WebHookShopify);
 router.post('/CartShopify', integracaoShopify.CartShopify);
 
 router.post('/GetDadosLoja', integracaoShopify.GetDadosLoja);
+router.get('/GetDadosLojaShop', integracaoShopify.GetDadosLoja);
 
 router.post('/GetDadosLojaByIDUsuario', integracaoShopify.GetDadosLojaByIDUsuario);
 

@@ -3,8 +3,8 @@
 const TEMPLATE_ITENS_CART = '<div class="product"> <div class="row col-md-12"> <div class="mt-2 w-100 col-md-9"> <img class="rounded img-fluid float-left imgVariant" src="{img}"/> <div class="product-name"> <div class="product-name mt-1 col-md-10"> <a class="ml-2 w-100" href="#">{title}</a> <div class="product-info"> <div> <span class="value ml-2">{variant_title}</span> </div></div><div class="product-info"> <div> <span class="value ml-2"> <small>{quantity} Unidade(s) - <b>R${variant_price}</b> </small> </span> </div></div></div></div></div><div class="col-md-2 mt-4"><span class="fa fa-trash itemCartDelete" id="{id_cart}"></span></div></div><hr/></div>';
 const TEMPLATE_ITENS_FRETE = '<div class="card-default minusmargintop col-md-12 " > <div class="card-body"> <div class="form-group row formGroup"> <button type="button" class="btn btn-secondary col-md-11 pull-left float-left btnFrete classSelected" id="{id_frete}" > <p> <span class="text-left pull-left float-left col-md-10 textInfoFrete">{nome_frete}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10 textInfoFrete">Preço: R${{preco_frete}}</span> </p><p> <span class="text-left pull-left float-left ml-0 col-md-10"> <small>Entrega garantida</small> </span> </p></button> </div></div></div>';
 //const ULR_BASE = "http://localhost:3000/";
-const ULR_BASE = "https://hmlapi.thuor.com:9443/";
-const ULR_BASE_WEB = "http://localhost:8081/";
+const ULR_BASE = "https://api.thuor.com:8443/";
+const ULR_BASE_WEB = "https://app.thuor.com/";
 const URL_END_POINT_GET_PRODUTO_BY_ID = ULR_BASE + "produtos/GetProdutoByIDThuor";
 const URL_END_POINT_SAVE_REVIEW = ULR_BASE + "reviews/SaveReview";
 const URL_END_POINT_GET_PRODUCT = ULR_BASE + "produtos/GetProdutoIDThuor";

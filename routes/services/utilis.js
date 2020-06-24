@@ -85,13 +85,13 @@ module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
         try {
             //console.log(to, subject, html);
             var transporter = nodemailer.createTransport({
-                host: constantes.HOST_SMTP,
-                service: constantes.HOST_SERVICE,
-                port: constantes.PORT_SMTP,
+                host: constantes.HML_HOST_SMTP,
+                service: constantes.HML_HOST_SERVICE,
+                port: constantes.HML_PORT_SMTP,
                 secure: false,
                 auth: {
-                    user: constantes.USER_SMTP,
-                    pass: constantes.PASS_SMTP
+                    user: constantes.HML_USER_SMTP,
+                    pass: constantes.HML_PASS_SMTP
                 }
             });
             if (arrayAttachments == null) { arrayAttachments = []; }
@@ -153,9 +153,8 @@ module.exports.getDetail = (actualDetail, detail) => {
         }
     })
 }
-function SendEmailBoleto(JSON_EMAIL) {
-    return new Promise((resolve, reject) => {
-        //console.log(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador);
+function SendEmailBoleto(JSON_EMAIL, ordem, PJSON_LOJA) {
+    return new Promise((resolve, reject) => {      
         try {
             var template = path.resolve('public/templates/template_boleto_email.html');
             fs.readFile(template, 'utf8', async function (err, html) {
@@ -163,21 +162,21 @@ function SendEmailBoleto(JSON_EMAIL) {
                     throw err;
                 }
                 var LHTML = html;
-                var LNome = UTILIS.toCamelCase(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.nome_completo).split(' ')[0];
+                var LNome = UTILIS.toCamelCase(JSON_EMAIL.nome_completo).split(' ')[0];
                 LHTML = LHTML.replace("{first_name}", LNome);
-                const LVencimentoBoleto = moment(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.vencimentoBoleto).format('DD/MM/YYYY');
-                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
+                const LVencimentoBoleto = moment(JSON_EMAIL.vencimentoBoleto).format('DD/MM/YYYY');
+                LTitulo = constantes.STRING_SUBJECT_EMAIL_BOLETO.replace("{data_vencimento}", LVencimentoBoleto).replace("{pedido}", ordem);
                 var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailBoleto);
                 arrayAttachments.forEach((obj, i) => {
                     obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                 });
                 LHTML = LHTML.replace("{vencimento", LVencimentoBoleto);
-                LHTML = LHTML.replace("{bar_cod}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.barcode);
-                LHTML = LHTML.replace(/{link_boleto}/g, JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.urlBoleto);
-                LHTML = LHTML.replace("{total}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.valor);
-                LHTML = LHTML.replace("{ordem_id}", JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.id_transacao);
-                var from = constantes.FROM_MAIL.replace("{nome_loja}", JSON_EMAIL.dadosCompra.dadosComprador.dadosLoja.nome_loja).replace("{email_loja}", JSON_EMAIL.dadosCompra.dadosComprador.dadosLoja.email_loja);
-                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.dadosCompra.dadosComprador.dadosComprador.email, LTitulo, LHTML, arrayAttachments, from);
+                LHTML = LHTML.replace("{bar_cod}", JSON_EMAIL.barcode);
+                LHTML = LHTML.replace(/{link_boleto}/g, JSON_EMAIL.urlBoleto);
+                LHTML = LHTML.replace("{total}", JSON_EMAIL.valor);
+                LHTML = LHTML.replace("{ordem_id}", ordem);
+                var from = constantes.FROM_MAIL.replace("{nome_loja}", PJSON_LOJA.nome_loja).replace("{email_loja}", PJSON_LOJA.email_loja);
+                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.email, LTitulo, LHTML, arrayAttachments, from);
                 if (LRetornoMail == 1) {
                     //res.status(200).send('E-mail de redefinição enviado');
                     resolve(1);
@@ -190,9 +189,25 @@ function SendEmailBoleto(JSON_EMAIL) {
         }
     })
 }
-module.exports.SendEmailBoleto = (req, res, next) => {
-    const JSON_EMAIL = req.body;
-    res.status(200).send(SendEmailBoleto(JSON_EMAIL));
+module.exports.SendEmailBoleto = async (req, res, next) => {
+    const {JSON_EMAIL, ordem} = req.body;
+    const LRetornoEmailBoleto = await SendEmailBoleto(JSON_EMAIL, ordem);
+    res.json(LRetornoEmailBoleto);
+}
+
+module.exports.SendEmailBoletoInternal = (PJSON, PJSONLoja) => {
+    return new Promise(async (resolve, reject)=>{
+        try{
+            const Ordem = PJSON.ordem_id;
+            const OrdemID = JSON.parse(Ordem);
+            const LRetornoEmailBoleto = await SendEmailBoleto(PJSON, OrdemID.order.order_number, PJSONLoja);
+            resolve(LRetornoEmailBoleto);
+        }
+        catch(error){
+            reject(error);
+        }
+    })
+  
 }
 
 module.exports.sleep = (seconds) => {
