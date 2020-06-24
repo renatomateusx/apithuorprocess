@@ -407,7 +407,7 @@ module.exports.CheckStatusBoleto = (idTransaction, LDadosCheckout) => {
 
 module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
    try {
-      const { shop, id_usuario, id, lvalue } = req.body;
+      const { shop, id_usuario, id, valor } = req.body;
       const LRetornoPedido = await transacoes.GetTransacoesByID_IDUsuario(shop, id_usuario, id);
 
       const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
@@ -417,7 +417,7 @@ module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
          const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
          const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
          const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-         const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
+         const ValorRefund = valor || LResponseGW.transaction_details.total_paid_amount;
 
          var LRefund = {
             "language": "pt",

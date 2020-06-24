@@ -6,6 +6,7 @@ const utilis = require('../resources/util');
 const format = require('string-format');
 const fulfillments = require('../schemas/fulfillments');
 const moment = require('moment');
+const constantes = require('../resources/constantes');
 
 module.exports.GetTransacoes = (req, res, next) => {
     try {
@@ -268,7 +269,7 @@ async function getItemsRefound(items) {
 
 module.exports.ReembolsarPedidoByID = (req, res, next) => {
     try {
-        const { shop, id_usuario, id } = req.body;
+        const { shop, id_usuario, id, valor } = req.body;
         pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2 and id=$3', [shop, id_usuario, id], async (error, results) => {
             if (error) {
                 throw error
@@ -278,8 +279,8 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
             if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 1) {
                 mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
-                const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-                const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+                const LResponseGW = LRetornoPedido.json_gw_response;
+                const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
 
                 mercadopago.payment.refund(LResponseGW.id)
@@ -295,7 +296,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                                 "refund_line_items": ItemsRefound,
                                 "transactions": [
                                     {
-                                        "amount": LResponseGW.transaction_details.total_paid_amount,
+                                        "amount": valor || LResponseGW.transaction_details.total_paid_amount,
                                         "kind": "refund",
                                         "gateway": "MP"
                                     }
