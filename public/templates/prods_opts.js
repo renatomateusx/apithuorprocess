@@ -3,7 +3,7 @@ const TEMPLATE_ITENS_FRETE = '<div class="card-default minusmargintop col-md-12 
 //const ULR_BASE = "http://localhost:3000/";
 const ULR_BASE = "https://api.thuor.com:7443/";
 //const ULR_BASE = "https://api.thuor.com:9443/";
-const ULR_BASE_WEB = "https://thuor.com/";
+const ULR_BASE_WEB = "https://app.thuor.com/";
 //const ULR_BASE_WEB = "http://localhost:8081/";
 const URL_END_POINT_GET_PRODUTO_BY_ID = ULR_BASE + "produtos/GetProdutoByIDThuor";
 const URL_END_POINT_SAVE_REVIEW = ULR_BASE + "reviews/SaveReview";

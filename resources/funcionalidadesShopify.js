@@ -37,6 +37,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                                     const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
+                                LJSON.dadosComprador.ordem_id = RetornoShopifyJSON;
                                 const response = {
                                     dataGateway: data,
                                     dataStore: RetornoShopifyJSON,
@@ -98,7 +99,7 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                         {
                             "kind": "authorization",
                             "status": "success",
-                            "amount": parseFloat(Pjson.dadosComprador.valor)
+                            "amount": parseFloat(Pjson.paymentData.transaction_amount)
                         }
                     ],
                     "financial_status": situacao

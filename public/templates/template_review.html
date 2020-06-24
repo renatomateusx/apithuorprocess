@@ -242,7 +242,7 @@
 		}
 
 		.fontName {
-			font-size: 21px !important;
+			font-size: 18px !important;
 			margin-left: 0px !important;
 			left: 0 !important;
 		}
@@ -320,11 +320,13 @@
 		.fontf {
 			color: gold;
 		}
-		.imageDisplayOff{
-			display: none!important;
+
+		.imageDisplayOff {
+			display: none !important;
 		}
-		.imageDisplayOn{
-			display: block!important;
+
+		.imageDisplayOn {
+			display: block !important;
 		}
 	</style>
 
@@ -333,45 +335,18 @@
 <body>
 	<div class="col-md-12 mt-5">
 		<div class="row card-header text-center rounded">
-			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_avaliacao"><span class="fa fa-star fontf mr-2"></span><span clas="ml-2">Seja o
-				primeiro a <a href="">escrever uma avaliação</a></span></span>
-			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_mais_avaliacao"><span class="fa fa-star fontf mr-2"></span><span
-				clas="ml-1"><span class="qtd ml-2 mr-2" id="qtd"></span>Deixe sua avaliação e ajude outras pessoas a se
-				decidirem. <a href="">Escrever uma avaliação</a></span></span>
+			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_avaliacao"><span
+					class="fa fa-star fontf mr-2"></span><span clas="ml-2">Seja o
+					primeiro a <a href="">escrever uma avaliação</a></span></span>
+			<span class="text-center mt-1 mr-2" style="display: none;" id="escrever_mais_avaliacao"><span
+					class="fa fa-star fontf mr-2"></span><span clas="ml-1"><span class="qtd ml-2 mr-2"
+						id="qtd"></span>Deixe sua avaliação e ajude outras pessoas a se
+					decidirem. <a href="">Escrever uma avaliação</a></span></span>
 		</div>
 		<div class="row" id="divResult">
-			<!-- <div class="col-md-1"></div>
-			<div class="col-xl-3 ml-1 card card-default">
-				<a href="#">
-					<img class="img-fluid" src="{img}" alt="{titulo}" />
-				</a>
-				<div class="card-body">
-					<p class="d-flex">
-						<span>
-							<small class="mr-1">
-								<a class="ml-1 fontName" href="#">
-									{nome}
-									<span class="ml-2 fa fa-check-circle checkedBuy" title="Compra Verificada"></span>
-								</a>
-							</small>
-						</span>
-					</p>
-					<h4>
-						<a href="#" class="noopen">
-							<span class="fa fa-star starFulFill"></span>
-							<span class="fa fa-star starFulFill"></span>
-							<span class="fa fa-star starFulFill"></span>
-							<span class="fa fa-star starFulFill"></span>
-							<span class="fa fa-star starFulFill"></span>
-						</a>
-					</h4>
-					<p><b>{titulo}</b></p>
-					<p>{avaliacao}</p>
-				</div>
-			</div>
-			<div class="col-md-1"></div> -->
+			
 		</div>
-		<div class="row mt-2">
+		<div class="row mt-2 ">
 
 			<div class="col-md-3 mr-0 pr-0 pl-0"></div>
 			<div class="col-xl-6 ml-0 mr-0 pr-0 pl-0">
@@ -458,7 +433,8 @@
 											onclick="validateMyForm();">Salvar</button>
 									</div>
 									<div class="float-left pull-left mt-1">
-										<strong><a href="https://thuor.com" target="_blank">Thuor - Integrando Ideias e Negócios</a></strong>
+										<strong><a href="https://app.thuor.com" target="_blank">Thuor - Integrando Ideias e
+												Negócios</a></strong>
 									</div>
 								</div>
 							</div>
@@ -489,13 +465,15 @@
 
 
 	<script type="text/javascript">
-
-		const TEMPLATE_INICIAL = '<div class="col-md-1"></div>';
-		const TEMPLATE = '<div class="col-xl-3 ml-1 card card-default"><a href="#"><img class="img-thumbnail thumb128 rounded imageThumb {image_display}" src="{img}" alt="{titulo}"/></a><div class="card-body"><p class="d-flex"><span><small class="mr-1"><a class="ml-1 fontName" href="#">{nome}<span class="ml-2 fa fa-check-circle checkedBuy" title="Compra Verificada"></span></a></small></span></p><h4><a href="#" class="noopen"><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span></a></h4><p><b>{titulo}</b></p><p>{avaliacao}</p></div></div>';
+		const URL_BASE = "http://localhost:3000/";
+		//const URL_BASE = "https://hmlapi.thuor.com:9443/";
+		//const URL_BASE = "https://api.thuor.com:9443/";
+		const TEMPLATE_INICIAL = '<div class="products-grid row four-items"></div>';
+		const TEMPLATE = '<div class="grid-item col-12 col-6 col-md-4 col-lg-3 ml-1 mt-2"><a href="#"><img class="img-thumbnail thumb128 rounded imageThumb {image_display}" src="{img}" alt="{titulo}"/></a><div class="card-body"><p class="d-flex"><span><small class="mr-1"><a class="ml-1 fontName" href="#">{nome}<span class="ml-2 fa fa-check-circle checkedBuy" title="Compra Verificada"></span></a></small></span></p><h4><a href="#" class="noopen"><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span><span class="fa fa-star starFulFill"></span></a></h4><p><b>{titulo}</b></p><p>{avaliacao}</p></div></div>';
 		//const URL_END_POINT = "http://localhost:3000/reviews/GetReviewByID";
 		//const URL_END_POINT_SAVE_REVIEW = "http://localhost:3000/reviews/SaveReview";
-		const URL_END_POINT = "https://hmlapi.thuor.com:9443/reviews/GetReviewByID";
-		const URL_END_POINT_SAVE_REVIEW = "https://hmlapi.thuor.com:9443/reviews/SaveReview";
+		const URL_END_POINT = URL_BASE + "reviews/GetReviewByID";
+		const URL_END_POINT_SAVE_REVIEW = URL_BASE + "reviews/SaveReview";
 		var isShowingLoading = false;
 		var formValidate = [];
 		var errors = [];
@@ -514,8 +492,10 @@
 			formValidate.push({ nome: 'imagem', type: 'text', required: false, value: '' });
 
 			var url = new URL(window.location.href);
+			var path_name = url.pathname;
 			var shopifyVariantID = url.searchParams.get("variant");
 			var wooVariantID = url.searchParams.get("product");
+
 			//console.log(shopifyVariantID);
 			if (shopifyVariantID != null && shopifyVariantID != undefined) {
 				id_produto_geral = shopifyVariantID;
@@ -528,6 +508,14 @@
 				getReviews(id_produto_geral);
 				plataforma = 'woo';
 				HideLoading();
+			}
+			if (shopifyVariantID == null && wooVariantID == null) {
+				console.log("Produto JSON", '{{product.id}}');
+				const LocalShopifyProduct = '{{product.id}}';
+				if (LocalShopifyProduct) {
+					getReviews(LocalShopifyProduct, url_loja);
+					HideLoading();
+				}
 			}
 			// Swal.fire({
 			// 	type: 'success',
@@ -794,7 +782,7 @@
 					if (LQTD > 0) {
 						document.getElementById("escrever_mais_avaliacao").style.display = "";
 						document.getElementById("escrever_avaliacao").style.display = "none;";
-					}else{
+					} else {
 						document.getElementById("escrever_mais_avaliacao").style.display = "none;";
 						document.getElementById("escrever_avaliacao").style.display = "";
 					}
@@ -804,10 +792,10 @@
 						LTemp = LTemp.replace("{titulo}", obj.titulo);
 						LTemp = LTemp.replace("{titulo}", obj.titulo);
 						LTemp = LTemp.replace("{avaliacao}", obj.avaliacao);
-						if(obj.imagem != undefined && obj.imagem != null && obj.imagem.length > 0){
+						if (obj.imagem != undefined && obj.imagem != null && obj.imagem.length > 0) {
 							LTemp = LTemp.replace("{image_display}", "imageDisplayOn");
 						}
-						else{
+						else {
 							LTemp = LTemp.replace("{image_display}", "imageDisplayOff");
 						}
 

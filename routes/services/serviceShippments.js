@@ -244,7 +244,7 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
     .catch((error) => {
         console.log("Erro ao pegar o fulfillment", error);
     })
-console.log('Serviço de Shipment Rodando!', moment().format('HH:mm:ss'));
+// console.log('Serviço de Shipment Rodando!', moment().format('HH:mm:ss'));
 
 
 

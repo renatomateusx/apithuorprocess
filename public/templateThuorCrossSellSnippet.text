@@ -1,0 +1,198 @@
+<script>
+/* THUOR CROSS SELL */
+    const URL_BASE_CS = "http://localhost:3000/";
+//const URL_BASE_CS = "https://api.thuor.com:7443/";
+var IMAGE_BASE_CS = URL_BASE_CS + 'images/templates/payment_form.png';
+var LSTYLE_TEMPLATE_CS = '.imgProd{object-fit:contain;max-height:100%}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
+var LPRINCIPAL_TEMPLATE_CS = ' <div class="divProdutosRelacionados"><hr> <h3 class="box-title">  <span class="title">Você também pode gostar de</span>    </h3>        <hr> </div> <div class="products-grid row four-items" id="divResultProds"></div>';
+var LTEMPLATE_CS = '<div class="card grid-item col-12 col-6 col-md-4 col-lg-3"> <img src="{image}" class="imgProd col-lg-12"> <div class="product-bottom text-center"> <span class="col-"><a class="product-title" href="">{title_product}</a></span> <div class="price-box"> <div class="price-sale"> <span class="old-price"><a class="old-price" href="">R${old_price}</a></span> <span class="special-price"><a class="special-price" href="">R${actual_price}</a></span> </div></div></div></div>';
+var END_POINT_GET_APP_PARCEL_BY_USER_ID_CS = URL_BASE_CS + 'apps/GetIntegracaoApps'
+var END_POINT_GET_DADOS_APP_CHECKOUT_CS = URL_BASE_CS + 'checkouts/GetCheckoutAtivo'
+var URL_END_POINT_GET_DADOS_LOJA_CS = URL_BASE_CS + "integracaoShopify/GetDadosLoja";
+var URL_END_POINT_GET_CROSS_SELL_CS = URL_BASE_CS + "crosssells/GetCrossSellByStorePageOrCartPage";
+var URL_END_POINT_GET_ID_THUOR_BY_ID_PRODUTO_CS = URL_BASE_CS + "crosssells/";
+var URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS = URL_BASE_CS + "produtos/GetProdutoIDThuor";
+var currentPage = '{{ template.name }}';
+var id_produto = '{{product.id}}';
+var arrayCSSsCS =
+    [
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' },
+        { script: './styleck.css' },
+        { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css' }
+    ];
+
+var arrayScriptsCS =
+    [
+        { script: 'https://unpkg.com/axios/dist/axios.min.js', trigger: 0 },
+        { script: 'https://code.jquery.com/jquery-3.2.1.slim.min.js', trigger: 0 },
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', trigger: 0 },
+        { script: 'https://use.fontawesome.com/aa8f958ac7.js', trigger: 0 },
+        { script: 'https://kit.fontawesome.com/2ecd77a85b.js', trigger: 0 }
+    ];
+
+
+async function initializeFunctionCS() {
+    const LDoc = await GetElementCS();
+    if (LDoc) {
+        LDoc.insertAdjacentHTML("beforeend", LPRINCIPAL_TEMPLATE_CS);
+    
+    const LShop = window.location.host;
+    id_produto = 4789136097339;
+    currentPage = 'cart';
+    const LBody = {
+        shop: 'kingofertas.myshopify.com'
+    }
+    var arrayProdutos = [];
+    postAxiosCS(URL_END_POINT_GET_DADOS_LOJA_CS, LBody, (response) => {
+        // currentPage
+        const DadosLoja = response.data;
+        postAxiosCS(URL_END_POINT_GET_CROSS_SELL_CS, { id_produto: id_produto, id_usuario: DadosLoja.id_usuario }, (responseC) => {
+            const LDadosCrossSell = responseC.data;
+            if (LDadosCrossSell) {
+
+                if (currentPage == 'cart') {
+                    const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 2);
+                    if (LCS) {
+                        const LProdsArray = LCS.id_produto_to.split(',');
+                        if (LProdsArray) {
+                            LProdsArray.forEach((objProds, i) => {
+                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto: objProds }, (responseProds) => {
+                                    preencheTemplateCS(responseProds.data);
+                                });
+                            });
+
+                        }
+                    }
+                }
+                if (currentPage == 'product') {
+                    const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 1);
+                    if (LCS) {
+                        const LProdsArray = LCS.id_produto_to.split(',');
+                        if (LProdsArray) {
+                            LProdsArray.forEach((objProds, i) => {
+                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto: objProds }, (responseProds) => {
+                                    preencheTemplateCS(responseProds.data);
+                                });
+                            });
+                        }
+                    }
+                }
+
+            }
+        });
+    })
+    }
+}
+
+function preencheTemplateCS(PProdutos) {
+    if (PProdutos) {
+        const LImage = PProdutos.json_dados_produto.image.src;
+        const LTitulo = PProdutos.json_dados_produto.title;
+        const LOldP = formatPriceCS(PProdutos.json_dados_produto.variants[0].compare_at_price);
+        const LNewP = formatPriceCS(PProdutos.json_dados_produto.variants[0].price);
+        console.log(LImage, LTitulo, LOldP, LNewP);
+        var LHTML = LTEMPLATE_CS.replace("{image}", LImage).replace("{title_product}", LTitulo).replace("{old_price}", LOldP).replace("{actual_price}", LNewP);
+
+        const doc = document.getElementById("divResultProds");
+        doc.insertAdjacentHTML("beforeend", LHTML);
+    }
+}
+
+function postAxiosCS(url, data, success) {
+    axios.post(url, data)
+        .then(function (response) {
+            success(response);
+        })
+        .catch(function (error) {
+            console.log('Erro ao executar Axios', error);
+        });
+}
+
+function formatPriceCS(value) {
+    let val = (value / 1).toFixed(2).replace(".", ",");
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function processaTemplateCS(parcelaSelecionad, parcelaSelecionadaText) {
+    const lqtd_parcela = document.getElementById("qtd_parcela");
+    const lpreco = document.getElementById("preco");
+    lqtd_parcela.innerText = parcelaSelecionad + "x";
+    const LPa = parcelaSelecionadaText.split(' ');
+    const len = LPa.length;
+    var ppreco = LPa[4];
+
+    lpreco.innerText = "R$" + ppreco.replace(")", "");
+}
+
+
+function GetElementCS() {
+    return new Promise((resolve, reject) => {
+        try {
+            var form = '';
+            const form0 = document.getElementById("divProdutosRelacionados");
+            const form1 = document.getElementById("shopify-section-cart-template");
+            const form2 = document.getElementById("shopify-section-recently-viewed-products");
+            const form3 = document.getElementsByClassName("theme-ask")[0];            
+            form = form0 || form3 || form1 || form2;
+
+            resolve(form);
+        }
+        catch (error) {
+            reject(error);
+        }
+    })
+}
+
+$(document).ready(function () {
+    var self = this;
+    arrayCSSsCS.forEach((obj, i) => {
+        var link = document.createElement('link');
+        link.id = i;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = obj.script;
+        link.media = 'all';
+        document.head.appendChild(link);
+    });
+    arrayScriptsCS.forEach((obj, i) => {
+        let script = document.createElement("script");
+        script.type = 'text/javascript';
+
+        script.setAttribute(
+            "src",
+            obj.script
+        );
+
+        if (obj.trigger == 1) {
+            script.onload = function () {
+                obj.call;
+            }
+        }
+        document.head.appendChild(script);
+    });
+
+
+});
+function initializeCSS() {
+    var head = document.head || document.getElementsByTagName('head')[0],
+        style = document.createElement('style');
+
+    head.appendChild(style);
+
+    style.type = 'text/css';
+    if (style.styleSheet) {
+        // This is required for IE8 and below.
+        style.styleSheet.cssText = LSTYLE_TEMPLATE_CS;
+    } else {
+        style.appendChild(document.createTextNode(LSTYLE_TEMPLATE_CS));
+    }
+}
+window.onload = function () {
+    initializeCSS();
+    initializeFunctionCS();
+}
+/* THUOR CROSS SELL */
+</script>

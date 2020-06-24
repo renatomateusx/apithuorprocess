@@ -69,19 +69,27 @@ module.exports.GetClienteByID = (req, res, next) => {
     }
 }
 
-module.exports.SaveLead = (req, res, next) => {
+module.exports.SaveLead = async (req, res, next) => {
     try {
         const { nome, email, id_usuario, telefone, lead } = req.body;
         const Lead = JSON.parse(Buffer.from(lead, 'base64').toString());
-        const LData = moment().format();
-        const LCampanhaEnviar = 1;
-        pool.query('insert into lead (email, nome, id_usuario, telefone, lead, data_produtos_carrinho, campanha_enviar) VALUES ($1, $2, $3, $4, $5,$6,$7) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4, lead=$5, data_produtos_carrinho=$6, campanha_enviar=$7', [email, nome, id_usuario, telefone, Lead, LData, LCampanhaEnviar], (error, results) => {
-            if (error) {
-                throw error
-            }
-            res.status(200).send(results.rows);
+        const LLeadBuyer = await module.exports.GetDadosCompradorLeadInternal(email);
+        const LLedB = JSON.stringify(LLeadBuyer.lead.dadosComprador);
+        const LLength = JSON.stringify(Lead.dadosComprador);
+        if (LLedB.length > LLength.length) {
+            res.json(1);
             res.end();
-        })
+        } else {
+            const LData = moment().format();
+            const LCampanhaEnviar = 1;
+            pool.query('insert into lead (email, nome, id_usuario, telefone, lead, data_produtos_carrinho, campanha_enviar) VALUES ($1, $2, $3, $4, $5,$6,$7) ON CONFLICT (email) DO UPDATE SET email=$1, nome=$2, id_usuario=$3, telefone=$4, lead=$5, data_produtos_carrinho=$6, campanha_enviar=$7', [email, nome, id_usuario, telefone, Lead, LData, LCampanhaEnviar], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                res.status(200).send(results.rows);
+                res.end();
+            })
+        }
     } catch (error) {
         res.json(error);
         res.end();
@@ -131,11 +139,27 @@ module.exports.GetDadosCompradorLead = (req, res, next) => {
                     throw error
                 }
                 res.status(200).send(results.rows[0]);
-            res.end();
+                res.end();
             })
         } catch (error) {
             res.json(error);
             res.end();
+        }
+    })
+
+}
+
+module.exports.GetDadosCompradorLeadInternal = (email) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM lead WHERE email = $1', [email], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
         }
     })
 

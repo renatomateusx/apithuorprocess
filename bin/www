@@ -11,6 +11,7 @@ var https = require('https');
 var fs = require('fs');
 var path = require('path');
 var cors = require('cors');
+const SLL_PORT = 7443;
 /**
  * Get port from environment and store in Express.
  */
@@ -36,22 +37,22 @@ var server = http.createServer(app);
 
 /* COMENTAR ABAIXO PARA USAR LOCALMENTE */
 // var privateKey = fs
-//   .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.key'))
+//   .readFileSync(path.resolve('../../../../conf/web/ssl.api.thuor.com.key'))
 //   .toString();
 // var certificate = fs
-//   .readFileSync(path.resolve('../../../conf/web/ssl.hmlapi.thuor.com.pem'))
+//   .readFileSync(path.resolve('../../../../conf/web/ssl.api.thuor.com.pem'))
 //   .toString();
 // var options = {key: privateKey, cert: certificate};
 // var ssl_server = https.createServer(options, function(req, res) {
 //     app.handle(req, res);
 //   })
-//   .listen(9443);
+//   .listen(7443);
 // var io = require('socket.io')(ssl_server);
 // /* COMENTAR ACIMA PARA USAR LOCALMENTE */
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-/* COMENTAR ABAIXO PARA USAR LOCALMENTE */
+// /* COMENTAR ABAIXO PARA USAR LOCALMENTE */
 // io.listen(ssl_server);
 
 // io.on('connection', res => {
