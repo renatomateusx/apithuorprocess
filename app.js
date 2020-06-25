@@ -42,6 +42,7 @@ var mensageria = require('./routes/mensageria');
 var pixels = require('./routes/pixels');
 var clientes = require('./routes/clientes');
 var services_shipment = require('./routes/services/serviceShippments');
+var services_bulk_cancel = require('./routes/services/bulkCancelBoletos');
 var webhookshopify = require('./webhooks/webhookshopify');
 var cupons = require('./routes/cupons');
 var campanhas = require('./routes/integracaoCampanhas/campanhas');

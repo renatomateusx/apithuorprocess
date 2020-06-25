@@ -41,6 +41,37 @@ module.exports.GetCheckoutAtivo = (req, res, next) => {
     }
 }
 
+module.exports.GetCheckoutAtivoInternalOption = (id_usuario) => {
+    return new Promise((resolve, reject)=>{
+        try {
+            pool.query('SELECT * FROM checkouts where id_usuario = $1 and status = 1', [id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                results.rows.forEach(async (ck, ii) => {
+                    if (ck.gateway == 1 && ck.json_checkout) {
+                        ck.json_checkout.forEach((objck, i) => {
+                            if (objck.status == 1) {
+                                results.rows[0].chave_publica = objck.chave_publica;
+                                results.rows[0].token_acesso = objck.token_acesso;
+                                resolve(results.rows[0]);
+                            }
+    
+                        })
+                    }
+                    else {
+                        resolve(results.rows[0]);
+                    }
+                });
+    
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+    
+}
+
 module.exports.GetCheckoutByID = (req, res, next) => {
     try {
         const { id_usuario, gateway } = req.body;
@@ -56,6 +87,22 @@ module.exports.GetCheckoutByID = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetCheckoutByIDInternal = (id_usuario, gateway) => {
+    return new Promise((resolve, reject)=>{
+        try {
+            pool.query('SELECT * FROM checkouts where id_usuario = $1 and gateway=$2', [id_usuario, gateway], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+    
 }
 
 module.exports.GetCheckoutAtivoInternal = (req, res, next) => {
@@ -201,7 +248,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                     var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'pending', constantes.GATEWAY_MP);
                     const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
                     const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
-                    const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
+                    utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                     // var plataformasResponse = {
                     //     shopify: responseShopify,
                     //     woo: 'notYet'

@@ -134,7 +134,7 @@ module.exports.DoPay = (req, res, next) => {
                }
                const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
                const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
-               const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
+               utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                res.status(200).send(responseShopify);
 
             }

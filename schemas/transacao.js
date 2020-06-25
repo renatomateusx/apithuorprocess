@@ -25,6 +25,22 @@ module.exports.GetTransacoes = (req, res, next) => {
     }
 }
 
+module.exports.GetTransacoesPendentes = () => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query("select * from transacoes where status = 'PENDING'", (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
 module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
     try {
         const { shop, id_usuario } = req.body;
@@ -90,6 +106,22 @@ module.exports.SetPaymentComissionDone = (req, res, next) => {
     } catch (error) {
         res.json(error);
     }
+}
+
+module.exports.CancelaBoleto = (id, jsonGW, id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query("UPDATE transacoes SET status = 'CANCELED', json_gw_response = $1 WHERE id_usuario = $2 and id = $3", [jsonGW, id_usuario, id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(0)
+        }
+    })
+
 }
 
 
@@ -192,7 +224,7 @@ module.exports.GetTransacoesByID_IDUsuario = (shop, id_usuario, id) => {
 module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if(!track || track == undefined){
+            if (!track || track == undefined) {
                 track = 0;
             }
             pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway, ttrack) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track], (error, results) => {
