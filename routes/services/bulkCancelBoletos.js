@@ -94,7 +94,7 @@ var ja = schedule.scheduleJob("* * */16 * * * ", async function () {
     })
 
 
- console.log('Serviço de Bulk Cancel Boleto Rodando!', moment().format('HH:mm:ss'));
+//  console.log('Serviço de Bulk Cancel Boleto Rodando!', moment().format('HH:mm:ss'));
 
 
 

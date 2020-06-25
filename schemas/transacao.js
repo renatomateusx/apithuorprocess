@@ -57,6 +57,77 @@ module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
     }
 }
 
+module.exports.GetTransacaoInternaByIDTransacao = (id, id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM transacoes_internas where id_transacao = $1 and id_usuario =$2', [id, id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+module.exports.DeleteTransacaoInterna = (id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('DELETE FROM transacoes_internas where id = $1', [id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+
+
+module.exports.DevolveComissao =  (idt, id_usuario, url_loja) => {
+    return new Promise(async(resolve, reject) => {
+
+        try {
+            const TranInterna = await module.exports.GetTransacaoInternaByIDTransacao(idt, id_usuario);
+            if (TranInterna) {
+                const LID = TranInterna.id;
+                const LValor = (TranInterna.valor_comissao * -1);
+                const LStatus = TranInterna.status;
+                if (LStatus == "PENDING") {
+                    const DeleteT = await module.exports.DeleteTransacaoInterna(LID);
+                    if (DeleteT == 1) {
+                        resolve(DeleteT);
+                    }
+                    else {
+                        reject(DeleteT);
+                    }
+                }
+                else if(LStatus == "PAID"){
+                    pool.query("UPDATE transacoes_internas set valor_comissao = $1 and status = 'PENDING' where id = $2 and id_transacao = $3", [LValor, LID, idt], (error, results) => {
+                        if (error) {
+                            throw error
+                        }
+                        resolve(1);
+                    })
+                }
+                
+            }
+            else {
+                resolve(-2);
+            }
+        } catch (error) {
+            reject(error);
+        }
+
+    })
+}
+
 module.exports.GetReportQtdPerDaySales = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -244,10 +315,10 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
 
 
 
-module.exports.insereTransacaoInterna = (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
+module.exports.insereTransacaoInterna = (idtr, data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway], (error, results) => {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, , id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -311,6 +382,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
             if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 1) {
                 mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
+                const LIDT = LRetornoPedido.id;
                 const LResponseGW = LRetornoPedido.json_gw_response;
                 const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
@@ -343,7 +415,8 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                             .then(async retornoShopify => {
                                 const RetornoShopifyJSON = retornoShopify.body;
                                 transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
-                                    .then((retornoInsereTransacao) => {
+                                    .then(async (retornoInsereTransacao) => {
+                                        const LDevolve = await module.exports.DevolveComissao(LIDT, id_usuario, LDadosLoja.url_loja);
                                         const response = {
                                             dataGateway: data.response,
                                             dataStore: RetornoShopifyJSON

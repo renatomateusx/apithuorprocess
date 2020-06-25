@@ -413,9 +413,10 @@ module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
       const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
       const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
       if (LDadosGateway.api_login != undefined && LDadosGateway.gateway == 3) {
-         const LFrontEnd = JSON.parse(LRetornoPedido.json_front_end_user_data);
-         const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-         const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+         const LIDT = LRetornoPedido.id;
+         const LFrontEnd = LRetornoPedido.json_front_end_user_data;
+         const LResponseGW = LRetornoPedido.json_gw_response;
+         const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
          const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
          const ValorRefund = valor || LResponseGW.transaction_details.total_paid_amount;
 
@@ -443,7 +444,7 @@ module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
          utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, undefined, undefined, "POST")
             .then(async (resRet) => {
 
-               const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 3)
+               const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 3, LIDT)
                res.status(200).send(LResponse);
 
 

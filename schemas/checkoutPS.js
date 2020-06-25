@@ -178,8 +178,9 @@ module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
         const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
         const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
         if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
-            const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-            const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+            const LIDT = LRetornoPedido.id;
+            const LResponseGW = LRetornoPedido.json_gw_response;
+            const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
             const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
             const ValorRefund = valor || LResponseGW.transaction_details.total_paid_amount;
 
@@ -201,10 +202,8 @@ module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
 
             utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
                 .then(async (resRet) => {
-                    const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2)
+                    const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2, LIDT)
                     res.status(200).send(LResponse);
-
-
                 })
                 .catch(error => {
                     console.log("Erro ao efetuar o Refound", error);

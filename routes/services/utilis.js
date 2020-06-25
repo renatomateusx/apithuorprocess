@@ -85,18 +85,18 @@ module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
         try {
             //console.log(to, subject, html);
             var transporter = nodemailer.createTransport({
-                host: constantes.HML_HOST_SMTP,
-                service: constantes.HML_HOST_SERVICE,
-                port: constantes.HML_PORT_SMTP,
+                host: constantes.HOST_SMTP,
+                service: constantes.HOST_SERVICE,
+                port: constantes.PORT_SMTP,
                 secure: false,
                 auth: {
-                    user: constantes.HML_USER_SMTP,
-                    pass: constantes.HML_PASS_SMTP
+                    user: constantes.USER_SMTP,
+                    pass: constantes.PASS_SMTP
                 }
             });
             if (arrayAttachments == null) { arrayAttachments = []; }
             var mailOptions = {
-                from: from || constantes.EMAIL_FROM,
+                from: from || constantes.NOME_FROM + '<'+constantes.EMAIL_FROM+'>',
                 to: to,
                 subject: subject,
                 attachments: arrayAttachments,
