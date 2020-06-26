@@ -53,7 +53,6 @@
                     cart: cartJSON
                 }                
                 postAxios(cartEndpoint, dataBody, function (resEndPoint) {
-                    console.log(resEndPoint);
                     var respCart = resEndPoint.data;
                     if(respCart.skip_cart == '0'){
                         document.getElementsByTagName("BODY")[0].style.display = 'block'; 
@@ -67,7 +66,7 @@
                         window.ThuorCheckoutUrl = respCart.urlCheckout;
 
 
-                        if ((respCart.skip_cart == 1 || respCart.skip_cart == '1') && respCart.urlCheckout != '') {
+                        if (respCart.active == "1" && (respCart.skip_cart == 1 || respCart.skip_cart == '1') && respCart.urlCheckout != '') {
                             // Limpa o carrinho do Shopify
                             postAjax('/cart/clear.js', JSON.stringify({}), function () {
                                 window.location = respCart.urlCheckout;

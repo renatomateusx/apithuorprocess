@@ -3,6 +3,7 @@ var jwt = require('jsonwebtoken');
 const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
+const utilisM = require('../routes/services/utilis');
 const format = require('string-format');
 const transacoes = require('./transacao');
 const clientes = require('../schemas/clientes');
@@ -146,7 +147,7 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     }
                     const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
                     const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
-                    const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
+                    utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                     //console.log(responseShopify);
                     res.status(200).send(responseShopify);
 
@@ -172,16 +173,17 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
 
 module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
     try {
-        const { shop, id_usuario, id, lvalue } = req.body;
+        const { shop, id_usuario, id, valor } = req.body;
         const LRetornoPedido = await transacoes.GetTransacoesByID_IDUsuario(shop, id_usuario, id);
 
         const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
         const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
         if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 2) {
-            const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-            const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+            const LIDT = LRetornoPedido.id;
+            const LResponseGW = LRetornoPedido.json_gw_response;
+            const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
             const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-            const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
+            const ValorRefund = valor || LResponseGW.transaction_details.total_paid_amount;
 
             var LRefund = {
                 "amount": {
@@ -201,10 +203,8 @@ module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
 
             utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LRefund, LHeaderKey, LHeaderValue, "POST")
                 .then(async (resRet) => {
-                    const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2)
+                    const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 2, LIDT)
                     res.status(200).send(LResponse);
-
-
                 })
                 .catch(error => {
                     console.log("Erro ao efetuar o Refound", error);

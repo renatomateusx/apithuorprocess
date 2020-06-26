@@ -59,7 +59,7 @@ async function processaConsultaMercadoPago() {
     try {
         const LTransacoes = await transacoes.GetTransacoesPendentesByGatewayINTERNAL(constantes.GATEWAY_MP);
         LTransacoes.forEach(async (objTransaction, i) => {
-
+            const LTid = objTransaction.id;
             const LFrontEnd = objTransaction.json_front_end_user_data;
             const LDadosCheckout = LFrontEnd.dadosCheckout;
             const LBackEnd = objTransaction.json_back_end_payment
@@ -87,7 +87,7 @@ async function processaConsultaMercadoPago() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
-                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_MP);
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_MP);
                         console.log(LTellShopify);
                         console.log(InsereTransacaoInterna);
                     }
@@ -107,7 +107,7 @@ async function processaConsultaPagSeguro() {
     try {
         const LTransacoes = await transacoes.GetTransacoesPendentesByGatewayINTERNAL(constantes.GATEWAY_PS);
         LTransacoes.forEach(async (objTransaction, i) => {
-
+            const LTid = objTransaction.id;
             const LFrontEnd = objTransaction.json_front_end_user_data;
             const LDadosCheckout = LFrontEnd.dadosCheckout;
             const LBackEnd = objTransaction.json_back_end_payment
@@ -136,7 +136,7 @@ async function processaConsultaPagSeguro() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
-                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PS);
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PS);
                     }
 
                 }
@@ -154,7 +154,7 @@ async function processaConsultaPayU() {
     try {
         const LTransacoes = await transacoes.GetTransacoesPendentesByGatewayINTERNAL(constantes.GATEWAY_PayU);
         LTransacoes.forEach(async (objTransaction, i) => {
-
+            const LTid = objTransaction.id;
             const LFrontEnd = objTransaction.json_front_end_user_data;
             const LBackEnd = objTransaction.json_back_end_payment
             const LDadosCheckout = LFrontEnd.dadosCheckout;
@@ -183,7 +183,7 @@ async function processaConsultaPayU() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
-                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PayU);
+                        const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PayU);
 
                     }
                 }

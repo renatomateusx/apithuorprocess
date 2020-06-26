@@ -19,7 +19,7 @@ module.exports = Object.freeze({
     WEBSITE_ACTIVATE_EMAIL: 'https://app.thuor.com/ativacao/',
     WEBSITE_ACTIVATE_RESET_SENHA: 'https://app.thuor.com/redefinir/',
     WEBSITE_CART: 'https://app.thuor.com/cart/items?',
-    WEBSITEAPI: 'https://api.thuor.com:7443/webhooks/webhooksshopify/rotas',
+    WEBSITEAPI: 'https://api.thuor.com:7443/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com:7443/webhooks/webhookpayu',
     // WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
     WEBSITECHECKOUT: 'https://app.thuor.com/cart/items?',
@@ -141,7 +141,8 @@ module.exports = Object.freeze({
     PORT_SMTP: '587',
     USER_SMTP: '1028cb1452db730d788e8839e5964d29',
     PASS_SMTP: '4b6b1c2c2932b278f8a94ce169d348db',
-    EMAIL_FROM: "no-replay@thuor.com",
+    EMAIL_FROM: "no-reply@thuor.com",
+    NOME_FROM: "Thuor",
     EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
 
     CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,
@@ -151,6 +152,8 @@ module.exports = Object.freeze({
     CONSTANTE_TESTES: true,
 
 
+    /* CANCELA BOLETO API MP */
+    END_POINT_CANCELA_BOLETO_API_MP: 'https://api.mercadopago.com/v1/advanced_payments/{ID}?access_token={TOKEN}',
 
 
 

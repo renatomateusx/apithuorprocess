@@ -25,6 +25,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                         const RetornoShopifyJSON = retornoShopify.body;
                         transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP, LJSON.dadosComprador.ttrack)
                             .then(async (retornoInsereTransacao) => {
+                                const IDTr = retornoInsereTransacao;
                                 const LDataProcess = moment().format();
                                 const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
                                 const LComissaoValue = 0.00;
@@ -34,7 +35,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                                     LPercentComission = parseFloat(LPercentComission);
                                     const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LJSON.dadosComprador.valor);
                                     LValorComissao = parseFloat(LValCom);
-                                    const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
+                                    const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(IDTr, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                 LJSON.dadosComprador.ordem_id = RetornoShopifyJSON;
@@ -170,7 +171,7 @@ module.exports.tellShopifyPaymentStatus = (PdadosLoja, PdadosComprador, Pshopify
 
 }
 
-module.exports.refoundShopify = (JSON, LDadosLoja, ItemsRefound, ValorRefund, GW) => {
+module.exports.refoundShopify = (JSON, LDadosLoja, ItemsRefound, ValorRefund, GW, IDTr) => {
     return new Promise(async (resolve, reject) => {
         try {
             var LRefoundShopify = {
@@ -199,7 +200,8 @@ module.exports.refoundShopify = (JSON, LDadosLoja, ItemsRefound, ValorRefund, GW
                 .then(async retornoShopify => {
                     const RetornoShopifyJSON = retornoShopify.body;
                     transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, GW, 'REEMBOLSADA')
-                        .then((retornoInsereTransacao) => {
+                        .then(async (retornoInsereTransacao) => {
+                            const LDevole = await transacoes.DevolveComissao(IDTr, id_usuario, LDadosLoja.url_loja, ValorRefund);
                             const response = {
                                 dataGateway: GW,
                                 dataStore: RetornoShopifyJSON

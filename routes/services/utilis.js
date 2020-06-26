@@ -85,18 +85,18 @@ module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
         try {
             //console.log(to, subject, html);
             var transporter = nodemailer.createTransport({
-                host: constantes.HML_HOST_SMTP,
-                service: constantes.HML_HOST_SERVICE,
-                port: constantes.HML_PORT_SMTP,
+                host: constantes.HOST_SMTP,
+                service: constantes.HOST_SERVICE,
+                port: constantes.PORT_SMTP,
                 secure: false,
                 auth: {
-                    user: constantes.HML_USER_SMTP,
-                    pass: constantes.HML_PASS_SMTP
+                    user: constantes.USER_SMTP,
+                    pass: constantes.PASS_SMTP
                 }
             });
             if (arrayAttachments == null) { arrayAttachments = []; }
             var mailOptions = {
-                from: from || constantes.EMAIL_FROM,
+                from: from || constantes.NOME_FROM + '<'+constantes.EMAIL_FROM+'>',
                 to: to,
                 subject: subject,
                 attachments: arrayAttachments,
@@ -176,7 +176,7 @@ function SendEmailBoleto(JSON_EMAIL, ordem, PJSON_LOJA) {
                 LHTML = LHTML.replace("{total}", JSON_EMAIL.valor);
                 LHTML = LHTML.replace("{ordem_id}", ordem);
                 var from = constantes.FROM_MAIL.replace("{nome_loja}", PJSON_LOJA.nome_loja).replace("{email_loja}", PJSON_LOJA.email_loja);
-                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.email, LTitulo, LHTML, arrayAttachments, from);
+                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.email, LTitulo, LHTML, arrayAttachments, PJSON_LOJA.nome_loja);
                 if (LRetornoMail == 1) {
                     //res.status(200).send('E-mail de redefinição enviado');
                     resolve(1);

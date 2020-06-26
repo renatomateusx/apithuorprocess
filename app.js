@@ -42,6 +42,7 @@ var mensageria = require('./routes/mensageria');
 var pixels = require('./routes/pixels');
 var clientes = require('./routes/clientes');
 var services_shipment = require('./routes/services/serviceShippments');
+var services_bulk_cancel = require('./routes/services/bulkCancelBoletos');
 var webhookshopify = require('./webhooks/webhookshopify');
 var cupons = require('./routes/cupons');
 var campanhas = require('./routes/integracaoCampanhas/campanhas');
@@ -54,6 +55,7 @@ var checkoutThuorComission = require('./routes/checkoutsThuorComission');
 var planos = require('./routes/planos');
 var mensalidades = require('./routes/mensalidades');
 var ajuda = require('./routes/ajuda');
+var meta = require('./routes/meta');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -103,6 +105,7 @@ app.use('/checkoutThuorComission', checkoutThuorComission);
 app.use('/planos', planos);
 app.use('/mensalidades', mensalidades);
 app.use('/ajuda', ajuda);
+app.use('/meta', meta);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
