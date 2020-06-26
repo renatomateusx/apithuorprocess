@@ -15,6 +15,8 @@ router.post('/GetProdutoByIDThuor', produtosSchema.GetProdutoByIDThuor);
 
 router.post('/GetProdutoIDThuor', produtosSchema.GetProdutoIDThuor);
 
+router.post('/GetProdutoByIDThuorUnique', produtosSchema.GetProdutoByIDThuorUnique);
+
 router.post('/GetProdutoByIDImported', produtosSchema.GetProdutoByIDImported);
 
 router.post('/GetProdutoByIDImportedCheckoutIndependente', produtosSchema.GetProdutoByIDImportedCheckoutIndependente);

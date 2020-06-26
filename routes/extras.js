@@ -5,38 +5,15 @@ var done = false;
 router.post('/ViaCEP', function (req, res, next) {
   try {
     let LCep = req.body.cep;
-    let URL = `https://viacep.com.br/ws/${LCep}/json/`;
+    let URL = `https://viacep.com.br/ws/${LCep}/json/unicode`;
     /* SE DEMORAR MAIS DE 5 SEGUNDOS, É PORQUE NENHUMA ESTÁ FUNCIONANDO. */
-    setTimeout(() => { if (done == false) { done = true; res.json(null); res.end(); } }, 5000);
     setTimeout(() => {
-      urlCEP2 = `http://cep.republicavirtual.com.br/web_cep.php?cep=${LCep}&formato=json`;
-      if (done == false) {
-        done = true;
-        utilis
-          .makeAPICallExternalHeadersCustom(urlCEP2, undefined, undefined)
-          .then(responseJSON => {
-
-            responseJSON = JSON.parse(responseJSON);
-            if (responseJSON.resultado == "1") {
-              var LCEP = {
-                "cep": responseJSON.cep,
-                "logradouro": responseJSON.tipo_logradouro + " " + responseJSON.logradouro,
-                "bairro": responseJSON.bairro,
-                "complemento": " ",
-                "localidade": responseJSON.cidade,
-                "uf": responseJSON.uf
-              }
-
-              res.json(LCEP);
-              res.end();
-            }
-
-          })
-          .catch(error => {
-            console.log('Erro ao pegar dados do Republica Virtual', error);
-          });
-      }
-    }, 2500);
+      
+        console.log("foi");
+        res.json(null);
+        res.end();
+      
+    }, 5000);
     utilis
       .makeAPICallExternal(URL)
       .then(responseJSON => {
@@ -51,11 +28,9 @@ router.post('/ViaCEP', function (req, res, next) {
           "ibge": responseJSON.ibge,
           "gia": responseJSON.gia
         }
-        if (done == false) {
-          done = true;
+
           res.json(LCEP);
           res.end();
-        }
       })
       .catch(error => {
         console.log('Erro ao pegar dados do VIACEP', error);

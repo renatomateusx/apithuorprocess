@@ -83,7 +83,6 @@ module.exports.SendMailMailJet = (to, subject, html, arrayAttachments, from) => 
 module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
     return new Promise((resolve, reject) => {
         try {
-            //console.log(to, subject, html);
             var transporter = nodemailer.createTransport({
                 host: constantes.HOST_SMTP,
                 service: constantes.HOST_SERVICE,
@@ -95,13 +94,16 @@ module.exports.SendMail = (to, subject, html, arrayAttachments, from) => {
                 }
             });
             if (arrayAttachments == null) { arrayAttachments = []; }
+            var fromM = from || constantes.NOME_FROM;
+            var emailFrom = fromM + constantes.EMAIL_FROM_TAG;
             var mailOptions = {
-                from: from || constantes.NOME_FROM + '<'+constantes.EMAIL_FROM+'>',
+                from: emailFrom,
                 to: to,
                 subject: subject,
                 attachments: arrayAttachments,
                 html: html
             };
+
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
                     console.log(error);
@@ -191,6 +193,7 @@ function SendEmailBoleto(JSON_EMAIL, ordem, PJSON_LOJA) {
 }
 module.exports.SendEmailBoleto = async (req, res, next) => {
     const {JSON_EMAIL, ordem} = req.body;
+   
     const LRetornoEmailBoleto = await SendEmailBoleto(JSON_EMAIL, ordem);
     res.json(LRetornoEmailBoleto);
 }

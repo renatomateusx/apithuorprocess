@@ -31,6 +31,23 @@ module.exports.GetProdutoByID = (req, res, next) => {
         res.end();
     }
 }
+
+module.exports.GetProdutoByIDThuorUnique = (req, res, next) => {
+    try {
+        const { id_produto } = req.body;
+
+        pool.query('SELECT * FROM produtos WHERE id_thuor = $1', [id_produto], (error, results) => {
+            if (error) {
+                throw error
+            }
+            res.status(200).json(results.rows[0])
+        })
+    } catch (error) {
+        res.json(error);
+        res.end();
+    }
+}
+
 function GetImageVariantID(variant, images) {
     return new Promise((resolve, reject) => {
         try {
