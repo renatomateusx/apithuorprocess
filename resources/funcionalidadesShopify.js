@@ -201,7 +201,7 @@ module.exports.refoundShopify = (JSON, LDadosLoja, ItemsRefound, ValorRefund, GW
                     const RetornoShopifyJSON = retornoShopify.body;
                     transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, GW, 'REEMBOLSADA')
                         .then(async (retornoInsereTransacao) => {
-                            const LDevole = await transacoes.DevolveComissao(IDTr, id_usuario, LDadosLoja.url_loja);
+                            const LDevole = await transacoes.DevolveComissao(IDTr, id_usuario, LDadosLoja.url_loja, ValorRefund);
                             const response = {
                                 dataGateway: GW,
                                 dataStore: RetornoShopifyJSON

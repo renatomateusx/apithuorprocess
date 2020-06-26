@@ -10,6 +10,8 @@ const moment = require('moment');
 const clientes = require('../schemas/clientes');
 const funcionalidadesShopify = require('../resources/funcionalidadesShopify');
 const checkoutsSchema = require('../schemas/checkouts');
+const utilisM = require('../routes/services/utilis');
+
 function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
    return new Promise(async (resolve, reject) => {
       try {

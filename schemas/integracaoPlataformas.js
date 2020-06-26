@@ -63,7 +63,7 @@ module.exports.AddIntegracaoShopifyCheckout = (req, res, next) => {
                 plataforma,
                 email_loja,
                 nome_loja,
-                +limpa_carrinho,
+            +limpa_carrinho,
                 url_person],
             (error, results) => {
                 if (error) {
@@ -325,56 +325,56 @@ module.exports.CartShopify = async (req, res, next) => {
     var status, url_loja, token, isShopify, clearCart, skipToCheckout;
     var produto_option_id = [], produto_option_quantity = [], produto_option_variante_id = [];
     const { shop, cart } = req.body;
-        
-        token = "shopify-" + cart.token;
-        var promises = [];
-        cart.items.forEach((obj, i) => {
-            promises.push(
-                new DeferredPromise()
-            )
-        })
-        var redirTo = ['cart', 'checkout'];
-        var RetornoShopify = null;
-        var produtoFinal = constantes.WEBSITECHECKOUT;
-        const dadosLoja = await getDadosLoja(shop);
-        status = dadosLoja.status;
-        url_loja = dadosLoja.url_loja;
-        skipToCheckout = dadosLoja.pula_carrinho || 0;
-        clearCart = dadosLoja.limpa_carrinho;
-        isShopify = 1;
 
-        produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length, url_loja);
-        cart.items.forEach(async (Item, i) => {
-            const cartItem = Item;
-            var produto_id = Item.product_id;
-            var ProdutoVariante;
-            const produto = await getDadosProduto(produto_id, cartItem.id);
-            ProdutoVariante = produto.variante_id;
-            produtoFinal = produtoFinal + await getURLProduto(produto.id_thuor, cartItem.quantity, ProdutoVariante, i);
-            promises[i].resolve();
-        });
-        Promise.all(promises)
-            .then(() => {
-                var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
-                var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
-                urlCart = urlCart.substr(0, urlCart.length - 1);
-                urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
-                //console.log("Prod", produtoFinal);
-                RetornoShopify = {
-                    "url": urlCart,
-                    "urlCheckout": urlCheckout,
-                    "active": status,
-                    "skip_cart": skipToCheckout,
-                    "clean_cart": clearCart
-                }
-                //console.log("ProdutoFinal", RetornoShopify);
-                res.json(RetornoShopify);
-                res.end();
-            })
-            .catch((error) => {
-                console.log("Error", error);
-            })
-    
+    token = "shopify-" + cart.token;
+    var promises = [];
+    cart.items.forEach((obj, i) => {
+        promises.push(
+            new DeferredPromise()
+        )
+    })
+    var redirTo = ['cart', 'checkout'];
+    var RetornoShopify = null;
+    var produtoFinal = constantes.WEBSITECHECKOUT;
+    const dadosLoja = await getDadosLoja(shop);
+    status = dadosLoja.status;
+    url_loja = dadosLoja.url_loja;
+    skipToCheckout = dadosLoja.pula_carrinho || 0;
+    clearCart = dadosLoja.limpa_carrinho;
+    isShopify = 1;
+
+    produtoFinal = produtoFinal + await getDadosAdicionaisUrlProduto(token, isShopify, clearCart, cart.items.length, url_loja);
+    cart.items.forEach(async (Item, i) => {
+        const cartItem = Item;
+        var produto_id = Item.product_id;
+        var ProdutoVariante;
+        const produto = await getDadosProduto(produto_id, cartItem.id);
+        ProdutoVariante = produto.variante_id;
+        produtoFinal = produtoFinal + await getURLProduto(produto.id_thuor, cartItem.quantity, ProdutoVariante, i);
+        promises[i].resolve();
+    });
+    Promise.all(promises)
+        .then(() => {
+            var urlCart = produtoFinal = produtoFinal + format("redirectTo={}&", redirTo[0]);
+            var urlCheckout = produtoFinal = produtoFinal.replace('redirectTo=cart', 'redirectTo=checkout');
+            urlCart = urlCart.substr(0, urlCart.length - 1);
+            urlCheckout = urlCheckout.substr(0, urlCheckout.length - 1);
+            //console.log("Prod", produtoFinal);
+            RetornoShopify = {
+                "url": urlCart,
+                "urlCheckout": urlCheckout,
+                "active": status,
+                "skip_cart": skipToCheckout,
+                "clean_cart": clearCart
+            }
+            //console.log("ProdutoFinal", RetornoShopify);
+            res.json(RetornoShopify);
+            res.end();
+        })
+        .catch((error) => {
+            console.log("Error", error);
+        })
+
 }
 
 
@@ -621,55 +621,64 @@ module.exports.WebHookShopify = async (req, res, next) => {
         var HSha256 = req.headers['x-shopify-hmac-sha256'];
         var HShop = req.headers['x-shopify-shop-domain'];
         var HVersion = req.headers['x-shopify-api-version'];
-        //////console.log(HTopic, HShop);
-        getDadosLoja(HShop)
-            .then((LDadosLoja) => {
-                const LBody = req.body;
-                if (HTopic == 'products/create') {
-                    req.body.id_produto_json = LBody.id;
-                    req.body.json_dados_produto = LBody;
-                    req.body.titulo_produto = LBody.title;
-                    req.body.id_usuario = LDadosLoja.id_usuario;
-                    produtos.AddProduto(req, res, next);
+        console.log(HTopic, HShop, HVersion);
+        if (HTopic && HShop) {
+            getDadosLoja(HShop)
+                .then((LDadosLoja) => {
+                    const LBody = req.body;
+                    if (HTopic == 'products/create') {
+                        req.body.id_produto_json = LBody.id;
+                        req.body.json_dados_produto = LBody;
+                        req.body.titulo_produto = LBody.title;
+                        req.body.id_usuario = LDadosLoja.id_usuario;
+                        produtos.AddProduto(req, res, next);
 
-                }
-                if (HTopic == 'products/update') {
-                    req.body.id_produto_json = LBody.id;
-                    req.body.json_dados_produto = LBody;
-                    req.body.titulo_produto = LBody.title;
-                    req.body.id_usuario = LDadosLoja.id_usuario;
-                    produtos.UpdateProduto(req, res, next);
+                    }
+                    if (HTopic == 'products/update') {
+                        req.body.id_produto_json = LBody.id;
+                        req.body.json_dados_produto = LBody;
+                        req.body.titulo_produto = LBody.title;
+                        req.body.id_usuario = LDadosLoja.id_usuario;
+                        produtos.UpdateProduto(req, res, next);
 
-                }
-                if (HTopic == 'orders/create' || HTopic == 'orders/update') {
-                    console.log("Orders", HTopic);
-                    LBody.orders.forEach((obj, i) => {
+                    }
+                    if (HTopic == 'orders/create' || HTopic == 'orders/update') {
+                        console.log("Orders", HTopic);
+                        const obj = LBody;
                         req.body.email = obj.email;
-                        req.body.telefone = obj.phone;
-                        obj.fulfillments.forEach((objF, i) => {
-                            req.body.order_id = obj.id;
-                            req.body.fulfillment_id = objF.id;
-                            req.body.json_shopify_order = objF;
-                            req.body.data = objF.created_at;
-                            req.body.updated = objF.updated_at;
-                            req.body.status = 0;
-                            //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
-                            //////fulfillments.SaveFulFillment(req, res, next);
-                            transacoes.UpdateTransacaoShopifyOrder(req, res, next);
-                        })
+                        if (obj.phone) {
+                            req.body.telefone = obj.phone;
+                        }
+                        if (obj.fulfillments) {
+                            if (obj.fulfillments.length > 0) {
+                                obj.fulfillments.forEach((objF, i) => {
+                                    req.body.order_id = obj.id;
+                                    req.body.fulfillment_id = objF.id;
+                                    req.body.json_shopify_order = obj;
+                                    req.body.data = obj.created_at;
+                                    req.body.updated = obj.updated_at;
+                                    req.body.status = 0;
+                                    //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
+                                    //////fulfillments.SaveFulFillment(req, res, next);
+                                    transacoes.UpdateTransacaoShopifyOrder(req, res, next);
+                                })
+                            }
+                        }
+                    }
+                    res.status(200).send('Ok!');
+                    res.end();
+                })
+                .catch((error) => {
+                    console.log("Erro ao pegar dados da Loja", error);
+                    res.status(500).send('Erro ao receber dados do webhook ' + error);
+                    res.end();
+                })
 
-                    })
-                }
-                res.status(200).send('Ok!');
-                res.end();
-            })
-            .catch((error) => {
-                console.log("Erro ao pegar dados da Loja", error);
-                res.status(500).send('Erro ao receber dados do webhook ' + error);
-                res.end();
-            })
-
-
+        }
+        else {
+            res.status(200).send('Erro ao receber dados do webhook ' + error);
+            res.end();
+        }
         // pool.query('UPDATE integracoes_plataformas SET limpa_carrinho=$3 where id_usuario = $1 and plataforma=$2 and id=$4', [id_usuario, plataforma, limpa_carrinho, id], (error, results) => {
         //     if (error) {
         //         throw error

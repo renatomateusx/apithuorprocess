@@ -3,6 +3,7 @@ var jwt = require('jsonwebtoken');
 const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
+const utilisM = require('../routes/services/utilis');
 const format = require('string-format');
 const transacoes = require('./transacao');
 const clientes = require('../schemas/clientes');

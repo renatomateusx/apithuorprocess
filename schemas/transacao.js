@@ -7,7 +7,8 @@ const format = require('string-format');
 const fulfillments = require('../schemas/fulfillments');
 const moment = require('moment');
 const constantes = require('../resources/constantes');
-
+const users = require('../schemas/users');
+const planos = require('../schemas/planos');
 module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -90,15 +91,20 @@ module.exports.DeleteTransacaoInterna = (id) => {
 
 
 
-module.exports.DevolveComissao =  (idt, id_usuario, url_loja) => {
-    return new Promise(async(resolve, reject) => {
+module.exports.DevolveComissao = (idt, id_usuario, url_loja, valor) => {
+    return new Promise(async (resolve, reject) => {
 
         try {
             const TranInterna = await module.exports.GetTransacaoInternaByIDTransacao(idt, id_usuario);
             if (TranInterna) {
                 const LID = TranInterna.id;
-                const LValor = (TranInterna.valor_comissao * -1);
+                var LValor = (TranInterna.valor_comissao * -1);
                 const LStatus = TranInterna.status;
+                const LFrontEnd = TranInterna.json_front_end_user_data;
+                const LBackEnd = TranInterna.json_back_end_payment;
+                const LGWResp = TranInterna.json_gw_response;
+                const GW = TranInterna.gateway;
+
                 if (LStatus == "PENDING") {
                     const DeleteT = await module.exports.DeleteTransacaoInterna(LID);
                     if (DeleteT == 1) {
@@ -108,15 +114,23 @@ module.exports.DevolveComissao =  (idt, id_usuario, url_loja) => {
                         reject(DeleteT);
                     }
                 }
-                else if(LStatus == "PAID"){
-                    pool.query("UPDATE transacoes_internas set valor_comissao = $1 and status = 'PENDING' where id = $2 and id_transacao = $3", [LValor, LID, idt], (error, results) => {
-                        if (error) {
-                            throw error
+                else if (LStatus == "PAID") {
+                    const LData = moment().format();
+                    const UsuarioDado = await users.GetUserByIDInternal(id_usuario);
+                    const LPlano = await planos.GetUserByIDInternalByID(UsuarioDado.plano);
+                    if (valor != undefined) {
+                        if (valor > 0 && valor < LValor) {
+                            const lvalor = (parseFloat(LFrontEnd.dadosComprador.valor) - parseFloat(valor));
+                            var LPercentComission = LPlano.json.addon.replace("%", "");
+                            LPercentComission = parseFloat(LPercentComission);
+                            const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
+                            LValor = parseFloat(LValCom);
                         }
-                        resolve(1);
-                    })
+                    }
+                    const LResolve = await module.exports.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LGWResp, 'PENDING', LValor, GW);
+                    resolve(LResolve);
                 }
-                
+
             }
             else {
                 resolve(-2);
@@ -416,7 +430,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                                 const RetornoShopifyJSON = retornoShopify.body;
                                 transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
                                     .then(async (retornoInsereTransacao) => {
-                                        const LDevolve = await module.exports.DevolveComissao(LIDT, id_usuario, LDadosLoja.url_loja);
+                                        const LDevolve = await module.exports.DevolveComissao(LIDT, id_usuario, LDadosLoja.url_loja, valor);
                                         const response = {
                                             dataGateway: data.response,
                                             dataStore: RetornoShopifyJSON

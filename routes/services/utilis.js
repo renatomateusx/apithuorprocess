@@ -176,7 +176,7 @@ function SendEmailBoleto(JSON_EMAIL, ordem, PJSON_LOJA) {
                 LHTML = LHTML.replace("{total}", JSON_EMAIL.valor);
                 LHTML = LHTML.replace("{ordem_id}", ordem);
                 var from = constantes.FROM_MAIL.replace("{nome_loja}", PJSON_LOJA.nome_loja).replace("{email_loja}", PJSON_LOJA.email_loja);
-                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.email, LTitulo, LHTML, arrayAttachments, from);
+                const LRetornoMail = await module.exports.SendMail(JSON_EMAIL.email, LTitulo, LHTML, arrayAttachments, PJSON_LOJA.nome_loja);
                 if (LRetornoMail == 1) {
                     //res.status(200).send('E-mail de redefinição enviado');
                     resolve(1);
