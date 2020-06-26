@@ -6,7 +6,9 @@ const utilis = require('../resources/util');
 const format = require('string-format');
 const fulfillments = require('../schemas/fulfillments');
 const moment = require('moment');
-
+const constantes = require('../resources/constantes');
+const users = require('../schemas/users');
+const planos = require('../schemas/planos');
 module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -24,6 +26,22 @@ module.exports.GetTransacoes = (req, res, next) => {
     }
 }
 
+module.exports.GetTransacoesPendentes = () => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query("select * from transacoes where status = 'PENDING'", (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
 module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
     try {
         const { shop, id_usuario } = req.body;
@@ -38,6 +56,90 @@ module.exports.GetPagamentosEfetuadosPorSeller = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.GetTransacaoInternaByIDTransacao = (id, id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM transacoes_internas where id_transacao = $1 and id_usuario =$2', [id, id_usuario], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows[0]);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+module.exports.DeleteTransacaoInterna = (id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('DELETE FROM transacoes_internas where id = $1', [id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+
+
+module.exports.DevolveComissao = (idt, id_usuario, url_loja, valor) => {
+    return new Promise(async (resolve, reject) => {
+
+        try {
+            const TranInterna = await module.exports.GetTransacaoInternaByIDTransacao(idt, id_usuario);
+            if (TranInterna) {
+                const LID = TranInterna.id;
+                var LValor = (TranInterna.valor_comissao * -1);
+                const LStatus = TranInterna.status;
+                const LFrontEnd = TranInterna.json_front_end_user_data;
+                const LBackEnd = TranInterna.json_back_end_payment;
+                const LGWResp = TranInterna.json_gw_response;
+                const GW = TranInterna.gateway;
+
+                if (LStatus == "PENDING") {
+                    const DeleteT = await module.exports.DeleteTransacaoInterna(LID);
+                    if (DeleteT == 1) {
+                        resolve(DeleteT);
+                    }
+                    else {
+                        reject(DeleteT);
+                    }
+                }
+                else if (LStatus == "PAID") {
+                    const LData = moment().format();
+                    const UsuarioDado = await users.GetUserByIDInternal(id_usuario);
+                    const LPlano = await planos.GetUserByIDInternalByID(UsuarioDado.plano);
+                    if (valor != undefined) {
+                        if (valor > 0 && valor < LValor) {
+                            const lvalor = (parseFloat(LFrontEnd.dadosComprador.valor) - parseFloat(valor));
+                            var LPercentComission = LPlano.json.addon.replace("%", "");
+                            LPercentComission = parseFloat(LPercentComission);
+                            const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
+                            LValor = parseFloat(LValCom);
+                        }
+                    }
+                    const LResolve = await module.exports.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LGWResp, 'PENDING', LValor, GW);
+                    resolve(LResolve);
+                }
+
+            }
+            else {
+                resolve(-2);
+            }
+        } catch (error) {
+            reject(error);
+        }
+
+    })
 }
 
 module.exports.GetReportQtdPerDaySales = (req, res, next) => {
@@ -89,6 +191,22 @@ module.exports.SetPaymentComissionDone = (req, res, next) => {
     } catch (error) {
         res.json(error);
     }
+}
+
+module.exports.CancelaBoleto = (id, jsonGW, id_usuario) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query("UPDATE transacoes SET status = 'CANCELED', json_gw_response = $1 WHERE id_usuario = $2 and id = $3", [jsonGW, id_usuario, id], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(0)
+        }
+    })
+
 }
 
 
@@ -191,7 +309,7 @@ module.exports.GetTransacoesByID_IDUsuario = (shop, id_usuario, id) => {
 module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if(!track || track == undefined){
+            if (!track || track == undefined) {
                 track = 0;
             }
             pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway, ttrack) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track], (error, results) => {
@@ -211,10 +329,10 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
 
 
 
-module.exports.insereTransacaoInterna = (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
+module.exports.insereTransacaoInterna = (idtr, data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway], (error, results) => {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, , id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -268,7 +386,7 @@ async function getItemsRefound(items) {
 
 module.exports.ReembolsarPedidoByID = (req, res, next) => {
     try {
-        const { shop, id_usuario, id } = req.body;
+        const { shop, id_usuario, id, valor } = req.body;
         pool.query('SELECT * FROM transacoes where url_loja = $1 and id_usuario =$2 and id=$3', [shop, id_usuario, id], async (error, results) => {
             if (error) {
                 throw error
@@ -278,8 +396,9 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
             if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 1) {
                 mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
-                const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-                const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+                const LIDT = LRetornoPedido.id;
+                const LResponseGW = LRetornoPedido.json_gw_response;
+                const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
 
                 mercadopago.payment.refund(LResponseGW.id)
@@ -295,7 +414,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                                 "refund_line_items": ItemsRefound,
                                 "transactions": [
                                     {
-                                        "amount": LResponseGW.transaction_details.total_paid_amount,
+                                        "amount": valor || LResponseGW.transaction_details.total_paid_amount,
                                         "kind": "refund",
                                         "gateway": "MP"
                                     }
@@ -310,7 +429,8 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
                             .then(async retornoShopify => {
                                 const RetornoShopifyJSON = retornoShopify.body;
                                 transacoes.updateTransacao(id_usuario, LDadosLoja.url_loja, data.response, 'reembolsada')
-                                    .then((retornoInsereTransacao) => {
+                                    .then(async (retornoInsereTransacao) => {
+                                        const LDevolve = await module.exports.DevolveComissao(LIDT, id_usuario, LDadosLoja.url_loja, valor);
                                         const response = {
                                             dataGateway: data.response,
                                             dataStore: RetornoShopifyJSON

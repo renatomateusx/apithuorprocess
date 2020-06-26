@@ -10,6 +10,8 @@ const moment = require('moment');
 const clientes = require('../schemas/clientes');
 const funcionalidadesShopify = require('../resources/funcionalidadesShopify');
 const checkoutsSchema = require('../schemas/checkouts');
+const utilisM = require('../routes/services/utilis');
+
 function insereTransacao(id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway) {
    return new Promise(async (resolve, reject) => {
       try {
@@ -86,7 +88,7 @@ module.exports.DoPay = (req, res, next) => {
                LJSON.dadosComprador.data = moment().format('YYYY-MM-DD HH:mm:ss');
                LJSON.dadosComprador.id_transacao = json.paymentResponse.transactionResponse.orderId;
                LJSON.dadosComprador.id_transacao_payu = json.paymentResponse.transactionResponse.transactionId;
-               LJSON.dadosComprador.valorParcela = (parseFloat(LJSON.dadosComprador.valor.amount.summary.paid.replace(',', '.')) / parseInt(LJSON.dadosComprador.parcela));
+               LJSON.dadosComprador.valorParcela = (parseFloat(LJSON.dadosComprador.valor.amount.summary.paid) / parseInt(LJSON.dadosComprador.parcela));
                var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, json.paymentResponse, LJSON.paymentData, 'paid', constantes.GATEWAY_PayU);
                var plataformasResponse = {
                   shopify: responseShopify,
@@ -134,7 +136,7 @@ module.exports.DoPay = (req, res, next) => {
                }
                const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
                const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
-               const LEmail = await utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
+               utilisM.SendEmailBoletoInternal(LDadosComprador, LDadosLoja);
                res.status(200).send(responseShopify);
 
             }
@@ -407,17 +409,18 @@ module.exports.CheckStatusBoleto = (idTransaction, LDadosCheckout) => {
 
 module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
    try {
-      const { shop, id_usuario, id, lvalue } = req.body;
+      const { shop, id_usuario, id, valor } = req.body;
       const LRetornoPedido = await transacoes.GetTransacoesByID_IDUsuario(shop, id_usuario, id);
 
       const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
       const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
       if (LDadosGateway.api_login != undefined && LDadosGateway.gateway == 3) {
-         const LFrontEnd = JSON.parse(LRetornoPedido.json_front_end_user_data);
-         const LResponseGW = JSON.parse(LRetornoPedido.json_gw_response);
-         const LResponseMKTPlace = JSON.parse(LRetornoPedido.json_shopify_response);
+         const LIDT = LRetornoPedido.id;
+         const LFrontEnd = LRetornoPedido.json_front_end_user_data;
+         const LResponseGW = LRetornoPedido.json_gw_response;
+         const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
          const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-         const ValorRefund = lvalue || LResponseGW.transaction_details.total_paid_amount;
+         const ValorRefund = valor || LResponseGW.transaction_details.total_paid_amount;
 
          var LRefund = {
             "language": "pt",
@@ -443,7 +446,7 @@ module.exports.ReembolsarPedidoPayUByID = async (req, res, next) => {
          utilis.makeAPICallExternalParamsJSON(Lurl, "", LRefund, undefined, undefined, "POST")
             .then(async (resRet) => {
 
-               const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 3)
+               const LResponse = await funcionalidadesShopify.refoundShopify(LResponseGW, LDadosLoja, ItemsRefound, ValorRefund, 3, LIDT)
                res.status(200).send(LResponse);
 
 

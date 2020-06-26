@@ -14,7 +14,7 @@ module.exports.DoPay = (req, res, next) => {
         const { pay } = req.body;
         console.log("Pay", pay);
         
-        mercadopago.configurations.setAccessToken(constantes.SAND_BOX_MP_ACCESS_TOKEN);        
+        mercadopago.configurations.setAccessToken(constantes.PRODUCAO_BOX_MP_ACCESS_TOKEN);        
         mercadopago.payment.save(pay)
             .then(async function (data) {
                 const DataResponse = data.response;
