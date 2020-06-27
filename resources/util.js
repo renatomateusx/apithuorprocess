@@ -114,9 +114,11 @@ module.exports.makeAPICallExternalHeadersCustom = function (url, headerAdditiona
     var Lheader = {
       'Content-Type': 'application/json'
     };
-    headerAdditional.forEach((obj, i) => {
-      Lheader[obj] = valueHeaderAditional[i];
-    })
+    if (headerAdditional) {
+      headerAdditional.forEach((obj, i) => {
+        Lheader[obj] = valueHeaderAditional[i];
+      })
+    }
     request(
       {
         headers: Lheader,

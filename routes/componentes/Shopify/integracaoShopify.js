@@ -183,6 +183,20 @@ function getTemplateThuorSnippet() {
   });
 }
 
+function getTemplateThuorPopUpSnippet() {
+  return new Promise((resolve, reject) => {
+    try {
+      var pathFile = pathWay.join(__dirname, '../../../public/templateThuorPopUpSnippet.text');
+
+      var data = fileSystem.readFileSync(pathFile, 'utf8');
+      resolve(data.toString());
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 function getTemplateThuorCrossSellSnippet() {
   return new Promise((resolve, reject) => {
     try {
@@ -266,9 +280,102 @@ function processaTemas(req, res, next, url, path, headerAditional, valueHeaderAd
                           utilis.makeAPICallExternalHeaders(url, LThemeLiquid, body, headerAditional, valueHeaderAditional)
                             .then(retornoGetThemeLiquid => {
                               var LRet = JSON.parse(retornoGetThemeLiquid);
-                              var OLDValue = LRet.asset.value.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT, '</body>');
+                              var OLDValue = LRet.asset.value;
+                              OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT, '');
                               OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT_YAMPI, "");
-                              var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT);
+                              var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_THEME_LIQUID_EDIT_CONTENT + "</body>");
+                              var LThemeEdited = {
+                                "asset": {
+                                  "key": 'layout/theme.liquid',
+                                  "value": LNewHTMLValue
+                                }
+                              }
+                              //CHAMA API PARA ESCREVER O NOVO VALUR INCLUINDO A CHAMADA DO SNIPPET TO THUOR NO ARQUIVO THEME.LIQUID
+                              utilis.makeAPICallExternalParamsJSON(url, PathAsset, LThemeEdited, headerAditional, valueHeaderAditional, 'PUT')
+                                .then(retornoEdicaoArquivo => {
+                                  resolve({ mensagem: retornoEdicaoArquivo });
+                                })
+                                .catch(error => {
+                                  console.log("Erro ao EDITAR O ARQUIVO THEME.LIQUID ", error);
+                                })
+
+                            })
+                            .catch(error => {
+                              console.log("Error", error);
+                            })
+                        })
+                        .catch(error => {
+                          console.log("Error", error);
+                        })
+                    })
+                    .catch(error => {
+                      console.log("Error", error);
+                    })
+                })
+                .catch((error) => {
+                  console.log("Erro ao pegar o template ThuorSnippet", error);
+                })
+
+            }
+
+          });
+          //res.end();
+        })
+        .catch(error => {
+          console.log("Erro ao processar temas", error);
+        })
+    }
+    catch (error) {
+      reject(error);
+    }
+  })
+
+}
+
+function processaTemasAppPopUp(req, res, next, url, path, headerAditional, valueHeaderAditional) {
+  return new Promise((resolve, reject) => {
+    try {
+      utilis.makeAPICallExternalHeaders(url, path, headerAditional, valueHeaderAditional)
+        .then(retorno => {
+          //console.log("WebHook Criado ", url + path);
+          var LTemas = JSON.parse(retorno);
+
+          LTemas.themes.forEach((tema, i) => {
+            if (tema.role === "main") {
+              getTemplateThuorPopUpSnippet()
+                .then((retornoTemplate) => {
+
+                  var LThemeID = tema.id;
+                  var LAssets = "assets.json";
+                  var PathAsset = path.replace(".json", "") + "/" + LThemeID + "/" + LAssets;
+                  var body = {
+                    "asset": {
+                      "key": '' + constantes.RESOURCE_THUOR_SPNIPPET_APP_POPUP_LIQUID + '',
+                      "value": retornoTemplate
+                    }
+                  }
+                  //CHAMA FUNÇÃO PARA CRIAR O ARQUIVO ThuorSnippet.liquid
+                  utilis.makeAPICallExternalParamsJSON(url, PathAsset, body, headerAditional, valueHeaderAditional, 'PUT')
+                    .then(retornoAssets => {
+                      //res.json({ mensagem: retornoAssets });
+                      //https://kingofertas.myshopify.com/admin/api/2020-04/themes/95439847483/assets.json?asset[key]=layout/theme.liquid
+                      var LThemeLiquid = PathAsset + "?asset[key]=" + constantes.RESOURCE_THUOR_THEME_LIQUID;
+                      var LThemeBak = {
+                        "asset": {
+                          "key": 'layout/theme_edited_by_thuor_for_app_pop_up.liquid',
+                          "source_key": "layout/theme.liquid"
+                        }
+                      }
+                      ///CHAMA API PARA FAZER BACKUP DO THEME.LIQUID             
+                      utilis.makeAPICallExternalParamsJSON(url, PathAsset, LThemeBak, headerAditional, valueHeaderAditional, 'PUT')
+                        .then(retornoBackup => {
+                          // res.json({ mensagem: retornoBackup });
+                          utilis.makeAPICallExternalHeaders(url, LThemeLiquid, body, headerAditional, valueHeaderAditional)
+                            .then(retornoGetThemeLiquid => {
+                              var LRet = JSON.parse(retornoGetThemeLiquid);
+                              var OLDValue = LRet.asset.value;
+                              OLDValue = OLDValue.replace(constantes.RESOURCE_THUOR_POP_UP_THEME_LIQUID_EDIT_CONTENT, '');
+                              var LNewHTMLValue = OLDValue.replace('</body>', constantes.RESOURCE_THUOR_POP_UP_THEME_LIQUID_EDIT_CONTENT + "</body>");
                               var LThemeEdited = {
                                 "asset": {
                                   "key": 'layout/theme.liquid',
@@ -492,6 +599,47 @@ router.post('/ReInstalarIntegracao', function (req, res, next) {
   }
 });
 
+router.post('/InstalarAppPopUp', function (req, res, next) {
+  try {
+    const { id_usuario } = req.body;
+    req.body.id = id_usuario;
+    usuario.GetUserByID(req, res, next)
+      .then(userInfo => {
+        req.body.id_usuario = id_usuario;
+        integracaoShopify.GetIntegracaoShopifyCheckout(req, res, next)
+          .then(async integraShopify => {
+            const url_loja = integraShopify[0].url_loja;
+            const chave_api_key = integraShopify[0].chave_api_key;
+            const senha = integraShopify[0].senha;
+            const segredo_compartilhado = integraShopify[0].segredo_compartilhado;
+            const versao = constantes.VERSAO_API;
+            const resourceWebHooks = constantes.RESOURCE_WEBHOOKS;
+            const resourceTemas = constantes.RESOURCE_TEMAS;
+
+            //url = "https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json";
+            const url = format("https://{}:{}@{}", chave_api_key, senha, url_loja);
+            const path = format("/admin/api/{}/{}.json", versao, resourceWebHooks)
+            var headerAditional = "X-Shopify-Access-Token";
+            var valueHeaderAditional = senha;
+            var PathTemas = format("/admin/api/{}/{}.json", versao, resourceTemas);
+            const LProcessThemes = await processaTemasAppPopUp(req, res, next, url, PathTemas, headerAditional, valueHeaderAditional);
+            res.json({ mensagem: 'Aplicação Instalada' });
+          })
+          .catch(error => {
+            console.log("Erro ao pegar dados da integração com o checkout da shopify", error);
+          })
+
+      })
+      .catch(error => {
+        console.log("Erro ao capturar o usuário pelo ID", error);
+        reject(error);
+      })
+
+  } catch (error) {
+    res.json(error);
+    res.end();
+  }
+});
 
 router.post('/InstalarAppReview', function (req, res, next) {
   try {

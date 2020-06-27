@@ -1,16 +1,39 @@
 var express = require('express');
 var router = express.Router();
 var utilis = require('../resources/util');
-
-router.post('/ViaCEP', function(req, res, next) {
+var done = false;
+router.post('/ViaCEP', function (req, res, next) {
   try {
-    res.json(null);
     let LCep = req.body.cep;
-    let URL = `https://viacep.com.br/ws/${LCep}/json/`;
+    let URL = `https://viacep.com.br/ws/${LCep}/json/unicode`;
+    /* SE DEMORAR MAIS DE 5 SEGUNDOS, É PORQUE NENHUMA ESTÁ FUNCIONANDO. */
+    setTimeout(() => {
+      if (done == false) {
+        console.log("foi");
+        done = true;
+        res.json(null);
+        res.end();
+      }
+    }, 5000);
     utilis
       .makeAPICallExternal(URL)
       .then(responseJSON => {
-        // res.json(responseJSON);
+        var LCEP = {
+          "cep": responseJSON.cep,
+          "logradouro": responseJSON.logradouro,
+          "complemento": responseJSON.complemento,
+          "bairro": responseJSON.bairro,
+          "localidade": responseJSON.localidade,
+          "uf": responseJSON.uf,
+          "unidade": responseJSON.unidade,
+          "ibge": responseJSON.ibge,
+          "gia": responseJSON.gia
+        }
+        if (done == false) {
+          done = true;
+          res.json(LCEP);
+          res.end();
+        }
       })
       .catch(error => {
         console.log('Erro ao pegar dados do VIACEP', error);

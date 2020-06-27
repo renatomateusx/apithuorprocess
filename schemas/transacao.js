@@ -1,5 +1,4 @@
 var pool = require('../db/queries');
-const mercadopago = require("mercadopago");
 var integracaoShopify = require('./integracaoPlataformas');
 var checkoutsSchema = require('./checkouts');
 const utilis = require('../resources/util');
@@ -395,13 +394,15 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
             const LDadosLoja = await integracaoShopify.GetDadosLojaInternal(shop);
             const LDadosGateway = await checkoutsSchema.GetCheckoutAtivoInternal(req, res, next);
             if (LDadosGateway.token_acesso != undefined && LDadosGateway.gateway == 1) {
-                mercadopago.configurations.setAccessToken(LDadosGateway.token_acesso);
                 const LIDT = LRetornoPedido.id;
                 const LResponseGW = LRetornoPedido.json_gw_response;
                 const LResponseMKTPlace = LRetornoPedido.json_shopify_response;
                 const ItemsRefound = await getItemsRefound(LResponseMKTPlace.order.line_items);
-
-                mercadopago.payment.refund(LResponseGW.id)
+                const URL = constantes.API_MP_REFOUND.replace("{id}", LResponseGW.id).replace('{token}', LDadosGateway.token_acesso);
+                const LRefound = {                   
+                    "amount": valor || LRetornoPedido.json_front_end_user_data.dadosComprador.valor
+                }
+                utilis.makeAPICallExternalParamsJSON(URL, '', LRefound, undefined, undefined, 'POST')
                     .then(async function (data) {
                         var LRefoundShopify = {
                             "refund": {
