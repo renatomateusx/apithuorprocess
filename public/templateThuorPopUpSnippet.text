@@ -1,0 +1,160 @@
+<script>
+//var ULR_BASE = "http://localhost:3000/";
+var ULR_BASE = "https://api.thuor.com:7443/";
+var LSTYLE_TEMPLATEpop = '.imgProd{object-fit:contain;width:10rem!important}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
+var LTEMPLATEpop = ' <div class="row card card-default mt-5"> <div class="col-xl-12"> <div class="card b "> <div class="card-header "> <div class="float-right mt-2"> <div class="badge badge-info">Thuor PopUp</div></div><h4 class="col-xl-12 mt-2 float-left pull-left text-justify p-0"><span>{title}</span></h4> </div><div class="card-body row bb bt grid-item col-lg-12"> <a href="#" class="inline col-lg-12 float-center text-center"> <img class="float-center pull-center avatar imgProd" src="{image}" alt="{link}" class="rounded-circle thumb48"></a> <div class="col-lg-12 text-center"><strong><a target="_blank" href="{link}">{titulo_produto}</a></strong></div></div><div class="card-body grid-item col-xl-12 text-justify"> <p>{texto}</p></div></div></div></div>';
+var END_POINT_GET_APP_POPUP_BY_USER_ID = ULR_BASE + 'apps/GetIntegracaoApps'
+var END_POINT_GET_DADOS_APP_CHECKOUT = ULR_BASE + 'checkouts/GetCheckoutAtivo'
+var URL_END_POINT_GET_DADOS_LOJA = ULR_BASE + "integracaoShopify/GetDadosLoja";
+var URL_END_POINT_GET_CROSS_SELL = ULR_BASE + "crosssells/GetCrossSellByStorePageOrCartPage";
+var URL_END_POINT_GET_ID_THUOR_BY_ID_PRODUTO = ULR_BASE + "crosssells/";
+var URL_END_POINT_GET_PRODUTO_BY_ID_THUOR = ULR_BASE + "produtos/GetProdutoIDThuor";
+var currentPage = '{{ template.name }}';
+var id_produto = '{{product.id}}';
+var mouseX = 0;
+var mouseY = 0;
+var popupCounter = 0;
+var isShowing = false;
+var LocalDadosPopUpGeral = null;
+var arrayCSSs =
+    [
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css' },
+        { script: './styleck.css' },
+        { script: 'https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css' }
+    ];
+
+var arrayScripts =
+    [
+        { script: 'https://unpkg.com/axios/dist/axios.min.js', trigger: 0 },
+        { script: 'https://code.jquery.com/jquery-3.2.1.slim.min.js', trigger: 0 },
+        { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js', trigger: 0 },
+        { script: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', trigger: 0 },
+        { script: 'https://use.fontawesome.com/aa8f958ac7.js', trigger: 0 },
+        { script: 'https://kit.fontawesome.com/2ecd77a85b.js', trigger: 0 }
+    ];
+
+
+async function initializeFunctionPOP() {
+    const LShop = window.location.host;
+    /*currentPage = "index";*/
+    const LBody = {
+        shop: LShop
+    }
+    var arrayProdutos = [];
+    if (currentPage == "index" || currentPage == "product") {
+        postAxios(URL_END_POINT_GET_DADOS_LOJA, LBody, (response) => {
+            // currentPage
+            const DadosLoja = response.data;
+            postAxios(END_POINT_GET_APP_POPUP_BY_USER_ID, { id_usuario: DadosLoja.id_usuario, app: 10 }, (responseC) => {
+                const LDadosPopUp = responseC.data;
+                LocalDadosPopUpGeral = LDadosPopUp;
+                    /*
+                    console.log(LDadosPopUp);
+                    showPopUP(LDadosPopUp);*/
+                
+            });
+        })
+    }
+}
+
+function postAxios(url, data, success) {
+    axios.post(url, data)
+        .then(function (response) {
+            success(response);
+        })
+        .catch(function (error) {
+            console.log('Erro ao executar Axios', error);
+        });
+}
+
+function formatPrice(value) {
+    let val = (value / 1).toFixed(2).replace(".", ",");
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function showPopUP(PDadosPopUp) {
+    if (PDadosPopUp) {
+        if(PDadosPopUp.status == 1){
+            const HTML = LTEMPLATEpop.replace(/{title}/g, PDadosPopUp.propriedades.titulo).replace(/{image}/g, PDadosPopUp.propriedades.image).replace(/{titulo_produto}/g, PDadosPopUp.propriedades.titulo_produto).replace(/{texto}/g, PDadosPopUp.propriedades.texto).replace(/{link}/g, "https://"+PDadosPopUp.propriedades.link);
+            if (!isShowing) {
+
+                Swal.fire({
+                    title: '',
+                    icon: 'info',
+                    html: HTML,
+                    showCloseButton: true,
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    focusConfirm: false,
+                    confirmButtonText: '',
+                    onBeforeOpen: () => {
+                        isShowing = true;
+                    },
+                    onClose: () => {
+                        isShowing = false;
+                    }
+                })
+            }
+        }
+    }
+}
+
+$(document).ready(function () {
+    var self = this;
+    arrayCSSs.forEach((obj, i) => {
+        var link = document.createElement('link');
+        link.id = i;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = obj.script;
+        link.media = 'all';
+        document.head.appendChild(link);
+    });
+    arrayScripts.forEach((obj, i) => {
+        let script = document.createElement("script");
+        script.type = 'text/javascript';
+
+        script.setAttribute(
+            "src",
+            obj.script
+        );
+
+        if (obj.trigger == 1) {
+            script.onload = function () {
+                obj.call;
+            }
+        }
+        document.head.appendChild(script);
+    });
+
+    $(document).mouseleave(function () {
+        showPopUP(LocalDadosPopUpGeral);
+    });
+    document.addEventListener("beforeunload", function () {
+        alert("certeza?");
+        showPopUP(LocalDadosPopUpGeral);
+    })
+
+
+});
+function initializeCSSpop() {
+    var head = document.head || document.getElementsByTagName('head')[0],
+        style = document.createElement('style');
+
+    head.appendChild(style);
+
+    style.type = 'text/css';
+    if (style.styleSheet) {
+        // This is required for IE8 and below.
+        style.styleSheet.cssText = LSTYLE_TEMPLATEpop;
+    } else {
+        style.appendChild(document.createTextNode(LSTYLE_TEMPLATEpop));
+    }
+}
+window.onload = function () {
+    initializeCSSpop();
+    initializeFunctionPOP();
+}
+</script>

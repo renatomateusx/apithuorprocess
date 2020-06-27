@@ -1,6 +1,5 @@
 var pool = require('../db/queries');
 var jwt = require('jsonwebtoken');
-const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');
@@ -13,27 +12,20 @@ module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
         console.log("Pay", pay);
-        
-        mercadopago.configurations.setAccessToken(constantes.PRODUCAO_BOX_MP_ACCESS_TOKEN);        
-        mercadopago.payment.save(pay)
+        const URL = constantes.API_MP_PAYMENT.replace('{token}', LJSON.dadosCheckout.token_acesso)
+        utilis.makeAPICallExternalParamsJSON(URL, '', paymentData, undefined, undefined, 'POST')
             .then(async function (data) {
-                const DataResponse = data.response;
+                const DataResponse = JSON.parse(data.body);
                 ///console.log(data.response);
-                if (data.response.status == 'approved') {
-                    pay.data = data.response.date_created;
-                    pay.id_transacao = data.response.id;
-                    pay.valorParcela = data.response.transaction_details.installment_amount;
-                    // var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, data.response.status, constantes.GATEWAY_MP);
-                    // var plataformasResponse = {
-                    //     shopify: responseShopify,
-                    //     woo: 'notYet',
-                    // }                    
-
-                    res.status(200).send(data.response);
+                if (DataResponse.status == 'approved') {
+                    pay.data = DataResponse.date_created;
+                    pay.id_transacao = DataResponse.id;
+                    pay.valorParcela = DataResponse.transaction_details.installment_amount;
+                    res.status(200).send(DataResponse);
                 }
                 else {
-                    console.log("Response", data.response);
-                    res.status(200).send(data.response);
+                    console.log("Response", DataResponse);
+                    res.status(200).send(DataResponse);
                 }
 
             }).catch(function (error) {
