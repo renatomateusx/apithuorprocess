@@ -1,6 +1,5 @@
 var pool = require('../db/queries');
 var jwt = require('jsonwebtoken');
-const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const format = require('string-format');

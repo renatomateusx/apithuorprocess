@@ -8,11 +8,12 @@ router.post('/ViaCEP', function (req, res, next) {
     let URL = `https://viacep.com.br/ws/${LCep}/json/unicode`;
     /* SE DEMORAR MAIS DE 5 SEGUNDOS, É PORQUE NENHUMA ESTÁ FUNCIONANDO. */
     setTimeout(() => {
-      
+      if (done == false) {
         console.log("foi");
+        done = true;
         res.json(null);
         res.end();
-      
+      }
     }, 5000);
     utilis
       .makeAPICallExternal(URL)
@@ -28,9 +29,11 @@ router.post('/ViaCEP', function (req, res, next) {
           "ibge": responseJSON.ibge,
           "gia": responseJSON.gia
         }
-
+        if (done == false) {
+          done = true;
           res.json(LCEP);
           res.end();
+        }
       })
       .catch(error => {
         console.log('Erro ao pegar dados do VIACEP', error);

@@ -1,6 +1,5 @@
 var pool = require('../db/queries');
 var jwt = require('jsonwebtoken');
-const mercadopago = require("mercadopago");
 const constantes = require('../resources/constantes');
 const utilis = require('../resources/util');
 const utilisM = require('../routes/services/utilis');
@@ -155,9 +154,10 @@ module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
+        
         ///console.log("Pay", LJSON);
         if (LJSON.dadosCheckout.gateway == 1) {
-            mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
+            const URL = constantes.API_MP_PAYMENT.replace('{token}', LJSON.dadosCheckout.token_acesso)
             var paymentData = {
                 transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
                 token: LJSON.paymentData.token,
@@ -167,14 +167,14 @@ module.exports.DoPay = (req, res, next) => {
                 payer: LJSON.paymentData.payer
             }
             console.log("paymentData", paymentData);
-            mercadopago.payment.save(paymentData)
+            utilis.makeAPICallExternalParamsJSON(URL, '', paymentData, undefined, undefined, 'POST')
                 .then(async function (data) {
-                    const DataResponse = data.response;
-                    ///console.log(data.response);
-                    if (data.response.status == 'approved') {
-                        LJSON.dadosComprador.data = data.response.date_created;
-                        LJSON.dadosComprador.id_transacao = data.response.id;
-                        LJSON.dadosComprador.valorParcela = data.response.transaction_details.installment_amount;
+                    const DataResponse = JSON.parse(data.body);
+                    ///console.log(DataResponse);
+                    if (DataResponse.status == 'approved') {
+                        LJSON.dadosComprador.data = DataResponse.date_created;
+                        LJSON.dadosComprador.id_transacao = DataResponse.id;
+                        LJSON.dadosComprador.valorParcela = DataResponse.transaction_details.installment_amount;
                         var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'paid', constantes.GATEWAY_MP);
                         var plataformasResponse = {
                             shopify: responseShopify,
@@ -183,7 +183,7 @@ module.exports.DoPay = (req, res, next) => {
                         res.status(200).send(responseShopify);
                     }
                     else {
-                        console.log("Response", data.response);
+                        console.log("Response", DataResponse);
                         res.status(422).send("Pagamento não realizado, tente novamente");
                     }
 
@@ -209,10 +209,10 @@ module.exports.DoPayTicket = (req, res, next) => {
     try {
         const { pay } = req.body;
         const LJSON = JSON.parse(Buffer.from(pay, 'base64').toString());
+        const URL = constantes.API_MP_PAYMENT.replace('{token}', LJSON.dadosCheckout.token_acesso)
 
-        mercadopago.configurations.setAccessToken(LJSON.dadosCheckout.token_acesso);
         var FirstLastName = LJSON.dadosComprador.nome_completo.split(" ");
-        
+        // console.log(LJSON.dadosCheckout.token_acesso);
         var paymentData = {
             transaction_amount: parseFloat(LJSON.paymentData.transaction_amount),
             description: LJSON.paymentData.description,
@@ -235,16 +235,18 @@ module.exports.DoPayTicket = (req, res, next) => {
                 }
             }
         }
-        mercadopago.payment.create(paymentData)
+        utilis.makeAPICallExternalParamsJSON(URL, '', paymentData, undefined, undefined, 'POST')
             .then(async function (data) {
-                const DataResponse = data.response;
-                LJSON.dadosComprador.barcode = data.response.barcode.content;
-                LJSON.dadosComprador.urlBoleto = data.response.transaction_details.external_resource_url;
-                LJSON.dadosComprador.vencimentoBoleto = data.response.date_of_expiration;
-                LJSON.dadosComprador.data = data.response.date_created;
-                LJSON.dadosComprador.id_transacao = data.response.id;
+                
+                const DataResponse = JSON.parse(data.body);
+                /*console.log(DataResponse);*/
+                LJSON.dadosComprador.barcode = DataResponse.barcode.content;
+                LJSON.dadosComprador.urlBoleto = DataResponse.transaction_details.external_resource_url;
+                LJSON.dadosComprador.vencimentoBoleto = DataResponse.date_of_expiration;
+                LJSON.dadosComprador.data = DataResponse.date_created;
+                LJSON.dadosComprador.id_transacao = DataResponse.id;
                 //console.log(LJSON.dadosComprador);
-                if (data.response.status == 'pending') {
+                if (DataResponse.status == 'pending') {
                     var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'pending', constantes.GATEWAY_MP);
                     const LDadosComprador = responseShopify.dadosComprador.dadosComprador;
                     const LDadosLoja = responseShopify.dadosComprador.dadosLoja;
@@ -256,7 +258,7 @@ module.exports.DoPayTicket = (req, res, next) => {
                     res.status(200).send(responseShopify);
                 }
                 else {
-                    console.log("Response", data.response);
+                    console.log("Response", DataResponse);
                     res.status(422).send("Pagamento não realizado, tente novamente");
                 }
 
