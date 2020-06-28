@@ -11,12 +11,12 @@ const funcionalidadesShpify = require('../resources/funcionalidadesShopify');
 module.exports.DoPay = (req, res, next) => {
     try {
         const { pay } = req.body;
-        console.log("Pay", pay);
-        const URL = constantes.API_MP_PAYMENT.replace('{token}', LJSON.dadosCheckout.token_acesso)
-        utilis.makeAPICallExternalParamsJSON(URL, '', paymentData, undefined, undefined, 'POST')
+        pay.capture = false;
+        const URL = constantes.API_MP_PAYMENT.replace('{token}', constantes.PRODUCAO_BOX_MP_ACCESS_TOKEN);
+        utilis.makeAPICallExternalParamsJSON(URL, '', pay, undefined, undefined, 'POST')
             .then(async function (data) {
                 const DataResponse = JSON.parse(data.body);
-                ///console.log(data.response);
+                console.log(DataResponse);
                 if (DataResponse.status == 'approved') {
                     pay.data = DataResponse.date_created;
                     pay.id_transacao = DataResponse.id;
