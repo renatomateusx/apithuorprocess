@@ -214,7 +214,7 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
                                         obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                                     });
                                     console.log("Vou enviar EMail");
-                                    const LReturnEmail = await utilisEmail.SendMail('renatomateusx@gmail.com', LSubject, LHTML, arrayAttachments);
+                                    const LReturnEmail = await utilisEmail.SendMail('renatomateusx@gmail.com', LSubject, LHTML, arrayAttachments, DadosLoja.nome_loja);
                                     console.log("Enviei EMail", LReturnEmail);
                                     if (LReturnEmail) {
                                         console.log("Email Enviado");
