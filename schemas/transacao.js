@@ -228,7 +228,7 @@ module.exports.GetTransacoesInternas = (req, res, next) => {
 module.exports.GetTransacoesInternasPorLoja = (req, res, next) => {
     try {
         const data_processar = moment().format('YYYY-MM-DD');
-        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 ORDER BY id_usuario ASC", [data_processar], (error, results) => {
+        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar <= $1 ORDER BY id_usuario ASC", [data_processar], (error, results) => {
             if (error) {
                 throw error
             }
