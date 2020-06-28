@@ -37,10 +37,10 @@ var server = http.createServer(app);
 
 /* COMENTAR ABAIXO PARA USAR LOCALMENTE */
 // var privateKey = fs
-//   .readFileSync(path.resolve('../../../../conf/web/ssl.api.thuor.com.key'))
+//   .readFileSync(path.resolve(__dirname,'../../../../conf/web/ssl.api.thuor.com.key'))
 //   .toString();
 // var certificate = fs
-//   .readFileSync(path.resolve('../../../../conf/web/ssl.api.thuor.com.pem'))
+//   .readFileSync(path.resolve(__dirname,'../../../../conf/web/ssl.api.thuor.com.pem'))
 //   .toString();
 // var options = {key: privateKey, cert: certificate};
 // var ssl_server = https.createServer(options, function(req, res) {
