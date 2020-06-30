@@ -1,5 +1,5 @@
 var pool = require('../db/queries');
-
+const LNoImage = 'https://app.thuor.com/img/no-image.png';
 module.exports.GetProdutos = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -51,7 +51,10 @@ module.exports.GetProdutoByIDThuorUnique = (req, res, next) => {
 function GetImageVariantID(variant, images) {
     return new Promise((resolve, reject) => {
         try {
-            var imgSRC = images[0].src;
+            var imgSRC = LNoImage;
+            if(images.length > 0){
+                imgSRC = images[0].src;
+            }           
             for (let img of images) {
                 if (img.variant_ids.length > 0) {
                     //var imgs = img.variant_ids.indexOf(variant);
