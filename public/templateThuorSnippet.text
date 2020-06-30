@@ -1,4 +1,3 @@
-]
 <script src="https://unpkg.com/axios/dist/axios.min.js" view="item"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" view="item"></script>
 {% if template.name == 'product' %}
@@ -44,7 +43,7 @@
     }
 
     if (currentPage == 'cart') {
-            document.getElementsByTagName("BODY")[0].style.display = 'none';
+            /*document.getElementsByTagName("BODY")[0].style.display = 'none';*/
       		showThuorLoader();
             getAjax('/cart.json', function (res) {
                 var cartJSON = JSON.parse(res);
