@@ -64,7 +64,7 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                                             obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                                         });
 
-                                        const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments);
+                                        const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments, LLoja.nome_loja);
                                         if (LRetornoMail == 1) {
                                             const LUltimoEmailEnviado = moment().format();
                                             const LCampanhaEmailEnviada = resCampanha.id;

@@ -12,7 +12,7 @@ module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
         console.log(id_usuario);
-        pool.query('SELECT * FROM transacoes where id_usuario =$1', [id_usuario], (error, results) => {
+        pool.query('SELECT * FROM transacoes where id_usuario =$1 order by data desc', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
@@ -212,7 +212,7 @@ module.exports.CancelaBoleto = (id, jsonGW, id_usuario) => {
 module.exports.GetTransacoesInternas = (req, res, next) => {
     try {
         const LHoje = moment().format("YYYY-MM-DD");
-        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc ", [hoje], (error, results) => {
+        pool.query("SELECT  data_processar, id_usuario, plano_usuario, url_loja, status, gateway, SUM (CAST(valor_comissao AS DOUBLE PRECISION)) as comissao FROM transacoes_internas WHERE status = 'PENDING' and data_processar <= $1 GROUP BY data_processar, id_usuario, plano_usuario, url_loja, status, gateway ORDER BY id_usuario asc ", [LHoje], (error, results) => {
             if (error) {
                 throw error
             }
@@ -228,7 +228,7 @@ module.exports.GetTransacoesInternas = (req, res, next) => {
 module.exports.GetTransacoesInternasPorLoja = (req, res, next) => {
     try {
         const data_processar = moment().format('YYYY-MM-DD');
-        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar = $1 ORDER BY id_usuario ASC", [data_processar], (error, results) => {
+        pool.query("SELECT * FROM transacoes_internas WHERE status = 'PENDING' and data_processar <= $1 ORDER BY id_usuario ASC", [data_processar], (error, results) => {
             if (error) {
                 throw error
             }
@@ -331,7 +331,7 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
 module.exports.insereTransacaoInterna = (idtr, data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, , id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
                 if (error) {
                     throw error
                 }

@@ -1,5 +1,5 @@
 var pool = require('../db/queries');
-
+const LNoImage = 'https://app.thuor.com/img/no-image.png';
 module.exports.GetProdutos = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
@@ -51,7 +51,10 @@ module.exports.GetProdutoByIDThuorUnique = (req, res, next) => {
 function GetImageVariantID(variant, images) {
     return new Promise((resolve, reject) => {
         try {
-            var imgSRC = images[0].src;
+            var imgSRC = LNoImage;
+            if(images.length > 0){
+                imgSRC = images[0].src;
+            }           
             for (let img of images) {
                 if (img.variant_ids.length > 0) {
                     //var imgs = img.variant_ids.indexOf(variant);
@@ -357,7 +360,7 @@ module.exports.AddProduto = (req, res, next) => {
             var custom_frete = '0';
 
 
-            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma) SELECT $1, $2, $3, $4, $5, $6, $7, $8 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE id_produto_json = $1);', [id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma], (error, results) => {
+            pool.query('INSERT INTO produtos (id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma) VALUES( $1, $2, $3, $4, $5, $6, $7, $8 ) ON CONFLICT (id_produto_json) DO UPDATE SET id_produto_json =$1, json_dados_produto=$2', [id_produto_json, json_dados_produto, titulo_produto, id_usuario, status, tipo_produto, custom_frete, plataforma], (error, results) => {
                 if (error) {
                     throw error
                 }

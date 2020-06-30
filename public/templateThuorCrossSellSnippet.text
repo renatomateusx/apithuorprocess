@@ -10,10 +10,10 @@ var END_POINT_GET_APP_PARCEL_BY_USER_ID_CS = URL_BASE_CS + 'apps/GetIntegracaoAp
 var END_POINT_GET_DADOS_APP_CHECKOUT_CS = URL_BASE_CS + 'checkouts/GetCheckoutAtivo'
 var URL_END_POINT_GET_DADOS_LOJA_CS = URL_BASE_CS + "integracaoShopify/GetDadosLoja";
 var URL_END_POINT_GET_CROSS_SELL_CS = URL_BASE_CS + "crosssells/GetCrossSellByStorePageOrCartPage";
-var URL_END_POINT_GET_ID_THUOR_BY_ID_PRODUTO_CS = URL_BASE_CS + "crosssells/";
+var URL_END_POINT_GET_ID_THUOR_BY_id_produto_cs_CS = URL_BASE_CS + "crosssells/";
 var URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS = URL_BASE_CS + "produtos/GetProdutoIDThuor";
-var currentPage = '{{ template.name }}';
-var id_produto = '{{product.id}}';
+var currentPageCS = '{{ template.name }}';
+var id_produto_cs = '{{product.id}}';
 var arrayCSSsCS =
     [
         { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
@@ -40,26 +40,26 @@ async function initializeFunctionCS() {
         LDoc.insertAdjacentHTML("beforeend", LPRINCIPAL_TEMPLATE_CS);
     
     const LShop = window.location.host;
-    id_produto = 4789136097339;
-    currentPage = 'cart';
+    id_produto_cs = 4789136097339;
+    currentPageCS = 'cart';
     const LBody = {
         shop: 'kingofertas.myshopify.com'
     }
     var arrayProdutos = [];
     postAxiosCS(URL_END_POINT_GET_DADOS_LOJA_CS, LBody, (response) => {
-        // currentPage
+        // currentPageCS
         const DadosLoja = response.data;
-        postAxiosCS(URL_END_POINT_GET_CROSS_SELL_CS, { id_produto: id_produto, id_usuario: DadosLoja.id_usuario }, (responseC) => {
+        postAxiosCS(URL_END_POINT_GET_CROSS_SELL_CS, { id_produto_cs: id_produto_cs, id_usuario: DadosLoja.id_usuario }, (responseC) => {
             const LDadosCrossSell = responseC.data;
             if (LDadosCrossSell) {
 
-                if (currentPage == 'cart') {
+                if (currentPageCS == 'cart') {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 2);
                     if (LCS) {
-                        const LProdsArray = LCS.id_produto_to.split(',');
+                        const LProdsArray = LCS.id_produto_cs_to.split(',');
                         if (LProdsArray) {
                             LProdsArray.forEach((objProds, i) => {
-                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto: objProds }, (responseProds) => {
+                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
                                     preencheTemplateCS(responseProds.data);
                                 });
                             });
@@ -67,13 +67,13 @@ async function initializeFunctionCS() {
                         }
                     }
                 }
-                if (currentPage == 'product') {
+                if (currentPageCS == 'product') {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 1);
                     if (LCS) {
-                        const LProdsArray = LCS.id_produto_to.split(',');
+                        const LProdsArray = LCS.id_produto_cs_to.split(',');
                         if (LProdsArray) {
                             LProdsArray.forEach((objProds, i) => {
-                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto: objProds }, (responseProds) => {
+                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
                                     preencheTemplateCS(responseProds.data);
                                 });
                             });

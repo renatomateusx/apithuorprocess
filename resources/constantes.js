@@ -11,6 +11,7 @@ module.exports = Object.freeze({
     API_PS: 'https://sandbox.api.pagseguro.com/{}',
     API_PAYU: 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
     API_PAYU_REPORT: 'https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi',
+    CONSTANTE_APPROVED_MP: 'approved',
 
     SAND_BOX_MP_PUBLICK_KEY: 'TEST-855e506f-55a1-4372-8371-f9029f000dfe',
     SAND_BOX_MP_ACCESS_TOKEN: 'TEST-4338451460338304-062723-f2a8d25a06742e898d2b113a30045269-128404654',
