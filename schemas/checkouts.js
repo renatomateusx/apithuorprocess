@@ -181,16 +181,28 @@ module.exports.DoPay = (req, res, next) => {
                 .then(async function (data) {
                     const DataResponse = JSON.parse(data.body);
                     ///console.log(DataResponse);
-                    if (DataResponse.status == 'approved') {
-                        LJSON.dadosComprador.data = DataResponse.date_created;
-                        LJSON.dadosComprador.id_transacao = DataResponse.id;
-                        LJSON.dadosComprador.valorParcela = DataResponse.transaction_details.installment_amount;
-                        var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'paid', constantes.GATEWAY_MP);
-                        var plataformasResponse = {
-                            shopify: responseShopify,
-                            woo: 'notYet',
+                    if (DataResponse.status == constantes.CONSTANTE_APPROVED_MP) {
+                        const URL_CONSULTA = constantes.API_MP.replace('{id}', DataResponse.id).replace('{token}', LJSON.dadosCheckout.token_acesso);
+                        const Wait = await module.exports.Wait(3000);
+                        const LRetornoConsulta = await module.exports.GetStatusFromOrder(URL_CONSULTA);
+                        if (LRetornoConsulta.status != undefined) {
+                            if (LRetornoConsulta.status == constantes.CONSTANTE_APPROVED_MP) {
+                                LJSON.dadosComprador.data = DataResponse.date_created;
+                                LJSON.dadosComprador.id_transacao = DataResponse.id;
+                                LJSON.dadosComprador.valorParcela = DataResponse.transaction_details.installment_amount;
+                                var responseShopify = await funcionalidadesShpify.enviaOrdemShopify(LJSON, DataResponse, paymentData, 'paid', constantes.GATEWAY_MP);
+                                var plataformasResponse = {
+                                    shopify: responseShopify,
+                                    woo: 'notYet',
+                                }
+                                res.status(200).send(responseShopify);
+                            } else {
+                                res.status(422).send("Pagamento não realizado, tente novamente");
+                            }
+                        } else {
+                            res.status(422).send("Pagamento não realizado, tente novamente");
                         }
-                        res.status(200).send(responseShopify);
+
                     }
                     else {
                         console.log("Response", DataResponse);
@@ -213,6 +225,37 @@ module.exports.DoPay = (req, res, next) => {
         res.json(error);
         res.end();
     }
+}
+
+module.exports.Wait = (seconds) => {
+    return new Promise((resolve, reject) => {
+        try {
+            setTimeout(function () {
+                resolve(1);
+            }, seconds);
+        }
+        catch (error) {
+            reject(error);
+        }
+    })
+}
+
+module.exports.GetStatusFromOrder = (URL) => {
+    return new Promise((resolve, reject) => {
+        try {
+            utilis.makeAPICallExternalParamsJSON(URL, '', '', undefined, undefined, 'GET')
+                .then(async function (data) {
+                    const DataResponse = JSON.parse(data.body);
+                    resolve(DataResponse);
+                })
+                .catch((error) => {
+                    console.log("Erro", error);
+                })
+        }
+        catch (error) {
+            reject(error);
+        }
+    });
 }
 
 module.exports.DoPayTicket = (req, res, next) => {

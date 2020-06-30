@@ -12,7 +12,7 @@ module.exports.GetTransacoes = (req, res, next) => {
     try {
         const { id_usuario } = req.body;
         console.log(id_usuario);
-        pool.query('SELECT * FROM transacoes where id_usuario =$1', [id_usuario], (error, results) => {
+        pool.query('SELECT * FROM transacoes where id_usuario =$1 order by data desc', [id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
@@ -331,7 +331,7 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
 module.exports.insereTransacaoInterna = (idtr, data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, , id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
                 if (error) {
                     throw error
                 }
