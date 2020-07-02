@@ -67,24 +67,25 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
     return new Promise(async (resolve, reject) => {
         try {
             const LProd = Pjson.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
+            var DadosBoleto = {};
+            if (Pjson.dadosComprador.urlBoleto) {
+                DadosBoleto = {
+                    "name": "URL Boleto",
+                    "value": Pjson.dadosComprador.urlBoleto
+                }
+            }
             const LShopifyOrder = {
                 "order": {
                     "line_items": LProd,
                     "customer": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
-                        "email": Pjson.dadosComprador.email
+                        "email": Pjson.dadosComprador.email,
+                        "phone": Pjson.dadosComprador.telefone
                     },
-                    "billing_address": {
-                        "first_name": Pjson.dadosComprador.nome_completo,
-                        "last_name": "",
-                        "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
-                        "city": Pjson.dadosComprador.cidade,
-                        "province": Pjson.dadosComprador.estado,
-                        "country": "Brasil",
-                        "zip": Pjson.dadosComprador.cep
-                    },
+                    "note_attributes": [
+                        DadosBoleto
+                    ],
                     "shipping_address": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
@@ -114,6 +115,8 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
         }
     });
 }
+
+
 
 
 module.exports.tellShopifyPaymentStatus = (PdadosLoja, PdadosComprador, PshopifyOrder, teste, status, gateway) => {
