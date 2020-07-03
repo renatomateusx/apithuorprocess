@@ -86,6 +86,16 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                     "note_attributes": [
                         DadosBoleto
                     ],
+                    "billing_address": {
+                        "first_name": Pjson.dadosComprador.nome_completo,
+                        "last_name": "",
+                        "address1": Pjson.dadosComprador.endereco,
+                        "phone": Pjson.dadosComprador.telefone,
+                        "city": Pjson.dadosComprador.cidade,
+                        "province": Pjson.dadosComprador.estado,
+                        "country": "Brasil",
+                        "zip": Pjson.dadosComprador.cep
+                    },
                     "shipping_address": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
