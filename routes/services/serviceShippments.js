@@ -22,43 +22,50 @@ rules.minute = 0;
 rules.second = 1
 
 var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
-    fulfillments.GetFulFillmentList()
-        .then((resFul) => {
-            resFul.forEach(async (obj, i) => {
+fulfillments.GetFulFillmentList()
+    .then((resFul) => {
+        resFul.forEach(async (obj, i) => {
+            //console.log(obj)
+            const order_id = obj.order_id;
+            const id_usuario = obj.id_usuario;
+            const id = obj.id;
+            const fulfillment_id = obj.fulfillment_id;
+            const email = obj.email;
+            const statusText = obj.status_text || '';
+            const telefone = obj.telefone;
+            const tracking_number = obj.tracker_number;
+            var last_updated = "";
+            const actualDate = moment().format();
+            last_updated = moment(obj.last_updated).format();
+            const diff = moment(actualDate).diff(last_updated);
+            const duration = moment.duration(diff);
+            var LDescriptionCheckPoint = "";
+            var LDateCheckPoint = "";
+            var LStatusCheckPoint = "";
+            var LDetailCheckPoint = "";
+            var self = this;
+            const DadosLoja = await loja.GetLojaByUsuario(id_usuario);
+            var LSIT = " está chegando!";
+            var statusShip = 'PENDING';
+            var LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
+            var days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT;
+            var continua = true;
+            if (duration.asHours() >= 12) {
 
-                const order_id = obj.order_id;
-                const id_usuario = obj.id_usuario;
-                const id = obj.id;
-                const fulfillment_id = obj.fulfillment_id;
-                const email = obj.email;
-                const statusText = obj.status_text || '';
-                const telefone = obj.telefone;
-                const tracking_number = obj.json_shipments.tracking_number;
-                var last_updated = "";
-                const actualDate = moment().format();
-                last_updated = moment(obj.last_updated).format();
-                const diff = moment(actualDate).diff(last_updated);
-                const duration = moment.duration(diff);
-                var LDescriptionCheckPoint = "";
-                var LDateCheckPoint = "";
-                var LStatusCheckPoint = "";
-                var LDetailCheckPoint = "";
-                var self = this;
-                const DadosLoja = await loja.GetLojaByUsuario(id_usuario);
-                var LSIT = " está chegando!";
-                var statusShip = 'PENDING';
-                var LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
-                var days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT;
                 //console.log('diff', duration.asHours());
-                if (duration.asHours() >= 23) {
-
-                    //console.log('diff', duration.asHours());
-                    // console.log(tracking_number);
-                    const awa = await utilisEmail.sleep(25000);
-                    const LReturn = await logistica.TrackingCodeInternalNinja(tracking_number);
-                    if (div.indexOf("aduaneira finalizadaa") > -1) {
-                        days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS;
-                    }
+                const awa = await utilisEmail.sleep(5000);
+                const LReturn = await logistica.TrackingCodeInternalNinja(tracking_number);
+                
+                if (LReturn.indexOf("aduaneira finalizada") > -1) {
+                    days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS;
+                }
+                if (LReturn.indexOf("erro") > -1) {
+                    continua = false;
+                }
+                if (LReturn.indexOf("rastreio digitado ainda não é aceito em nosso sistema") > -1) {
+                    continua = false;
+                }
+                if (continua == true) {
                     const dom = new JSDOM(LReturn);
                     const item = dom.window.document.getElementsByClassName("year")[0].textContent;
                     var itemDate = item.split('/');
@@ -71,11 +78,11 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
                             if (statusText != status) {
                                 if (status.includes("entregue")) {
                                     LSIT = " foi ENTREGUE!";
-                                    statusShip = "DELIVERED"
+                                    statusShip = "ENTREGUE"
                                     LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO_ENTREGUE;
                                 } else {
                                     LSIT = " está chegando";
-                                    statusShip = "PENDING";
+                                    statusShip = "EM TRÂNSITO";
                                     LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
                                 }
                                 //
@@ -109,7 +116,7 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
                                         console.log("Enviei EMail", LReturnEmail);
                                         if (LReturnEmail) {
                                             console.log("Email Enviado");
-                                            const updateFulFillment = await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusShip, moment().format(), statusTracker);
+                                            const updateFulFillment =2// await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusShip, moment().format(), statusTracker);
                                             if (updateFulFillment) {
                                             }
                                             else {
@@ -124,30 +131,18 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
 
                     }
                     /* AQUI TERMINA */
-
                 }
-                var LDataProximo = moment()
-                    .add({ days: days })
-                    .format();
-                const LUpdateProximoPagamento = await fulfillments.UpdateStatusFulFillmentInternalProximaConsulta(id_usuario, id, LDataProximo);
-            });
-        })
-        .catch((error) => {
-            console.log("Erro ao pegar o fulfillment", error);
-        })
-    // console.log('Serviço de Shipment Rodando!', moment().format('HH:mm:ss'));
-
-
-
-
-
-
-
-
-
-
-
-
+            }
+            var LDataProximo = moment()
+                .add({ days: days })
+                .format();
+            const LUpdateProximoPagamento = await fulfillments.UpdateStatusFulFillmentInternalProximaConsulta(id_usuario, id, LDataProximo);
+        });
+    })
+    .catch((error) => {
+        console.log("Erro ao pegar o fulfillment", error);
+    })
+    console.log('Serviço de Shipment Rodando!', moment().format('DD-MM-YYYY HH:mm:ss'));
 
 });
 

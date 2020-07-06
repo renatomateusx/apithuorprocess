@@ -463,6 +463,7 @@ module.exports.ReembolsarPedidoByID = (req, res, next) => {
 module.exports.UpdateTransacaoShopifyOrder = (req, res, next) => {
     try {
         const { order_id, json_shopify_order } = req.body;
+        /* ALTERAR AQUI - INSERIR INSERT (ON CONFLICT) PARA EVITAR TANTAS LINHAS */
         pool.query("select * from transacoes where json_shopify_response ->> 'id' = $1", [order_id], (error, results) => {
             if (error) {
                 throw error
