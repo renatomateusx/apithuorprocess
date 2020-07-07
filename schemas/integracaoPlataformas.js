@@ -642,6 +642,11 @@ module.exports.WebHookShopify = async (req, res, next) => {
                         produtos.UpdateProduto(req, res, next);
 
                     }
+                    if (HTopic == 'products/delete') {
+                        req.body.id_produto_json = LBody.id;
+                        req.body.id_usuario = LDadosLoja.id_usuario;
+                        produtos.DeleteProduto(req, res, next);
+                    }
                     if (HTopic == 'orders/create' || HTopic == 'orders/update') {
                         console.log("Orders", HTopic);
                         const obj = LBody;
@@ -649,11 +654,11 @@ module.exports.WebHookShopify = async (req, res, next) => {
                         if (obj.phone) {
                             req.body.telefone = obj.phone;
                             req.body.telefone_comprador = obj.phone;
-                        }                        
-                        if(obj.shipping_address){
+                        }
+                        if (obj.shipping_address) {
                             req.body.nome_comprador = obj.shipping_address.first_name;
                         }
-                        if(obj.customer){
+                        if (obj.customer) {
                             req.body.nome_comprador = obj.customer.first_name;
                         }
                         if (obj.fulfillments) {
@@ -670,7 +675,7 @@ module.exports.WebHookShopify = async (req, res, next) => {
                                     //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
 
                                     /* DADOS INSERT FULFILL MENT */
-                                    req.body.email_comprador =  obj.email;
+                                    req.body.email_comprador = obj.email;
                                     req.body.numero_pedido = obj.order_number;
                                     req.body.codigo_rastreio = objF.tracking_number;
                                     req.body.id_usuario = LDadosLoja.id_usuario;

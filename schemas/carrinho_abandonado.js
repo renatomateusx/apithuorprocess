@@ -7,7 +7,7 @@ const transacoes = require('./transacao');
 
 module.exports.GetCarrinho = (req, res, next) => {
     try {
-        pool.query('SELECT * FROM carrinho_abandonado order by id asc', (error, results) => {
+        pool.query('SELECT * FROM carrinho_abandonado order by id_cart asc', (error, results) => {
             if (error) {
                 throw error
             }

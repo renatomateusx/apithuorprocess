@@ -390,9 +390,9 @@ module.exports.UpdateProduto = (req, res, next) => {
 
 module.exports.DeleteProduto = (req, res, next) => {
     try {
-        const { id_produto_json } = req.body
+        const { id_produto_json, id_usuario } = req.body
 
-        pool.query('DELETE FROM produtos WHERE id_produto_json = $1', [id_produto_json], (error, results) => {
+        pool.query('DELETE FROM produtos WHERE id_produto_json = $1 and id_usuario = $2', [id_produto_json, id_usuario], (error, results) => {
             if (error) {
                 throw error
             }
