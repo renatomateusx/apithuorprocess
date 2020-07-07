@@ -162,5 +162,8 @@ module.exports = Object.freeze({
     END_POINT_CANCELA_BOLETO_API_MP: 'https://api.mercadopago.com/v1/advanced_payments/{ID}?access_token={TOKEN}',
 
 
+    /* DIAS PARA A PRÓXIMA REQUISIÇÃO DE TRACKEAMENTO DE ENCOMENDAS. */
+    DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT: 5,
+    DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS: 2
 
 });

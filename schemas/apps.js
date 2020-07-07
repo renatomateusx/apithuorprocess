@@ -8,7 +8,7 @@ var moment = require("moment");
 
 module.exports.GetApps = (req, res, next) => {
     try {
-        pool.query('SELECT * FROM apps order by id asc', (error, results) => {
+        pool.query('SELECT * FROM apps where status = 1 order by id asc', (error, results) => {
             if (error) {
                 throw error
             }
