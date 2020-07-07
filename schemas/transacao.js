@@ -311,11 +311,12 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
             if (!track || track == undefined) {
                 track = 0;
             }
-            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway, ttrack) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10)', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track], (error, results) => {
+            pool.query('INSERT INTO transacoes (id_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, json_shopify_order, json_shopify_response, status, gateway, ttrack) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10) RETURNING *', [id_usuario, url_loja, JSON_FrontEndUserData, JSON_BackEndPayment, JSON_GW_Response, JSON_ShopifyOrder, JSON_ShopifyResponse, status, gateway, track], (error, results) => {
                 if (error) {
                     throw error
                 }
-                resolve(results.insertId);
+                // console.log("INSERTED ID", results.rows[0].id);
+                resolve(results.rows[0].id);
             })
 
         } catch (error) {
@@ -331,7 +332,7 @@ module.exports.insereTransacao = (id_usuario, url_loja, JSON_FrontEndUserData, J
 module.exports.insereTransacaoInterna = (idtr, data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway) => {
     return new Promise(async (resolve, reject) => {
         try {
-            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, json_front_end_user_data) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
+            pool.query('INSERT INTO transacoes_internas (data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, id_transacao) VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9, $10, $11,$12) ON CONFLICT (id_usuario, id_transacao) DO UPDATE SET data=$1, data_processar=$2, id_usuario=$3, plano_usuario=$4, url_loja=$5, json_front_end_user_data=$6, json_back_end_payment=$7, json_gw_response=$8, status=$9, valor_comissao=$10, gateway=$11, id_transacao=$12', [data, data_processar, id_usuario, plano_usuario, url_loja, json_front_end_user_data, json_back_end_payment, json_gw_response, status, valor_comissao, gateway, idtr], (error, results) => {
                 if (error) {
                     throw error
                 }
