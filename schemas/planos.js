@@ -7,7 +7,7 @@ const transacoes = require('./transacao');
 
 module.exports.GetPlanos = (req, res, next) => {
     try {
-        pool.query('SELECT * FROM planos', (error, results) => {
+        pool.query('SELECT * FROM planos order by id asc', (error, results) => {
             if (error) {
                 throw error
             }

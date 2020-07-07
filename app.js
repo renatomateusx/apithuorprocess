@@ -56,6 +56,7 @@ var planos = require('./routes/planos');
 var mensalidades = require('./routes/mensalidades');
 var ajuda = require('./routes/ajuda');
 var meta = require('./routes/meta');
+var fulfillments = require('./routes/fulfillments');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -106,6 +107,7 @@ app.use('/planos', planos);
 app.use('/mensalidades', mensalidades);
 app.use('/ajuda', ajuda);
 app.use('/meta', meta);
+app.use('/fulfillments', fulfillments);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

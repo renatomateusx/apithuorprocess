@@ -22,18 +22,18 @@ rules.minute = 0;
 rules.second = 1
 
 var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
-    fulfillments.GetFulFillmentList()
+fulfillments.GetFulFillmentList()
     .then((resFul) => {
         resFul.forEach(async (obj, i) => {
-            // const awa = await utilisEmail.sleep(1000);
+            //console.log(obj)
             const order_id = obj.order_id;
             const id_usuario = obj.id_usuario;
             const id = obj.id;
             const fulfillment_id = obj.fulfillment_id;
             const email = obj.email;
-            const statusText = obj.status_text ||'';
+            const statusText = obj.status_text || '';
             const telefone = obj.telefone;
-            const tracking_number = obj.json_shipments.tracking_number;
+            const tracking_number = obj.tracker_number;
             var last_updated = "";
             const actualDate = moment().format();
             last_updated = moment(obj.last_updated).format();
@@ -48,81 +48,93 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
             var LSIT = " está chegando!";
             var statusShip = 'PENDING';
             var LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
-            //console.log('diff', duration.asHours());
-            if (duration.asHours() >= 24) {
+            var days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT;
+            var continua = true;
+            if (duration.asHours() >= 12) {
 
                 //console.log('diff', duration.asHours());
-                // console.log(tracking_number);
+                const awa = await utilisEmail.sleep(5000);
                 const LReturn = await logistica.TrackingCodeInternalNinja(tracking_number);
-                const dom = new JSDOM(LReturn);
-                const item = dom.window.document.getElementsByClassName("year")[0].textContent;
-                var itemDate = item.split('/');
-                var dateFinal = itemDate[0] + '-' + itemDate[1] + '-'+ '20'+itemDate[2];
-                if (item.length > 5) {
-                    const ItemDiv = dom.window.document.getElementsByClassName("item")[0];
-                    const itemStatus = dom.window.document.getElementsByTagName("li");
-                    const status = itemStatus[2].innerHTML;
-                    if(status && status.length > 1){
-                        if(statusText != status){
-                            if (status.includes("entregue")) {
-                                LSIT = " foi ENTREGUE!";
-                                statusShip = "DELIVERED"
-                                LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO_ENTREGUE;
-                            } else {
-                                LSIT = " está chegando";
-                                statusShip = "PENDING";
-                                LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
-                            }
-                            //
-                            const LUpdateTracker = moment(dateFinal, 'DD-MM-YYYY').format();
-                            console.log('lup', LUpdateTracker);
-                            console.log('lst',moment(last_updated, 'YYYY-MM-DD').format());
-                            if (LUpdateTracker > moment(last_updated, 'YYYY-MM-DD').format()) {
-                                console.log(LUpdateTracker, last_updated);
-                                const statusTracker = status;
-                                
-                                var template = path.resolve('public/templates/email-encomenda.html');
-                                fs.readFile(template, 'utf8', async function (err, html) {
-                                    if (err) {
-                                        throw err;
-                                    }
-                                    var LHTML = html;
-                                    var URLTrack = constantes.URL_TRACK_CODE.replace('@', tracking_number);
-                                    //console.log(URLTrack);
-                                    LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);                                   
-                                    LHTML = LHTML.replace("@SATUS_ENCOMENDA", statusTracker);
-                                    LHTML = LHTML.replace("@NOME_LOJA", DadosLoja.nome_loja);
-                                    LHTML = LHTML.replace("@SIT", LSIT);
-                                    LHTML = LHTML.replace("@HTML_RASTREIO", ItemDiv.innerHTML);
-                                    //console.log(LHTML);
-                                    var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
-                                    arrayAttachments.forEach((obj, i) => {
-                                        obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
-                                    });
-                                    console.log("Vou enviar EMail");
-                                    const LReturnEmail = await utilisEmail.SendMail('renatomateusx@gmail.com', LSubject, LHTML, arrayAttachments, DadosLoja.nome_loja);
-                                    console.log("Enviei EMail", LReturnEmail);
-                                    if (LReturnEmail) {
-                                        console.log("Email Enviado");
-                                        const updateFulFillment = await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusShip, moment().format(), statusTracker);
-                                        if (updateFulFillment) {
-                                        }
-                                        else {
-                                            console.log("Error", updateFulFillment);
-                                       }
-                                    }
-                                });
+                
+                if (LReturn.indexOf("aduaneira finalizada") > -1) {
+                    days = constantes.DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS;
+                }
+                if (LReturn.indexOf("erro") > -1) {
+                    continua = false;
+                }
+                if (LReturn.indexOf("rastreio digitado ainda não é aceito em nosso sistema") > -1) {
+                    continua = false;
+                }
+                if (continua == true) {
+                    const dom = new JSDOM(LReturn);
+                    const item = dom.window.document.getElementsByClassName("year")[0].textContent;
+                    var itemDate = item.split('/');
+                    var dateFinal = itemDate[0] + '-' + itemDate[1] + '-' + '20' + itemDate[2];
+                    if (item.length > 5) {
+                        const ItemDiv = dom.window.document.getElementsByClassName("item")[0];
+                        const itemStatus = dom.window.document.getElementsByTagName("li");
+                        const status = itemStatus[2].innerHTML;
+                        if (status && status.length > 1) {
+                            if (statusText != status) {
+                                if (status.includes("entregue")) {
+                                    LSIT = " foi ENTREGUE!";
+                                    statusShip = "ENTREGUE"
+                                    LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO_ENTREGUE;
+                                } else {
+                                    LSIT = " está chegando";
+                                    statusShip = "EM TRÂNSITO";
+                                    LSubject = constantes.STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO;
+                                }
+                                //
+                                const LUpdateTracker = moment(dateFinal, 'DD-MM-YYYY').format();
+                                console.log('lup', LUpdateTracker);
+                                console.log('lst', moment(last_updated, 'YYYY-MM-DD').format());
+                                if (LUpdateTracker > moment(last_updated, 'YYYY-MM-DD').format()) {
+                                    console.log(LUpdateTracker, last_updated);
+                                    const statusTracker = status;
 
+                                    var template = path.resolve('public/templates/email-encomenda.html');
+                                    fs.readFile(template, 'utf8', async function (err, html) {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        var LHTML = html;
+                                        var URLTrack = constantes.URL_TRACK_CODE.replace('@', tracking_number);
+                                        //console.log(URLTrack);
+                                        LHTML = LHTML.replace("{URL_RASTREIO}", URLTrack);
+                                        LHTML = LHTML.replace("@SATUS_ENCOMENDA", statusTracker);
+                                        LHTML = LHTML.replace("@NOME_LOJA", DadosLoja.nome_loja);
+                                        LHTML = LHTML.replace("@SIT", LSIT);
+                                        LHTML = LHTML.replace("@HTML_RASTREIO", ItemDiv.innerHTML);
+                                        //console.log(LHTML);
+                                        var arrayAttachments = constantes.attachmentsAux.concat(constantes.attachmentsEmailRastreio);
+                                        arrayAttachments.forEach((obj, i) => {
+                                            obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
+                                        });
+                                        console.log("Vou enviar EMail");
+                                        const LReturnEmail = await utilisEmail.SendMail('renatomateusx@gmail.com', LSubject, LHTML, arrayAttachments, DadosLoja.nome_loja);
+                                        console.log("Enviei EMail", LReturnEmail);
+                                        if (LReturnEmail) {
+                                            console.log("Email Enviado");
+                                            const updateFulFillment =2// await fulfillments.UpdateStatusFulFillmentInternal(id_usuario, id, statusShip, moment().format(), statusTracker);
+                                            if (updateFulFillment) {
+                                            }
+                                            else {
+                                                console.log("Error", updateFulFillment);
+                                            }
+                                        }
+                                    });
+
+                                }
                             }
                         }
-                    }                    
-                  
+
+                    }
+                    /* AQUI TERMINA */
                 }
-                /* AQUI TERMINA */
-                
             }
             var LDataProximo = moment()
-                .add({ days: 1 })
+                .add({ days: days })
                 .format();
             const LUpdateProximoPagamento = await fulfillments.UpdateStatusFulFillmentInternalProximaConsulta(id_usuario, id, LDataProximo);
         });
@@ -130,20 +142,8 @@ var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
     .catch((error) => {
         console.log("Erro ao pegar o fulfillment", error);
     })
-// console.log('Serviço de Shipment Rodando!', moment().format('HH:mm:ss'));
+    console.log('Serviço de Shipment Rodando!', moment().format('DD-MM-YYYY HH:mm:ss'));
 
-
-
-
-
-
-
-
-
-
-
-
-    
 });
 
 module.exports = router;

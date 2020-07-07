@@ -648,19 +648,33 @@ module.exports.WebHookShopify = async (req, res, next) => {
                         req.body.email = obj.email;
                         if (obj.phone) {
                             req.body.telefone = obj.phone;
+                            req.body.telefone_comprador = obj.phone;
+                        }                        
+                        if(obj.shipping_address){
+                            req.body.nome_comprador = obj.shipping_address.first_name;
+                        }
+                        if(obj.customer){
+                            req.body.nome_comprador = obj.customer.first_name;
                         }
                         if (obj.fulfillments) {
                             if (obj.fulfillments.length > 0) {
                                 obj.fulfillments.forEach((objF, i) => {
                                     req.body.order_id = obj.id;
                                     req.body.fulfillment_id = objF.id;
-                                    req.body.json_shopify_order = obj;
+                                    req.body.tracker_number = objF.tracking_number;
                                     req.body.data = obj.created_at;
                                     req.body.updated = obj.updated_at;
                                     req.body.status = 0;
-                                    //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
-                                    //////fulfillments.SaveFulFillment(req, res, next);
+                                    req.body.id_usuario = LDadosLoja.id_usuario;
                                     transacoes.UpdateTransacaoShopifyOrder(req, res, next);
+                                    //console.log(req.body.order_id, req.body.fulfillment_id, req.body.json_shopify_order);
+
+                                    /* DADOS INSERT FULFILL MENT */
+                                    req.body.email_comprador =  obj.email;
+                                    req.body.numero_pedido = obj.order_number;
+                                    req.body.codigo_rastreio = objF.tracking_number;
+                                    req.body.id_usuario = LDadosLoja.id_usuario;
+                                    fulfillments.InsertFulFillment(req, res, next);
                                 })
                             }
                         }

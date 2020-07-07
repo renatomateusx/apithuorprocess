@@ -26,15 +26,17 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                         transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP, LJSON.dadosComprador.ttrack)
                             .then(async (retornoInsereTransacao) => {
                                 const IDTr = retornoInsereTransacao;
+                                
                                 const LDataProcess = moment().format();
                                 const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
                                 const LComissaoValue = 0.00;
-                                if (status == 'paid') {
+                                if (status.toUpperCase() == 'PAID') {
                                     const LPlano = await planos.GetUserByIDInternalByID(UsuarioDado.plano);
                                     var LPercentComission = LPlano.json.addon.replace("%", "");
                                     LPercentComission = parseFloat(LPercentComission);
                                     const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LJSON.dadosComprador.valor);
                                     LValorComissao = parseFloat(LValCom);
+                                    console.log("Comissão", LValorComissao);
                                     const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(IDTr, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
@@ -67,14 +69,25 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
     return new Promise(async (resolve, reject) => {
         try {
             const LProd = Pjson.produtos.filter(x => x.plataforma == constantes.PLATAFORMA_SHOPIFY);
+            var DadosBoleto = {};
+            if (Pjson.dadosComprador.urlBoleto) {
+                DadosBoleto = {
+                    "name": "URL Boleto",
+                    "value": Pjson.dadosComprador.urlBoleto
+                }
+            }
             const LShopifyOrder = {
                 "order": {
                     "line_items": LProd,
                     "customer": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
-                        "email": Pjson.dadosComprador.email
+                        "email": Pjson.dadosComprador.email,
+                        "phone": Pjson.dadosComprador.telefone
                     },
+                    "note_attributes": [
+                        DadosBoleto
+                    ],
                     "billing_address": {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
@@ -114,6 +127,8 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
         }
     });
 }
+
+
 
 
 module.exports.tellShopifyPaymentStatus = (PdadosLoja, PdadosComprador, PshopifyOrder, teste, status, gateway) => {

@@ -114,17 +114,22 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
             .then(async (resRet) => {
                 const Body = JSON.parse(resRet.body);
                 console.log("LID", Body);
-                if (resRet.body.indexOf('error_messages') > -1) {
+                if (Body.status == "DECLINED") {
+                    res.status(422).send(Body);
+                    res.end();
+                    return;
+                }
+                else if(Body.status == "DECLINED"){
                     res.status(422).send(Body);
                     res.end();
                     return;
                 }
 
-                if (Body.status.toUpperCase() == 'PAID') {
+                else if (Body.status.toUpperCase() == 'PAID') {
                     LJSON.dadosComprador.data = Body.created_at;
-                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid.replace(',','.'));
+                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid);
                     LJSON.dadosComprador.id_transacao = Body.id;
-                    LJSON.dadosComprador.valorParcela = (parseFloat(Body.amount.summary.paid.replace(',','.')) / Body.payment_method.installments);
+                    LJSON.dadosComprador.valorParcela = (parseFloat(Body.amount.summary.paid) / Body.payment_method.installments);
                     var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, Body, LJSON.paymentData, 'paid', constantes.GATEWAY_PS);
                     var plataformasResponse = {
                         shopify: responseShopify,
