@@ -1,19 +1,19 @@
 <script>
 /* THUOR CROSS SELL */
-    const URL_BASE_CS = "http://localhost:3000/";
-//const URL_BASE_CS = "https://api.thuor.com:7443/";
-var IMAGE_BASE_CS = URL_BASE_CS + 'images/templates/payment_form.png';
-var LSTYLE_TEMPLATE_CS = '.imgProd{object-fit:contain;max-height:100%}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
-var LPRINCIPAL_TEMPLATE_CS = ' <div class="divProdutosRelacionados"><hr> <h3 class="box-title">  <span class="title">Você também pode gostar de</span>    </h3>        <hr> </div> <div class="products-grid row four-items" id="divResultProds"></div>';
-var LTEMPLATE_CS = '<div class="card grid-item col-12 col-6 col-md-4 col-lg-3"> <img src="{image}" class="imgProd col-lg-12"> <div class="product-bottom text-center"> <span class="col-"><a class="product-title" href="">{title_product}</a></span> <div class="price-box"> <div class="price-sale"> <span class="old-price"><a class="old-price" href="">R${old_price}</a></span> <span class="special-price"><a class="special-price" href="">R${actual_price}</a></span> </div></div></div></div>';
-var END_POINT_GET_APP_PARCEL_BY_USER_ID_CS = URL_BASE_CS + 'apps/GetIntegracaoApps'
-var END_POINT_GET_DADOS_APP_CHECKOUT_CS = URL_BASE_CS + 'checkouts/GetCheckoutAtivo'
-var URL_END_POINT_GET_DADOS_LOJA_CS = URL_BASE_CS + "integracaoShopify/GetDadosLoja";
-var URL_END_POINT_GET_CROSS_SELL_CS = URL_BASE_CS + "crosssells/GetCrossSellByStorePageOrCartPage";
-var URL_END_POINT_GET_ID_THUOR_BY_id_produto_cs_CS = URL_BASE_CS + "crosssells/";
-var URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS = URL_BASE_CS + "produtos/GetProdutoIDThuor";
+    const URL_BASE_DSell = "http://localhost:3000/";
+//const URL_BASE_DSell = "https://api.thuor.com:7443/";
+var IMAGE_BASE_DSell = URL_BASE_DSell + 'images/templates/payment_form.png';
+var LSTYLE_TEMPLATE_DSell = '.imgProd{object-fit:contain;max-height:100%}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
+var LPRINCIPAL_TEMPLATE_DSell = ' <div class="divProdutosRelacionados"><hr> <h3 class="box-title">  <span class="title">E que tal esses?</span>    </h3>        <hr> </div> <div class="products-grid row four-items" id="divResultProds"></div>';
+var LTEMPLATE_DSell = '<div class="card grid-item col-12 col-6 col-md-4 col-lg-3"> <img src="{image}" class="imgProd col-lg-12"> <div class="product-bottom text-center"> <span class="col-"><a class="product-title" href="">{title_product}</a></span> <div class="price-box"> <div class="price-sale"> <span class="old-price"><a class="old-price" href="">R${old_price}</a></span> <span class="special-price"><a class="special-price" href="">R${actual_price}</a></span> </div></div></div></div>';
+var END_POINT_GET_APP_PARCEL_BY_USER_ID_DSell = URL_BASE_DSell + 'apps/GetIntegracaoApps'
+var END_POINT_GET_DADOS_APP_CHECKOUT_DSell = URL_BASE_DSell + 'checkouts/GetCheckoutAtivo'
+var URL_END_POINT_GET_DADOS_LOJA_DSell = URL_BASE_DSell + "integracaoShopify/GetDadosLoja";
+var URL_END_POINT_GET_DOWN_SELL_DSell = URL_BASE_DSell + "downsells/GetDownSellByStorePageOrCartPage";
+var URL_END_POINT_GET_ID_THUOR_BY_id_produto_DSell_DSell = URL_BASE_DSell + "downsells/";
+var URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_DSell = URL_BASE_DSell + "produtos/GetProdutoIDThuor";
 var currentPageCS = '{{ template.name }}';
-var id_produto_cs = '{{product.id}}';
+var id_produto_DSell = '{{product.id}}';
 var arrayCSSsCS =
     [
         { script: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
@@ -37,19 +37,19 @@ var arrayScriptsCS =
 async function initializeFunctionCS() {
     const LDoc = await GetElementCS();
     if (LDoc) {
-        LDoc.insertAdjacentHTML("beforeend", LPRINCIPAL_TEMPLATE_CS);
+        LDoc.insertAdjacentHTML("beforeend", LPRINCIPAL_TEMPLATE_DSell);
     
     const LShop = window.location.host;
-    id_produto_cs = 4789136097339;
+    id_produto_DSell = 4789136097339;
     currentPageCS = 'cart';
     const LBody = {
         shop: 'kingofertas.myshopify.com'
     }
     var arrayProdutos = [];
-    postAxiosCS(URL_END_POINT_GET_DADOS_LOJA_CS, LBody, (response) => {
+    postAxiosCS(URL_END_POINT_GET_DADOS_LOJA_DSell, LBody, (response) => {
         // currentPageCS
         const DadosLoja = response.data;
-        postAxiosCS(URL_END_POINT_GET_CROSS_SELL_CS, { id_produto_cs: id_produto_cs, id_usuario: DadosLoja.id_usuario }, (responseC) => {
+        postAxiosCS(URL_END_POINT_GET_DOWN_SELL_DSell, { id_produto_DSell: id_produto_DSell, id_usuario: DadosLoja.id_usuario }, (responseC) => {
             const LDadosCrossSell = responseC.data;
             if (LDadosCrossSell) {
 
@@ -57,10 +57,10 @@ async function initializeFunctionCS() {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 2);
                     if (LCS) {
                         if(LCS.status == 1){
-                            const LProdsArray = LCS.id_produto_cs_to.split(',');
+                            const LProdsArray = LCS.id_produto_DSell_to.split(',');
                             if (LProdsArray) {
                                 LProdsArray.forEach((objProds, i) => {
-                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
+                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_DSell, { id_produto_DSell: objProds }, (responseProds) => {
                                         preencheTemplateCS(responseProds.data);
                                     });
                                 });
@@ -73,10 +73,10 @@ async function initializeFunctionCS() {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 1);
                     if (LCS) {
                         if(LCS.status == 1){
-                            const LProdsArray = LCS.id_produto_cs_to.split(',');
+                            const LProdsArray = LCS.id_produto_DSell_to.split(',');
                             if (LProdsArray) {
                                 LProdsArray.forEach((objProds, i) => {
-                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
+                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_DSell, { id_produto_DSell: objProds }, (responseProds) => {
                                         preencheTemplateCS(responseProds.data);
                                     });
                                 });
@@ -98,7 +98,7 @@ function preencheTemplateCS(PProdutos) {
         const LOldP = formatPriceCS(PProdutos.json_dados_produto.variants[0].compare_at_price);
         const LNewP = formatPriceCS(PProdutos.json_dados_produto.variants[0].price);
         console.log(LImage, LTitulo, LOldP, LNewP);
-        var LHTML = LTEMPLATE_CS.replace("{image}", LImage).replace("{title_product}", LTitulo).replace("{old_price}", LOldP).replace("{actual_price}", LNewP);
+        var LHTML = LTEMPLATE_DSell.replace("{image}", LImage).replace("{title_product}", LTitulo).replace("{old_price}", LOldP).replace("{actual_price}", LNewP);
 
         const doc = document.getElementById("divResultProds");
         doc.insertAdjacentHTML("beforeend", LHTML);
@@ -189,9 +189,9 @@ function initializeCSS() {
     style.type = 'text/css';
     if (style.styleSheet) {
         // This is required for IE8 and below.
-        style.styleSheet.cssText = LSTYLE_TEMPLATE_CS;
+        style.styleSheet.cssText = LSTYLE_TEMPLATE_DSell;
     } else {
-        style.appendChild(document.createTextNode(LSTYLE_TEMPLATE_CS));
+        style.appendChild(document.createTextNode(LSTYLE_TEMPLATE_DSell));
     }
 }
 window.onload = function () {

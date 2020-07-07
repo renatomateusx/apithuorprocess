@@ -116,7 +116,7 @@ module.exports.UpdateLeadCampanha = (PUltimoEmailEnviado, PCampanhaEmailEnviada,
     return new Promise((resolve, reject) => {
         try {
             const data = moment().format();
-            pool.query('UPDATE lead set data_ultimo_email_enviado = $1, campanha_email_enviada = $2, sequencia_enviada = $3 where id = $4', [PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead], (error, results) => {
+            pool.query('UPDATE carrinho_abandonado set data_ultimo_email_enviado = $1, campanha_email_enviada = $2, sequencia_enviada = $3 where id_cart = $4', [PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead], (error, results) => {
                 if (error) {
                     throw error
                 }
@@ -167,7 +167,7 @@ module.exports.GetDadosCompradorLeadInternal = (email) => {
 module.exports.GetLeadCronJob = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
-            pool.query('SELECT * FROM lead WHERE campanha_enviar = 1', (error, results) => {
+            pool.query('SELECT * FROM carrinho_abandonado WHERE campanha_enviar = 1 and status =0', (error, results) => {
                 if (error) {
                     throw error
                 }
