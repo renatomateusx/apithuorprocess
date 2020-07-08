@@ -87,6 +87,9 @@ async function processaConsultaMercadoPago() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
+                        if(UsuarioDado.cobrar_por_transacao == 1){
+                            LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
+                        }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_MP);
                         console.log(LTellShopify);
                         console.log(InsereTransacaoInterna);
@@ -136,6 +139,9 @@ async function processaConsultaPagSeguro() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
+                        if(UsuarioDado.cobrar_por_transacao == 1){
+                            LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
+                        }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PS);
                     }
 
@@ -183,6 +189,9 @@ async function processaConsultaPayU() {
                         LPercentComission = parseFloat(LPercentComission);
                         const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LFrontEnd.dadosComprador.valor);
                         LValorComissao = parseFloat(LValCom);
+                        if(UsuarioDado.cobrar_por_transacao == 1){
+                            LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
+                        }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PayU);
 
                     }

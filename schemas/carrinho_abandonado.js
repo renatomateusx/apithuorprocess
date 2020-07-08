@@ -82,3 +82,39 @@ module.exports.SaveCarrinho = (req, res, next) => {
         }
     })
 }
+module.exports.UpdateStatusCarrinho = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+
+        try {
+            const {status, id_cart} = req.body;
+            const ids = id_cart.toString();
+            pool.query('UPDATE carrinho_abandonado SET status = $1 where id_cart in ($2)', [status, ids], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rowCount);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+module.exports.UpdateDadosClienteCarrinho = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+
+        try {
+            const {nome_cliente, email_cliente, telefone_cliente, id_cart} = req.body;
+            const ids = id_cart.toString();
+            pool.query('UPDATE carrinho_abandonado SET nome_cliente = $1, email_cliente = $2, telefone_cliente = $3 where id_cart in ($4)', [nome_cliente, email_cliente, telefone_cliente, ids], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rowCount);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+

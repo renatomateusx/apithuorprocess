@@ -37,6 +37,9 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                                     const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LJSON.dadosComprador.valor);
                                     LValorComissao = parseFloat(LValCom);
                                     console.log("Comissão", LValorComissao);
+                                    if(UsuarioDado.cobrar_por_transacao == 1){
+                                        LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
+                                    }
                                     const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(IDTr, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
