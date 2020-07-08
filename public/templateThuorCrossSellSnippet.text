@@ -56,27 +56,31 @@ async function initializeFunctionCS() {
                 if (currentPageCS == 'cart') {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 2);
                     if (LCS) {
-                        const LProdsArray = LCS.id_produto_cs_to.split(',');
-                        if (LProdsArray) {
-                            LProdsArray.forEach((objProds, i) => {
-                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
-                                    preencheTemplateCS(responseProds.data);
+                        if(LCS.status == 1){
+                            const LProdsArray = LCS.id_produto_cs_to.split(',');
+                            if (LProdsArray) {
+                                LProdsArray.forEach((objProds, i) => {
+                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
+                                        preencheTemplateCS(responseProds.data);
+                                    });
                                 });
-                            });
 
+                            }
                         }
                     }
                 }
                 if (currentPageCS == 'product') {
                     const LCS = LDadosCrossSell.find(x => x.quando_oferecer == 1);
                     if (LCS) {
-                        const LProdsArray = LCS.id_produto_cs_to.split(',');
-                        if (LProdsArray) {
-                            LProdsArray.forEach((objProds, i) => {
-                                postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
-                                    preencheTemplateCS(responseProds.data);
+                        if(LCS.status == 1){
+                            const LProdsArray = LCS.id_produto_cs_to.split(',');
+                            if (LProdsArray) {
+                                LProdsArray.forEach((objProds, i) => {
+                                    postAxiosCS(URL_END_POINT_GET_PRODUTO_BY_ID_THUOR_CS, { id_produto_cs: objProds }, (responseProds) => {
+                                        preencheTemplateCS(responseProds.data);
+                                    });
                                 });
-                            });
+                            }
                         }
                     }
                 }

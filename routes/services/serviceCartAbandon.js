@@ -30,7 +30,7 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                 campanhas.GetCampanhaByIDInternal(objLead.id_usuario, constantes.CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO)
                     .then(async (resCampanha) => {
                         LURLCartEmail = constantes.WEBSITE_CART;
-                        const LLead = objLead.lead;
+                        const LLead = objLead;
                         if (LLead != null) {
                             const LData = moment(objLead.data_produtos_carrinho).format();
                             const LCampanha = objLead.campanha_enviar;
@@ -39,12 +39,12 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                             const LSequencia = resCampanha.sequencia;
                             const LUltimoComprados = objLead.ultimos_produtos_comprados;
                             const LDataUltimaCompra = objLead.data_ultima_compra;
-                            const LEmail = LLead.dadosComprador.email;
-                            const LTelefone = LLead.dadosComprador.telefone;
-                            const LNome = LLead.dadosComprador.nome_completo.split(' ')[0];
+                            const LEmail = objLead.email_cliente;
+                            const LTelefone = objLead.telefone_cliente;
+                            const LNome = objLead.nome_cliente.split(' ')[0];
                             //console.log(LSequencia);
                             if (LSequenciEnviada == null) { LSequenciEnviada = 0; }
-                            var LProdutosIguais = await ProcessaProdutos(LUltimoComprados, LLead.produtos);
+                            var LProdutosIguais = true;// await ProcessaProdutos(LUltimoComprados, objLead.produtos);
                             //console.log("LProdutos", LProdutosIguais);
                             if (!LProdutosIguais) {
                                 const LNovaSequencia = parseInt(LSequenciEnviada) + 1;
@@ -56,7 +56,7 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                                         const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
                                         const MensagemText = LMensagem.mensagem;
                                         const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
-                                        const LTemplate = await ProcessaTemplate(LMensagem, LLoja, LLead.produtos, LNome);
+                                        const LTemplate = await ProcessaTemplate(LMensagem, LLoja, objLead.produtos, LNome, objLead.url_compra);
                                         //console.log('link', LTemplate.link);
                                         /*var LLEmail = 'renatomateusx@gmail.com' -- EMAIL TESTE*/
                                         var arrayAttachments = constantes.attachmentsAuxCartAbandon;
@@ -69,7 +69,7 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                                             const LUltimoEmailEnviado = moment().format();
                                             const LCampanhaEmailEnviada = resCampanha.id;
                                             const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
-                                            const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id);
+                                            const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id_cart);
                                             //console.log("Updated", LUpdated);
                                         }
                                         //console.log(MensagemText);
@@ -180,7 +180,7 @@ function GetTipoDiff(tipo, diff) {
     })
 }
 
-function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
+function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador, PLink) {
     return new Promise((resolve, reject) => {
         try {
             var lpromises = [];
@@ -226,8 +226,8 @@ function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
                         LProdArr = LProdArr.replace("{price}", objProd.variant_price);
                         HTMLArrayProd = HTMLArrayProd + LProdArr;
                         const IDProduto = await MontaDadosProduto(objProd);
-                        LURL = LURL + await getURLProduto(IDProduto, objProd.quantity, objProd.variant_id, i);
-                        LURLCartEmail = LURLCartEmail + LURL;
+                        //LURL = LURL + await getURLProduto(IDProduto, objProd.quantity, objProd.variant_id, i);
+                        //LURLCartEmail = LURLCartEmail + LURL;
                         lpromises[i].resolve();
                     });
                     //"http: //localhost:8081/cart/items?produto_option_id[0]=33311856853051&produto_option_quantity[0]=3&produto_option_variante_id[0]=33311856853051&produto_option_id[1]=33311681085499&produto_option_quantity[1]=1&produto_option_variante_id[1]=33311681085499&cart_token=shopify-4f8d0c4118d9f5dc37bcd2627a97d4b0&isShopify=1&limpa_carrinho=1&redirectTo=cart", 
@@ -235,7 +235,7 @@ function ProcessaTemplate(PMensagem, PDadosLoja, PProdutos, PNomeComprador) {
                 Promise.all(lpromises)
                     .then(() => {
                         LHTML = LHTML.replace("{products_list}", HTMLArrayProd);
-                        LURLCartEmail = LURLCartEmail + "redirectTo=cart";
+                        LURLCartEmail = PLink + "redirectTo=cart";
                         LHTML = LHTML.replace("{url_carrinho}", LURLCartEmail);
                         //console.log(LURLCartEmail);
                         resolve({ template: LHTML, titulo: LTitulo, link: LURLCartEmail });
