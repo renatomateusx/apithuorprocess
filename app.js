@@ -38,6 +38,7 @@ var webhookpagseguro = require('./webhooks/webhookpagseguro');
 var webhookpayu = require('./webhooks/webhookpayu');
 var upsells = require('./routes/upsells');
 var crosssells = require('./routes/crosssells');
+var downsells = require('./routes/downsell');
 var mensageria = require('./routes/mensageria');
 var pixels = require('./routes/pixels');
 var clientes = require('./routes/clientes');
@@ -57,6 +58,7 @@ var mensalidades = require('./routes/mensalidades');
 var ajuda = require('./routes/ajuda');
 var meta = require('./routes/meta');
 var fulfillments = require('./routes/fulfillments');
+var carrinho_abandonado = require('./routes/carrinho_abandonado');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -91,6 +93,7 @@ app.use('/webhookpayu', webhookpayu);
 app.use('/webhooks', webhookshopify);
 app.use('/upsells', upsells);
 app.use('/crosssells', crosssells);
+app.use('/downsells', downsells);
 app.use('/mensageria', mensageria);
 app.use('/pixels', pixels);
 app.use('/clientes', clientes);
@@ -108,6 +111,7 @@ app.use('/mensalidades', mensalidades);
 app.use('/ajuda', ajuda);
 app.use('/meta', meta);
 app.use('/fulfillments', fulfillments);
+app.use('/carrinhoAbandonado', carrinho_abandonado);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

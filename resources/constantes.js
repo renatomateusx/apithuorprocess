@@ -8,7 +8,7 @@ module.exports = Object.freeze({
     API_MP: 'https://api.mercadopago.com/v1/payments/{id}?access_token={token}',
     API_MP_REFOUND: 'https://api.mercadopago.com/v1/payments/{id}/refunds?access_token={token}',
     API_MP_PAYMENT: 'https://api.mercadopago.com/v1/payments?access_token={token}',
-    API_PS: 'https://sandbox.api.pagseguro.com/{}',
+    API_PS: 'https://api.pagseguro.com/{}',
     API_PAYU: 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
     API_PAYU_REPORT: 'https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi',
     CONSTANTE_APPROVED_MP: 'approved',

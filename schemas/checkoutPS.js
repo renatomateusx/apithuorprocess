@@ -108,24 +108,29 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
         LHeaderValue.push('1.0');
         LHeaderKey.push('X-idempotency-key');
         LHeaderValue.push('');
-        LJSON.paymentData.amount.value = parseFloat(LJSON.paymentData.amount.value);
-        ///console.log(LJSON.paymentData);
+        LJSON.paymentData.amount.value = parseFloat(module.exports.formatPrice(LJSON.paymentData.amount.value));
+        console.log(LJSON.paymentData);
         utilis.makeAPICallExternalParamsJSONHeadersArray(Lurl, "", LJSON.paymentData, LHeaderKey, LHeaderValue, "POST")
             .then(async (resRet) => {
                 const Body = JSON.parse(resRet.body);
                 console.log("LID", Body);
-                if (Body.status == "DECLINED") {
+                if (Body.message && Body.message.indexOf("Unauthorized") > -1) {
                     res.status(422).send(Body);
                     res.end();
                     return;
                 }
-                else if(Body.status == "DECLINED"){
+                if (Body.status && Body.status == "DECLINED") {
+                    res.status(422).send(Body);
+                    res.end();
+                    return;
+                }
+                if (Body.status && Body.status == "DECLINED") {
                     res.status(422).send(Body);
                     res.end();
                     return;
                 }
 
-                else if (Body.status.toUpperCase() == 'PAID') {
+                if (Body.status.toUpperCase() == 'PAID') {
                     LJSON.dadosComprador.data = Body.created_at;
                     LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid);
                     LJSON.dadosComprador.id_transacao = Body.id;
@@ -138,11 +143,13 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                     res.status(200).send(responseShopify);
                 }
                 else if (Body.status.toUpperCase() == 'WAITING') {
+                    console.log("Boleto", Body);
                     LJSON.dadosComprador.barcode = Body.payment_method.boleto.formatted_barcode;
                     LJSON.dadosComprador.urlBoleto = Body.links.find(x => x.media == 'application/pdf').href;
                     LJSON.dadosComprador.vencimentoBoleto = Body.payment_method.boleto.due_date;
                     LJSON.dadosComprador.data = Body.created_at;
                     LJSON.dadosComprador.id_transacao = Body.id;
+                    LJSON.dadosComprador.valor = parseFloat(Body.amount.summary.paid);
 
                     var responseShopify = await funcionalidadesShopify.enviaOrdemShopify(LJSON, Body, LJSON.paymentData, 'pending', constantes.GATEWAY_PS);
                     var plataformasResponse = {
@@ -169,10 +176,16 @@ module.exports.DoPayPagSeguroCard = (req, res, next) => {
                 res.end();
             })
     } catch (error) {
-        res.json(error);
+        console.log("Error", error);
+        res.status(422).send("Pagamento não realizado, tente novamente");
         res.end();
     }
 
+}
+
+module.exports.formatPrice =(value) => {
+    let val = (value / 1).toFixed(2).replace(".", ",");
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 module.exports.ReembolsarPedidoPSByID = async (req, res, next) => {
