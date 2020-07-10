@@ -89,7 +89,7 @@ module.exports.SaveBoletoRecoveryInternal = (nome_cliente, email_cliente,  telef
     return new Promise((resolve, reject) => {
 
         try {    
-            pool.query('INSERT INTO recupera_boleto (nome_cliente, email_cliente,  telefone_cliente, token_push_cliente, produto_nome,bar_code, url_boleto,  criado_em, modificado_em, status, campanha_enviar, ip, id_usuario, id_tr) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *', [nome_cliente, email_cliente,  telefone_cliente, token_push_cliente, produto_nome,bar_code, url_boleto,  criado_em, modificado_em, status, campanha_enviar, ip, id_usuario, id_tr], (error, results) => {
+            pool.query('INSERT INTO recupera_boleto (nome_cliente, email_cliente,  telefone_cliente, token_push_cliente, produto_nome,bar_code, url_boleto,  criado_em, modificado_em, status, campanha_enviar, ip, id_usuario, id_tr) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *', [nome_cliente, email_cliente,  telefone_cliente, token_push_cliente, produto_nome,bar_code, url_boleto,  criado_em, modificado_em, status, campanha_enviar, ip, id_usuario, id_tr], (error, results) => {
                 if (error) {
                     throw error
                 }

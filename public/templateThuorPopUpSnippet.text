@@ -1,8 +1,9 @@
 <script>
+
 //var ULR_BASE_POP = "http://localhost:3000/";
 var ULR_BASE_POP = "https://api.thuor.com:7443/";
-var LSTYLE_TEMPLATEpop = '.imgProd{object-fit:contain;width:10rem!important}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
-var LTEMPLATEpop = ' <div class="row card card-default mt-5"> <div class="col-xl-12"> <div class="card b "> <div class="card-header "> <div class="float-right mt-2"> <div class="badge badge-info">Thuor PopUp</div></div><h4 class="col-xl-12 mt-2 float-left pull-left text-justify p-0"><span>{title}</span></h4> </div><div class="card-body row bb bt grid-item col-lg-12"> <a href="#" class="inline col-lg-12 float-center text-center"> <img class="float-center pull-center avatar imgProd" src="{image}" alt="{link}" class="rounded-circle thumb48"></a> <div class="col-lg-12 text-center"><strong><a target="_blank" href="{link}">{titulo_produto}</a></strong></div></div><div class="card-body grid-item col-xl-12 text-justify"> <p>{texto}</p></div></div></div></div>';
+var LSTYLE_TEMPLATEpop = '.swal2-popup, .swal2-modal{width:75%!important;}.imgProd{object-fit:contain;width:16rem!important}@media screen and (max-width:700px){.fontTitle{font-size:1rem!important}.produtosTitle{font-size:1em!important;text-align:center!important;color:#1e90ff}.oldPrice{color:red!important;text-decoration:line-through;font-size:.7rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:1rem!important;padding-left:5px!important}}@media screen and (max-width:1000px){.oldPrice{color:red!important;text-decoration:line-through;font-size:1.5rem!important;margin-right:5px!important;padding:0}.newPrice{color:red!important;font-size:2rem!important;padding-left:5px!important}.fontTitle{font-size:3rem!important}.produtosTitle{font-size:3em!important;text-align:center!important;color:#1e90ff}.cardProd{height:100%!important}}.price-box{font-size:13px;font-weight:600;line-height:22px;letter-spacing:normal;margin-bottom:12px}.price-box .old-price{color:#cd2929;text-decoration:line-through;margin-right:5px}.price-box .special-price{color:#20bb09!important}.product-name,.product-title{color:#232323;display:block;margin-bottom:4px;text-transform:none;font-size:12px;line-height:22px;font-weight:500}.product-item .product-bottom{text-align:center}.widget-title .box-title{color:#232323;font-size:20px;letter-spacing:.05em;font-weight:700;text-transform:uppercase;position:relative;margin-bottom:15px}.widget-title.not-before .box-title .title{background-color:rgba(255,255,255,0)}';
+var LTEMPLATEpop = ' <div class="row card card-default mt-3"> <div class="col-xl-12"> <div class="card b "> <div class="card-header "> <div class="float-right mt-2"> <div class="badge badge-info"><a style="color: white!important;" href="https://thuor.com" target="_blank">Thuor PopUp</a></div></div><h4 class="col-xl-12 mt-2 float-left pull-left text-justify p-0"><span>{title}</span></h4> </div><div class="card-body row bb bt grid-item col-lg-12"> <a href="#" class="inline col-lg-12 float-center text-center"> <img class="float-center pull-center avatar imgProd" src="{image}" alt="{link}" class="rounded-circle thumb48"></a> <div class="col-lg-12 text-center"><strong><a target="_blank" href="{link}">{titulo_produto}</a></strong></div></div><div class="card-body grid-item col-xl-12 text-justify"> <p>{texto}</p></div></div></div></div>';
 var END_POINT_GET_APP_POPUP_BY_USER_ID_POP = ULR_BASE_POP + 'apps/GetIntegracaoApps'
 var END_POINT_GET_DADOS_APP_CHECKOUT_POP = ULR_BASE_POP + 'checkouts/GetCheckoutAtivo'
 var URL_END_POINT_GET_DADOS_LOJA_POP = ULR_BASE_POP + "integracaoShopify/GetDadosLoja";
@@ -37,7 +38,8 @@ var arrayScriptsPOP =
 
 
 async function initializeFunctionPOP() {
-    const LShop = window.location.host;
+    var LShop = window.location.host;
+    /*LShop = "salvadorofertas.com";*/
     /*currentPagePOP = "index";*/
     const LBody = {
         shop: LShop
@@ -130,8 +132,7 @@ $(document).ready(function () {
     document.addEventListener("beforeunload", function () {
         alert("certeza?");
         showPopUPPOP(LocalDadosPopUpGeralPOP);
-    })
-
+    });
 
 });
 function initializeCSSpop() {
@@ -152,4 +153,5 @@ window.onload = function () {
     initializeCSSpop();
     initializeFunctionPOP();
 }
+
 </script>

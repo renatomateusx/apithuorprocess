@@ -203,6 +203,7 @@ module.exports.SendEmailBoletoInternal = (PJSON, PJSONLoja) => {
         try{
             const Ordem = PJSON.ordem_id;
             const OrdemID = JSON.parse(Ordem);
+            console.log(OrdemID);
             const LRetornoEmailBoleto = await SendEmailBoleto(PJSON, OrdemID.order.order_number, PJSONLoja);
             resolve(LRetornoEmailBoleto);
         }

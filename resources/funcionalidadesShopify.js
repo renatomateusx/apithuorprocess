@@ -99,7 +99,7 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
                         "email": Pjson.dadosComprador.email,
-                        "phone": Pjson.dadosComprador.telefone
+                        
                     },
                     "note_attributes": [
                         DadosBoleto
@@ -108,7 +108,7 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
                         "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
+                        
                         "city": Pjson.dadosComprador.cidade,
                         "province": Pjson.dadosComprador.estado,
                         "country": "Brasil",
@@ -118,7 +118,7 @@ module.exports.mountJSONShopifyOrder = (Pjson, situacao) => {
                         "first_name": Pjson.dadosComprador.nome_completo,
                         "last_name": "",
                         "address1": Pjson.dadosComprador.endereco,
-                        "phone": Pjson.dadosComprador.telefone,
+                        
                         "city": Pjson.dadosComprador.cidade,
                         "province": Pjson.dadosComprador.estado,
                         "country": "Brasil",

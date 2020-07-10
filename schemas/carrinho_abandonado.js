@@ -75,10 +75,10 @@ module.exports.SaveCarrinho = (req, res, next) => {
                 if (error) {
                     throw error
                 }
-                resolve(results.rows[0].id_cart);
+                res.status(200).send(results.rows[0].id_cart);
             })
         } catch (error) {
-            reject(error);
+            res.status(422).send(error);
         }
     })
 }
@@ -92,10 +92,10 @@ module.exports.UpdateStatusCarrinho = (req, res, next) => {
                 if (error) {
                     throw error
                 }
-                resolve(results.rowCount);
+                res.json(results.rowCount);
             })
         } catch (error) {
-            reject(error);
+            res.json(error);
         }
     })
 }
@@ -106,14 +106,15 @@ module.exports.UpdateDadosClienteCarrinho = (req, res, next) => {
         try {
             const {nome_cliente, email_cliente, telefone_cliente, id_cart} = req.body;
             const ids = id_cart.toString();
+            console.log(ids);
             pool.query('UPDATE carrinho_abandonado SET nome_cliente = $1, email_cliente = $2, telefone_cliente = $3 where id_cart in ($4)', [nome_cliente, email_cliente, telefone_cliente, ids], (error, results) => {
                 if (error) {
                     throw error
                 }
-                resolve(results.rowCount);
+                res.json(results.rowCount);
             })
         } catch (error) {
-            reject(error);
+            res.json(error);
         }
     })
 }
