@@ -129,6 +129,23 @@ module.exports.UpdateLeadCampanha = (PUltimoEmailEnviado, PCampanhaEmailEnviada,
 
 }
 
+module.exports.UpdateLeadCampanhaBoleto = (PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const data = moment().format();
+            pool.query('UPDATE recupera_boleto set data_ultimo_email_enviado = $1, campanha_email_enviada = $2, sequencia_enviada = $3 where id_cart = $4', [PUltimoEmailEnviado, PCampanhaEmailEnviada, PSequenciaEnviada, PIdLead], (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(1);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
 module.exports.GetDadosCompradorLead = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
@@ -168,6 +185,23 @@ module.exports.GetLeadCronJob = (req, res, next) => {
     return new Promise((resolve, reject) => {
         try {
             pool.query('SELECT * FROM carrinho_abandonado WHERE campanha_enviar = 1 and status =0', (error, results) => {
+                if (error) {
+                    throw error
+                }
+                resolve(results.rows);
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+
+}
+
+
+module.exports.GetLeadCronJobBoleto = (req, res, next) => {
+    return new Promise((resolve, reject) => {
+        try {
+            pool.query('SELECT * FROM recupera_boleto WHERE campanha_enviar = 1 and status =0', (error, results) => {
                 if (error) {
                     throw error
                 }

@@ -14,6 +14,7 @@ const campanhas = require('../../schemas/integracaoCampanhas/campanhas');
 const mensageria = require('../../schemas/mensageria');
 const produtos = require('../../schemas/produtos');
 const DeferredPromise = require('@bitbar/deferred-promise');
+const twilio = require('../../schemas/twilio');
 var LURLCartEmail = "";
 //Vai rodar a cada 1 minuto
 
@@ -22,7 +23,7 @@ var rule = new schedule.RecurrenceRule();
 rule.hour = 0;
 rule.minute = 59;
 
-var jobCartAbandon = schedule.scheduleJob(rule, function () {
+var jobCartAbandon = schedule.scheduleJob("* * */23 * * * ", function () {
     //var jobCartAbandon = schedule.scheduleJob('* * * * * *', function () {
     lead.GetLeadCronJob()
         .then((resLead) => {
@@ -55,6 +56,7 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                                     if (LPodeEnviar) {
                                         const LMensagem = await mensageria.GetMensagemByIDInternal(objLead.id_usuario, LSequenciaEnviar.id_mensagem);
                                         const MensagemText = LMensagem.mensagem;
+                                        const MensagemTipo = LMensagem.tipo_mensagem;
                                         const LLoja = await loja.GetLojaByUsuario(objLead.id_usuario);
                                         const LTemplate = await ProcessaTemplate(LMensagem, LLoja, objLead.produtos, LNome, objLead.url_compra);
                                         //console.log('link', LTemplate.link);
@@ -63,15 +65,26 @@ var jobCartAbandon = schedule.scheduleJob(rule, function () {
                                         arrayAttachments.forEach((obj, i) => {
                                             obj.path = constantes.URL_PUBLIC_RESOURCES_EMAIL + '/' + obj.filename
                                         });
-
-                                        const LRetornoMail = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments, LLoja.nome_loja);
-                                        if (LRetornoMail == 1) {
+                                        var LRetornoMensagem = 0;
+                                        if(MensagemTipo == constantes.TIPO_MENSAGEM_EMAIL){
+                                            LRetornoMensagem = await utilisEmail.SendMail(LEmail, LTemplate.titulo, LTemplate.template, arrayAttachments, LLoja.nome_loja);
+                                        }
+                                        if(MensagemTipo == constantes.TIPO_MENSAGEM_SMS){
+                                            const LMensagemSe = LMensagem.mensagem.replace("{first_name}", toCamelCase(LNome));
+                                            LRetornoMensagem = await twilio.SendSMS(LMensagemSe, constantes.TWILIO_WHATS_APP_NUMBER, '+'+LTelefone);
+                                        }
+                                        if(MensagemTipo == constantes.TIPO_MENSAGEM_WHATS_APP){
+                                            const LMensagemSe = LMensagem.mensagem.replace("{first_name}", toCamelCase(LNome));
+                                            LRetornoMensagem = await twilio.SendWhatsApp(LMensagemSe, constantes.TWILIO_WHATS_APP_NUMBER, '+'+LTelefone);
+                                        }
+                                        if (LRetornoMensagem == 1) {
                                             const LUltimoEmailEnviado = moment().format();
                                             const LCampanhaEmailEnviada = resCampanha.id;
                                             const LSequenciaEnviada = LSequenciaEnviar.id_sequencia;
                                             const LUpdated = await lead.UpdateLeadCampanha(LUltimoEmailEnviado, LCampanhaEmailEnviada, LSequenciaEnviada, objLead.id_cart);
                                             //console.log("Updated", LUpdated);
                                         }
+                                        
                                         //console.log(MensagemText);
                                         //PEGAR A MENSAGEM DOM O ID DA SEQUENCIA.
                                         //MONTA O TEMPLATE

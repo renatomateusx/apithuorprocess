@@ -48,6 +48,7 @@ var webhookshopify = require('./webhooks/webhookshopify');
 var cupons = require('./routes/cupons');
 var campanhas = require('./routes/integracaoCampanhas/campanhas');
 var services_abandon_cart = require('./routes/services/serviceCartAbandon');
+var services_recuperacao_boleto = require('./routes/services/bulkCancelBoletos');
 var reviews = require('./routes/reviews');
 var apps = require('./routes/apps');
 var servicesConsultaPagamento = require('./routes/services/serviceConsultaPagamentos');
@@ -59,6 +60,8 @@ var ajuda = require('./routes/ajuda');
 var meta = require('./routes/meta');
 var fulfillments = require('./routes/fulfillments');
 var carrinho_abandonado = require('./routes/carrinho_abandonado');
+var twilio = require('./routes/twilio');
+var recupera_boleto = require('./routes/recupera_boleto');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -101,6 +104,7 @@ app.use('/servicesShipments', services_shipment);
 app.use('/cupons', cupons);
 app.use('/campanhas', campanhas);
 app.use('/serviceCartAbandon', services_abandon_cart);
+app.use('/serviceRecuperaBoleto', services_recuperacao_boleto);
 app.use('/reviews', reviews);
 app.use('/apps', apps);
 app.use('/servicesConsultaPagamento', servicesConsultaPagamento);
@@ -112,6 +116,8 @@ app.use('/ajuda', ajuda);
 app.use('/meta', meta);
 app.use('/fulfillments', fulfillments);
 app.use('/carrinhoAbandonado', carrinho_abandonado);
+app.use('/twilio', twilio);
+app.use('/recupera_boleto', recupera_boleto);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');

@@ -6,6 +6,7 @@ const clientes = require('../schemas/clientes');
 const users = require('../schemas/users');
 const moment = require('moment');
 const planos = require('../schemas/planos');
+const recupera_boletos = require('../schemas/recupera_boleto');
 
 module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) => {
     return new Promise(async (resolve, reject) => {
@@ -26,7 +27,7 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                         transacoes.insereTransacao(LJSON.dadosLoja.id_usuario, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, LShopifyOrder, retornoShopify.body, status.toUpperCase(), gatewayP, LJSON.dadosComprador.ttrack)
                             .then(async (retornoInsereTransacao) => {
                                 const IDTr = retornoInsereTransacao;
-                                
+
                                 const LDataProcess = moment().format();
                                 const UsuarioDado = await users.GetUserByIDInternal(LJSON.dadosLoja.id_usuario);
                                 const LComissaoValue = 0.00;
@@ -37,10 +38,22 @@ module.exports.enviaOrdemShopify = (LJSON, data, paymentData, status, gatewayP) 
                                     const LValCom = (parseFloat(LPercentComission) / 100) * parseFloat(LJSON.dadosComprador.valor);
                                     LValorComissao = parseFloat(LValCom);
                                     console.log("Comissão", LValorComissao);
-                                    if(UsuarioDado.cobrar_por_transacao == 1){
+                                    if (UsuarioDado.cobrar_por_transacao == 1) {
                                         LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
                                     }
                                     const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(IDTr, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LJSON.dadosLoja.url_loja, LJSON, paymentData, data, 'PENDING', LValorComissao, gatewayP);
+                                }
+                                else {
+                                    var lprpodName = '';
+                                    if (LJSON.produtos) {
+                                        if (LJSON.produtos.length > 0) {
+                                            LJSON.produtos.forEach((objProd, i) => {
+                                                lprpodName += objProd.title + "|";
+                                            })
+                                        }
+                                    }
+
+                                    const LRetornoBoletoRecovery = await recupera_boletos.SaveBoletoRecoveryInternal(LJSON.dadosComprador.nome_completo, LJSON.dadosComprador.email, LJSON.dadosComprador.telefone, null, lprpodName, LJSON.dadosComprador.barcode, LJSON.dadosComprador.urlBoleto, moment().format(), null, 0, 0, null, LJSON.dadosLoja.id_usuario, IDTr);
                                 }
                                 const LUpdate = await clientes.UpdateLead(LJSON.dadosComprador.email, LJSON.produtos);
                                 LJSON.dadosComprador.ordem_id = RetornoShopifyJSON;

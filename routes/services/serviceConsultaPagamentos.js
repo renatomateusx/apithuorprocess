@@ -19,12 +19,13 @@ const jp = require('jsonpath');
 const funcionalidadesShopify = require('../../resources/funcionalidadesShopify');
 const users = require('../../schemas/users');
 const planos = require('../../schemas/planos');
+const recupera_boleto = require('../../schemas/recupera_boleto');
 
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23;
 rule.minute = 0;
 
-var j = schedule.scheduleJob(rule, async function () {
+var j = schedule.scheduleJob("* * */22 * * * ", async function () {
 
     const LIntegracoes = await checkouts.GetIntegracaoCheckoutInternal();
     LIntegracoes.forEach((obj, i) => {
@@ -91,6 +92,7 @@ async function processaConsultaMercadoPago() {
                             LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
                         }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_MP);
+                        const UpdateStatusBoletoRecovery = await recupera_boleto.UpdateStatusBoletoRecoveryByIDTRInternal(1, LTid);
                         console.log(LTellShopify);
                         console.log(InsereTransacaoInterna);
                     }
@@ -143,6 +145,7 @@ async function processaConsultaPagSeguro() {
                             LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
                         }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PS);
+                        const UpdateStatusBoletoRecovery = await recupera_boleto.UpdateStatusBoletoRecoveryByIDTRInternal(1, LTid);
                     }
 
                 }
@@ -193,6 +196,7 @@ async function processaConsultaPayU() {
                             LValorComissao = parseFloat(UsuarioDado.valor_por_transacao)
                         }
                         const InsereTransacaoInterna = await transacoes.insereTransacaoInterna(LTid, LDataProcess, UsuarioDado.proximo_pagamento, UsuarioDado.id, UsuarioDado.plano, LFrontEnd.dadosLoja.url_loja, LFrontEnd, LBackEnd, LDadosGw, 'PENDING', LValorComissao, constantes.GATEWAY_PayU);
+                        const UpdateStatusBoletoRecovery = await recupera_boleto.UpdateStatusBoletoRecoveryByIDTRInternal(1, LTid);
 
                     }
                 }

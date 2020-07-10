@@ -22,7 +22,7 @@ module.exports = Object.freeze({
     WEBSITE_ACTIVATE_EMAIL: 'https://app.thuor.com/ativacao/',
     WEBSITE_ACTIVATE_RESET_SENHA: 'https://app.thuor.com/redefinir/',
     WEBSITE_CART: 'https://app.thuor.com/cart/items?',
-    WEBSITEAPI: 'https://api.thuor.com:7443/webhooks/webhookshopify/rotas',
+    WEBSITEAPIWH: 'https://api.thuor.com:7443/webhooks/webhookshopify/rotas',
     WEB_HOOK_PAYU: 'https://api.thuor.com:7443/webhooks/webhookpayu',
     // WEBSITECHECKOUT: 'http://localhost:8081/cart/items?',
     WEBSITECHECKOUT: 'https://app.thuor.com/cart/items?',
@@ -48,13 +48,13 @@ module.exports = Object.freeze({
     RESOURCE_THUOR_PRODUCT_LIQUID_EDIT_CONTENT: " <!-- Não remova. App Thuor Review. -->     {% capture thuor_review_snippet_content %}{% include 'ThuorReviewSnippet' %}{% endcapture %} {% unless thuor_review_snippet_content contains 'Liquid error' %} {% include 'ThuorReviewSnippet' %} {% endunless %}     <!-- Não remova. App Thuor Review. -->",
     RESOURCE_THUOR_PARCEL_APP_PRODUCT_LIQUID_EDIT_CONTENT: " <!-- Não remova. App Thuor Parcel. -->     {% capture thuor_parcel_snippet_content %}{% include 'ThuorParcelSnippet' %}{% endcapture %} {% unless thuor_parcel_snippet_content contains 'Liquid error' %} {% include 'ThuorParcelSnippet' %} {% endunless %}     <!-- Não remova. App Thuor Parcel. -->",
     RESOURCE_THUOR_CROSS_SELL_APP_PRODUCT_LIQUID_EDIT_CONTENT: " <!-- Não remova. App Thuor CrossSell. -->     {% capture thuor_cross_sell_snippet_content %}{% include 'ThuorCrossSellSnippet' %}{% endcapture %} {% unless thuor_cross_sell_snippet_content contains 'Liquid error' %} {% include 'ThuorCrossSellSnippet' %} {% endunless %}     <!-- Não remova. App Thuor CrossSell. -->",
-    
+
     //URL_TRACK_CODE: 'http://localhost:8081/track/@',
     URL_TRACK_CODE: 'https://app.thuor.com/track/@',
 
     // URL_PUBLIC_RESOURCES_EMAIL: 'http://localhost:3000/images/templates',
     URL_PUBLIC_RESOURCES_EMAIL: 'https://api.thuor.com/public/images/templates',
-    FROM_MAIL:'{nome_loja} <{email_loja}>',
+    FROM_MAIL: '{nome_loja} <{email_loja}>',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO: 'Sua encomenda está quase chegando!',
     STRING_SUBJECT_EMAIL_ENCOMENDA_RASTREIO_ENTREGUE: 'Sua encomenda foi entregue!',
     STRING_SUBJECT_EMAIL_ATIVAR_CONTA: 'Ative Sua Conta e Comece a Usar o Thuor Hoje Mesmo!',
@@ -83,6 +83,21 @@ module.exports = Object.freeze({
         path: 'URL_PUBLIC_RESOURCES',
         cid: 'footer' //same cid value as in the html img src
     },],
+    
+    attachmentsAuxRecuperaBoleto: [{
+        filename: 'rounded_corner_1.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'rounded_corner_1' //same cid value as in the html img src
+    },
+    {
+        filename: 'BOLETO.jpg',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'BOLETO'
+    }, {
+        filename: 'Bottom_round.png',
+        path: 'URL_PUBLIC_RESOURCES',
+        cid: 'Bottom_round'
+    }],
     attachmentsAuxCartAbandon: [{
         filename: 'rounded_corner_1.png',
         path: 'URL_PUBLIC_RESOURCES',
@@ -152,6 +167,7 @@ module.exports = Object.freeze({
     EMAIL_FROM_TESTES: "renatomateusx@gmail.com",
 
     CONSTANTE_ID_CAMPANHA_CARRINHO_ABANDONADO: 1,
+    CONSTANTE_ID_CAMPANHA_RECUPERACAO_BOLETO: 2,
 
 
     /* TESTES */
@@ -164,6 +180,22 @@ module.exports = Object.freeze({
 
     /* DIAS PARA A PRÓXIMA REQUISIÇÃO DE TRACKEAMENTO DE ENCOMENDAS. */
     DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT: 5,
-    DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS: 2
+    DAYS_ADD_NEXT_REQUEST_TRACKER_SHIPPMENT_MINUS: 2,
 
+
+    /* TIPO MENSAGENS */
+    TIPO_MENSAGEM_EMAIL: 1,
+    TIPO_MENSAGEM_SMS: 2,
+    TIPO_MENSAGEM_WHATS_APP: 3,
+
+    /* TWILIO */
+    TWILIO_NUMBER: '+19842134967',
+    SMS_ACCOUNT_ID: 'ACa60c4017644fdbf2824757f6736f5440',
+    SMS_ACCOUNT_TOKEN: 'b88dc6bce41c70604ae03dff52e94696',
+    TWILIO_WHATS_APP_NUMBER: 'whatsapp:+14155238886',
+    WHATSAPP_ACCOUNT_ID: 'AC2f5495e23e9c27a493995c61bb0f9043',
+    WHATSAPP_ACCOUNT_TOKEN: '7cf3b7e319c27fa082ba7b467238ed52',
+    TWILIO_KEY_WORKD: 'join fox-new',
+    /*WHATSAPP_ACCOUNT_ID: 'AC779cebeb0bdbf7b77d4d7a4889b9aaa6',
+    WHATSAPP_ACCOUNT_TOKEN: '163d287c00c23106bdc4fe5bafd636ee',*/
 });

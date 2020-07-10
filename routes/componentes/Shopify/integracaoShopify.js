@@ -17,56 +17,56 @@ const arrayWebHooks = [
   {
     "webhook": {
       "topic": "orders/create",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "orders/update",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "products/create",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "products/update",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "products/delete",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "refunds/create",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "customers/create",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   },
   {
     "webhook": {
       "topic": "customers/update",
-      "address": constantes.WEBSITEAPI,
+      "address": constantes.WEBSITEAPIWH,
       "format": "json"
     }
   }

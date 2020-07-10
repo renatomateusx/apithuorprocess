@@ -21,7 +21,7 @@ rules.hour = 0;
 rules.minute = 0;
 rules.second = 1
 
-var ja = schedule.scheduleJob("* * */23 * * * ", async function () {
+var ja = schedule.scheduleJob("* * */19 * * * ", async function () {
 fulfillments.GetFulFillmentList()
     .then((resFul) => {
         resFul.forEach(async (obj, i) => {

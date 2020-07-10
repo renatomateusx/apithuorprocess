@@ -11,4 +11,10 @@ router.post('/GetIntegracaoCampanhaByID', campanhas.GetCampanhaByID);
 router.post('/SaveCampanhaCartAbandon', campanhas.SaveCampanhaCartAbandon);
 router.post('/GetCampanhaCarrinhoAbandonado', campanhas.GetCampanhaCarrinhoAbandonado);
 
+
+router.post('/GetCampanhasBoleto', campanhas.GetCampanhasBoleto);
+router.post('/GetIntegracaoCampanhaByIDBoleto', campanhas.GetCampanhaByIDBoleto);
+router.post('/SaveCampanhaBoleto', campanhas.SaveCampanhaBoleto);
+router.post('/GetCampanhaBoleto', campanhas.GetCampanhaBoleto);
+
 module.exports = router;
